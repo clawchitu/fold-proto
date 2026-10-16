@@ -5,10 +5,14 @@
   const $ = (s) => document.querySelector(s);
   const opts = G.opts;
   const live = $('#live'), gridEl = $('#a11y-grid');
-  const KIND = { '-': '缺口', '.': '路', S: '路', G: '终点', x: '石头', k: '钥匙', D: '锁着的门', o: '开着的门', i: '湿墨', p: '纸片' };
-  const NOUN = { '.': '纸板', S: '纸板', G: '终点', k: '钥匙', o: '门', i: '湿墨', p: '纸片', x: '石头', D: '门' };
-  const pos = (c, r) => `第${r + 1}行第${c + 1}列`;
-  const DIR = { '-1,0': '左', '1,0': '右', '0,-1': '上', '0,1': '下' };
+  const I = window.I18N, { t } = I;
+  const KIND = (tile) => t('kind.' + (tile === 'S' ? '.' : tile));
+  const NOUN = (tile) => t('noun.' + (tile === 'S' ? '.' : tile));
+  const pos = (c, r) => t('pos', { r: r + 1, c: c + 1 });
+  const DIR = { '-1,0': 'left', '1,0': 'right', '0,-1': 'up', '0,1': 'down' };
+  const lvName = (i) => I.level(G.levels[i].id).name;
+  // English sentences start with a capital; a no-op for the CJK scripts
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
   // ---------- prefs ----------
   function save() { localStorage.setItem('fold.a11y', JSON.stringify(opts)); }
@@ -25,18 +29,18 @@
     opts[k] = v; save(); apply();
     if (k === 'audio' && v) { G.sound.ensure(); if (G.demo) G.endDemo(true); clearTimeout(flushT); pend = newPend(); saidAngle = Math.round(G.angle); }
     if (quiet) return;
-    const name = { audio: '声音模式', speak: '语音朗读', hc: '高对比', big: '大格子', motor: '大按钮' }[k];
-    say(`${name}${v ? '已开启' : '已关闭'}` + (k === 'audio' && v ? '。左页是木头声，右页是纸声，越靠上的行音越高；左页在左耳，右页在右耳。方向键听每一格，回车走过去，F 折一点，Shift 加 F 展开一点。按问号听全部按键。' : ''));
+    say(t(v ? 'optOn' : 'optOff', { name: t('opt.' + k) }) + (k === 'audio' && v ? t('audioIntro') : ''));
   }
 
   // ---------- announcer (aria-live, plus optional speech for players without a screen reader) ----------
   let sayT;
   function say(text) {
+    text = cap(text);
     clearTimeout(sayT); live.textContent = '';
     sayT = setTimeout(() => (live.textContent = text), 40);
     if (opts.speak && 'speechSynthesis' in window) {
       speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text); u.lang = 'zh-CN'; u.rate = 1.15;
+      const u = new SpeechSynthesisUtterance(text); u.lang = I.tag; u.rate = 1.15;
       speechSynthesis.speak(u);
     }
   }
@@ -83,26 +87,26 @@
     return [...Array(2 * N).keys()].map((c) => ({ c, x: spot(c, r).x })).sort((a, b) => a.x - b.x || a.c - b.c);
   }
   function scanRow(r) {
-    if (!sfx()) return say('先按 M 开启声音模式');
-    let t = 0, lastX = null;
+    if (!sfx()) return say(t('needAudio'));
+    let at = 0, lastX = null;
     for (const { c, x } of cellsByX(r)) {
-      if (lastX !== null && Math.abs(x - lastX) > 0.05) t += 0.11;   // stacked cells sound together
-      playCell(c, r, t, 0.8); lastX = x;
+      if (lastX !== null && Math.abs(x - lastX) > 0.05) at += 0.11;   // stacked cells sound together
+      playCell(c, r, at, 0.8); lastX = x;
     }
-    busyUntil = performance.now() + t * 1000 + 600;
+    busyUntil = performance.now() + at * 1000 + 600;
   }
   function scanAll() {
-    if (!sfx()) return say('先按 M 开启声音模式');
-    let t = 0;
+    if (!sfx()) return say(t('needAudio'));
+    let at = 0;
     for (let r = 0; r < G.state.h; r++) {
       let lastX = null;
       for (const { c, x } of cellsByX(r)) {
-        if (lastX !== null && Math.abs(x - lastX) > 0.05) t += 0.07;
-        playCell(c, r, t, 0.7); lastX = x;
+        if (lastX !== null && Math.abs(x - lastX) > 0.05) at += 0.07;
+        playCell(c, r, at, 0.7); lastX = x;
       }
-      t += 0.22;
+      at += 0.22;
     }
-    busyUntil = performance.now() + t * 1000 + 600;
+    busyUntil = performance.now() + at * 1000 + 600;
   }
   function goalCell() {
     const st = G.state;
@@ -123,31 +127,30 @@
 
   // ---------- labels ----------
   function label(c, r) {
-    const st = G.state, t = F.at(st, c, r), m = F.mirror(c), M = F.at(st, m, r), mode = G.mode;
+    const st = G.state, tl = F.at(st, c, r), m = F.mirror(c), M = F.at(st, m, r), mode = G.mode;
     const shaded = G.shade.has(c + ',' + r);
-    let kind = shaded && !F.isFloor(t) ? '影子，可以走' : KIND[t];
-    if (t === 'p' && mode === 'pop') kind = '纸片，立着成桥';
+    let kind = shaded && !F.isFloor(tl) ? t('kindShadow') : KIND(tl);
+    if (tl === 'p' && mode === 'pop') kind = t('kindTabUp');
     const parts = [pos(c, r), kind];
     const ch = st.char;
-    if (ch.c === c && ch.r === r) parts.push('你在这里');
-    else if (mode === 'fold' && ch.c === m && ch.r === r) parts.push('你在这一叠');
+    if (ch.c === c && ch.r === r) parts.push(t('hereYou'));
+    else if (mode === 'fold' && ch.c === m && ch.r === r) parts.push(t('hereStack'));
     let extra = '';
     if (!F.isRight(c)) {
-      if (t === '-' && F.isFloor(M)) extra = `合上后对面的${NOUN[M]}会落在这里`;
-      else if (t === '-' && M === 'x') extra = '合上后对面的石头会落在这里';
-      else if (t === 'D' && M === 'k') extra = '对面是钥匙，合上就能开门';
-      else if (F.isFloor(t) && M === 'x') extra = '合上会被对面的石头压住';
-      else if (t === 'i' && M === '-') extra = '合上会印到对面';
-      else if (t === 'p' && c === N - 1 && M === 'p') extra = '书半开时，和对面的纸片立成桥';
+      if (tl === '-' && (F.isFloor(M) || M === 'x')) extra = t('fallsHere', { noun: NOUN(M) });
+      else if (tl === 'D' && M === 'k') extra = t('doorKey');
+      else if (F.isFloor(tl) && M === 'x') extra = t('crushedHere');
+      else if (tl === 'i' && M === '-') extra = t('inkPrints');
+      else if (tl === 'p' && c === N - 1 && M === 'p') extra = t('tabBridge');
     } else {
-      const col = `第${m + 1}列`;
-      if (t === 'x') extra = `斜起时投下影子；合上会压住${col}`;
-      else if (t === 'k' && M === 'D') extra = `合上能打开${col}的门`;
-      else if (t === 'i' && M === '-') extra = `合上会印到${col}`;
-      else if (t === 'p' && c === N && M === 'p') extra = '书半开时，和对面的纸片立成桥';
-      else if (F.isFloor(t) && M === '-') extra = `合上后盖住${col}的缺口`;
+      const col = t('col', { c: m + 1 });
+      if (tl === 'x') extra = t('stoneShadow', { col });
+      else if (tl === 'k' && M === 'D') extra = t('keyOpens', { col });
+      else if (tl === 'i' && M === '-') extra = t('inkTo', { col });
+      else if (tl === 'p' && c === N && M === 'p') extra = t('tabBridge');
+      else if (F.isFloor(tl) && M === '-') extra = t('covers', { col });
     }
-    return parts.join('，') + (extra ? '；' + extra : '');
+    return cap(parts.join(t('sep')) + (extra ? t('semi') + extra : ''));
   }
 
   // ---------- ARIA grid laid over the book ----------
@@ -252,20 +255,20 @@
     saidAngle = a;
     const parts = [];
     if (p.mode) {
-      if (mode === 'fold') parts.push('书已合上');
-      else if (mode === 'pop') parts.push(G.tabs.length ? `书立起来了，${a}°，纸片立成了桥` : `书立起来了，${a}°`);
-      else if (a === 0) parts.push('书已打开');
-      else parts.push(a >= F.SHADE_MIN ? `书斜起，${a}°` : `书打开，${a}°`);
-    } else parts.push(`${a}°`);
-    if (p.connected) parts.push('路接通了');
-    else if (p.lost) parts.push('有的路断了');
-    for (const e of p.stamp) parts.push(e.type === 'door' ? '钥匙打开了门' : '墨印到了对页');
+      if (mode === 'fold') parts.push(t('book.closed'));
+      else if (mode === 'pop') parts.push(t(G.tabs.length ? 'book.popBridge' : 'book.pop', { a }));
+      else if (a === 0) parts.push(t('book.opened'));
+      else parts.push(t(a >= F.SHADE_MIN ? 'book.lean' : 'book.open', { a }));
+    } else parts.push(t('angle', { a }));
+    if (p.connected) parts.push(t('connected'));
+    else if (p.lost) parts.push(t('lost'));
+    for (const e of p.stamp) parts.push(t(e.type === 'door' ? 'doorOpened' : 'inkPrinted'));
     if (p.shade || (G.shade.size && !p.mode)) {
       const st = G.state, on = [...G.shade.keys()].map((k) => k.split(',').map(Number)).filter(([c, r]) => !F.isFloor(F.at(st, c, r)));
-      if (on.length) parts.push('影子落在' + on.map(([c, r]) => pos(c, r)).join('、'));
-      else if (p.shade && !G.shade.size) parts.push('影子没了');
+      if (on.length) parts.push(t('shadowOn', { cells: on.map(([c, r]) => pos(c, r)).join(t('list')) }));
+      else if (p.shade && !G.shade.size) parts.push(t('shadowGone'));
     }
-    say(parts.join('，'));
+    say(parts.join(t('sep')));
     relabel();
     // let the ear follow the right page: replay its half of your row where it now is
     const s = sfx();
@@ -278,9 +281,9 @@
   // ---------- game events ----------
   const bus = G.bus;
   bus.on('build', () => {
-    const lv = G.levels[G.index], st = G.state, g = goalCell();
+    const lv = I.level(G.levels[G.index].id), st = G.state, g = goalCell();
     buildGrid(); rebase(); pend = newPend(); saidAngle = Math.round(G.angle);
-    intro = `第${G.index + 1}关，${lv.name}。${lv.line}你在${pos(st.char.c, st.char.r)}，终点在${g ? pos(g.c, g.r) : '别处'}。书是打开的。`;
+    intro = t('intro', { n: G.index + 1, name: lv.name, line: lv.line, you: pos(st.char.c, st.char.r), goal: g ? pos(g.c, g.r) : t('elsewhere') });
     if (!G.angle) { say(intro); intro = null; }      // otherwise said once the book has swung open
     const ae = document.activeElement;
     if (gridActive && (!ae || ae === document.body || ae.closest('[hidden]') || gridEl.contains(ae))) setTimeout(() => focusCell(st.char.c, st.char.r), 30);
@@ -317,32 +320,32 @@
     rebase(); relabel();
     const ch = G.state.char;
     if (gridActive && gridEl.contains(document.activeElement)) focusCell(ch.c, ch.r);
-    const stack = G.mode === 'fold' && F.isRight(ch.c) ? `（右页，叠在第${F.mirror(ch.c) + 1}列上）` : '';
-    say((e.already ? `你已经在${pos(ch.c, ch.r)}` : `到了，${pos(ch.c, ch.r)}`) + stack);
+    const stack = G.mode === 'fold' && F.isRight(ch.c) ? t('stack', { c: F.mirror(ch.c) + 1 }) : '';
+    say(t(e.already ? 'already' : 'arrived', { pos: pos(ch.c, ch.r) }) + stack);
   });
   bus.on('blocked', ({ c, r, why, dc }) => {
     const st = G.state, s = sfx();
     const pc = Math.max(0, Math.min(st.w - 1, c));
     if (s) s.thud(panOf(pc, Math.max(0, Math.min(st.h - 1, r))));
-    if (why === 'path') return say('现在走不到那里');
+    if (why === 'path') return say(t('cantReach'));
     const ch = st.char;
-    let reason = '走不过去';
-    if (r < 0 || r >= st.h || c < 0 || c >= (G.mode === 'fold' ? N : st.w)) reason = '到书边了';
-    else if (G.mode !== 'fold' && ((ch.c === N - 1 && dc === 1) || (ch.c === N && dc === -1))) reason = '前面是折痕';
+    let reason = 'step';
+    if (r < 0 || r >= st.h || c < 0 || c >= (G.mode === 'fold' ? N : st.w)) reason = 'edge';
+    else if (G.mode !== 'fold' && ((ch.c === N - 1 && dc === 1) || (ch.c === N && dc === -1))) reason = 'crease';
     else {
       const ts = G.mode === 'fold' ? [F.at(st, c, r), F.at(st, F.mirror(c), r)] : [F.at(st, c, r)];
-      if (ts.includes('x')) reason = '石头挡住了';
-      else if (ts.includes('D')) reason = '门锁着';
-      else reason = '那边是缺口';
+      if (ts.includes('x')) reason = 'stone';
+      else if (ts.includes('D')) reason = 'door';
+      else reason = 'gap';
     }
-    say(reason);
+    say(t('no.' + reason));
   });
-  bus.on('slide', () => { const ch = G.state.char; say(`影子带着你滑到了${pos(ch.c, ch.r)}`); rebase(); relabel(); });
+  bus.on('slide', () => { const ch = G.state.char; say(t('slid', { pos: pos(ch.c, ch.r) })); rebase(); relabel(); });
   bus.on('fall', () => { rebase(); relabel(); const ch = G.state.char; if (gridActive) focusCell(ch.c, ch.r); });
-  bus.on('undo', () => { clearTimeout(flushT); pend = newPend(); saidAngle = Math.round(G.angle); rebase(); relabel(); place(); const ch = G.state.char; say(`已撤销。你在${pos(ch.c, ch.r)}，书${Math.round(G.angle)}°`); });
+  bus.on('undo', () => { clearTimeout(flushT); pend = newPend(); saidAngle = Math.round(G.angle); rebase(); relabel(); place(); const ch = G.state.char; say(t('undone', { pos: pos(ch.c, ch.r), a: Math.round(G.angle) })); });
   bus.on('toast', (t) => say(t));
   bus.on('win', ({ text, next }) => {
-    say(`过关！${text.replace(/。$/, '')}。按回车：${next}`);
+    say(t('win', { text: text.replace(/[。.]$/, ''), next }));
     if (fx) setTimeout(() => fx.motif(0, 1), 700);
     buzz([40, 60, 40, 60, 80]);
     setTimeout(() => { if (!$('#sheet-win').hidden) $('#btn-next').focus(); }, 520);
@@ -354,19 +357,18 @@
     const ways = F.neighbours(st, ch, G.mode, G.shade).map((n) => {
       const dc = G.mode === 'fold' ? F.proj(n.c) - F.proj(ch.c) : n.c - ch.c;
       return DIR[dc + ',' + (n.r - ch.r)];
-    }).filter(Boolean);
+    }).filter(Boolean).map((d) => t('dir.' + d));
     let goal = '';
     if (g) {
       const gc = G.mode === 'fold' ? F.proj(g.c) : g.c, cc = G.mode === 'fold' ? F.proj(ch.c) : ch.c;
       const dy = g.r - ch.r, dx = gc - cc, bits = [];
-      if (dy) bits.push(`${dy > 0 ? '下' : '上'}${Math.abs(dy)}格`);
-      if (dx) bits.push(`${dx > 0 ? '右' : '左'}${Math.abs(dx)}格`);
-      goal = `终点在${F.isRight(g.c) === F.isRight(ch.c) || G.mode === 'fold' ? '' : '对页，'}${bits.join('、') || '这里'}`;
+      if (dy) bits.push(t('goalSteps', { dir: t(dy > 0 ? 'dir.down' : 'dir.up'), n: Math.abs(dy) }));
+      if (dx) bits.push(t('goalSteps', { dir: t(dx > 0 ? 'dir.right' : 'dir.left'), n: Math.abs(dx) }));
+      goal = t('goal', { opp: F.isRight(g.c) === F.isRight(ch.c) || G.mode === 'fold' ? '' : t('goalOpp'), bits: bits.join(t('sep')) || t('here') });
     }
-    say(`你在${pos(ch.c, ch.r)}，${F.isRight(ch.c) ? '右页' : '左页'}。能走：${ways.join('、') || '哪里都不行'}。书${Math.round(G.angle)}°。${goal}`);
+    say(t('where', { pos: pos(ch.c, ch.r), page: t(F.isRight(ch.c) ? 'rightPage' : 'leftPage'), ways: ways.join(t('list')) || t('nowhere'), a: Math.round(G.angle), goal }));
     if (gridActive) focusCell(ch.c, ch.r);
   }
-  const HELP = '方向键：在格子间移动并听每一格。回车：走到这一格。Shift 加方向键：走一步。F：折一点；Shift 加 F：展开一点；C：合上；O：打开。L：听这一行；Shift 加 L：听整本书。W：我在哪。H：提示。U：撤销。R：重来。M：声音模式。';
 
   // ---------- global keys ----------
   window.addEventListener('keydown', (e) => {
@@ -388,14 +390,14 @@
       KeyL: () => (e.shiftKey ? scanAll() : scanRow(gridEl.contains(document.activeElement) ? focus.r : G.state.char.r)),
       KeyW: () => whereAmI(),
       KeyM: () => setOpt('audio', !opts.audio),
-      Slash: () => say(HELP),
+      Slash: () => say(t('help')),
     }[k];
     if (!act || (k === 'KeyZ' && !e.ctrlKey && !e.metaKey)) return;
     e.preventDefault();
     G.sound.ensure();
     act();
   });
-  function doUndo() { if (!G.undo()) say('没有可以撤销的'); }
+  function doUndo() { if (!G.undo()) say(t('nothingToUndo')); }
   // the slider: arrows move a whole step, so a screen-reader user isn't pressing 180 times
   const slider = $('#fold');
   slider.addEventListener('keydown', (e) => {
@@ -410,7 +412,7 @@
   function maybeSuggest() {
     if (suggested || opts.audio) return;
     suggested = true; localStorage.setItem('fold.suggested', '1');
-    G.toast('闭着眼也能玩：按 M 开启声音模式，按问号听按键说明');
+    G.toast(t('suggestToast'));
   }
   $('#a11y-suggest').addEventListener('click', () => {
     setOpt('audio', true);
@@ -435,7 +437,7 @@
   // ---------- settings sheet ----------
   $('#btn-a11y').addEventListener('click', () => { $('#sheet-a11y').hidden = false; });
   document.querySelectorAll('[data-opt]').forEach((s) => s.addEventListener('click', () => setOpt(s.dataset.opt, !opts[s.dataset.opt])));
-  $('#a11y-help').textContent = HELP;
+  $('#a11y-help').textContent = t('help');
 
   // ---------- dialogs: focus in, trap, Esc, focus back ----------
   const back = new Map();
@@ -462,8 +464,18 @@
   // level buttons get a spoken state
   new MutationObserver(() => document.querySelectorAll('#level-grid .lv').forEach((b, i) => {
     if (b.hasAttribute('aria-label')) return;
-    b.setAttribute('aria-label', `第${i + 1}关，${G.levels[i].name}${b.classList.contains('done') ? '，已完成' : ''}${b.classList.contains('current') ? '，当前' : ''}`);
+    const bits = [t('lvAria', { n: i + 1, name: lvName(i) })];
+    if (b.classList.contains('done')) bits.push(t('lvDone'));
+    if (b.classList.contains('current')) bits.push(t('lvCurrent'));
+    b.setAttribute('aria-label', cap(bits.join(t('sep'))));
   })).observe($('#level-grid'), { childList: true });
+
+  // a new language: relabel the grid and the help, then say so in the new voice
+  I.onChange(() => {
+    $('#a11y-help').textContent = t('help');
+    relabel();
+    say(t('langSet'));
+  });
 
   window.addEventListener('resize', place);
   window.addEventListener('scroll', place, true);

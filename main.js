@@ -3,6 +3,7 @@
   const F = window.FoldLogic;
   const { N } = F;
   const $ = (s) => document.querySelector(s);
+  const { t } = window.I18N, lvText = (i) => window.I18N.level(LEVELS[i].id);
 
   const ui = {
     book: $('#book'), left: $('#page-left'), right: $('#page-right'), grab: $('#grab'),
@@ -12,7 +13,6 @@
     winText: $('#win-text'), next: $('#btn-next'), tilt: $('#btn-tilt'),
   };
 
-  const MODE_WORD = { open: '打开', pop: '立起', fold: '合上' };
   const STEP = 15;                                   // keyboard / button fold step, degrees
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const opts = Object.assign({ audio: false, speak: false, hc: matchMedia('(prefers-contrast: more)').matches, big: false, motor: false },
@@ -122,9 +122,8 @@
     });
     charEl = document.createElement('div');
     charEl.className = 'char';
-    charEl.innerHTML = '<i></i>' + (index === 0 ? '<b class="tag">你</b>' : '');
-    ui.name.textContent = `${index + 1} / ${LEVELS.length} · ${lv.name}`;
-    ui.line.textContent = lv.line;
+    charEl.innerHTML = '<i></i>' + (index === 0 ? `<b class="tag" data-i18n="you">${t('you')}</b>` : '');
+    header();
     layout();
     paintTiles();
     placeChar(true);
@@ -176,7 +175,7 @@
     ui.book.dataset.mode = mode;
     ui.slider.value = Math.round(a);
     ui.angleNum.textContent = Math.round(a) + '°';
-    ui.modeWord.textContent = mode !== 'fold' && a >= F.SHADE_MIN ? '斜起' : MODE_WORD[mode];
+    ui.modeWord.textContent = t('mode.' + (mode !== 'fold' && a >= F.SHADE_MIN ? 'lean' : mode));
     ui.slider.setAttribute('aria-valuetext', `${ui.modeWord.textContent} ${Math.round(a)}°`);
     bus.emit('angle');
   }
@@ -219,7 +218,7 @@
     stopWalk(); rideSrc = null;
     sound.fall();
     charEl.classList.remove('fall'); void charEl.offsetWidth; charEl.classList.add('fall');
-    toast(angle >= F.FOLD_MIN ? '石头压下来了，重新开始' : '影子走了，纸人掉了下去');
+    toast(t(angle >= F.FOLD_MIN ? 'crushed' : 'fell'));
     setTimeout(() => { state.char = { ...state.start }; charEl.classList.remove('fall'); placeChar(true); bus.emit('fall'); }, 260);
   }
 
@@ -349,13 +348,21 @@
     setTimeout(() => {
       sound.win();
       charEl.classList.add('joy');
-      const last = index === LEVELS.length - 1;
-      ui.winText.textContent = last ? '全部完成。等 Duo 到了，用真的折痕再玩一次。' : `「${LEVELS[index].name}」完成`;
-      ui.next.textContent = last ? '回到第一关' : '下一关';
+      winTexts();
       setTimeout(() => (ui.sheetWin.hidden = false), 300);
       bus.emit('win', { text: ui.winText.textContent, next: ui.next.textContent });
     }, 180);
     return true;
+  }
+
+  function winTexts() {
+    const last = index === LEVELS.length - 1;
+    ui.winText.textContent = last ? t('allDone') : t('levelDone', { name: lvText(index).name });
+    ui.next.textContent = t(last ? 'first' : 'next');
+  }
+  function header() {
+    ui.name.textContent = t('levelHead', { n: index + 1, total: LEVELS.length, name: lvText(index).name });
+    ui.line.textContent = lvText(index).line;
   }
 
   function go(i) { if (demo) endDemo(false); index = (i + LEVELS.length) % LEVELS.length; build(); if (angle) tweenTo(0, 500); }
@@ -384,7 +391,7 @@
     foldTo(Math.max(0, Math.min(180, a)));
   }
   function hint() {
-    if (index === 0 && !opts.audio) playDemo(); else toast(LEVELS[index].hint);
+    if (index === 0 && !opts.audio) playDemo(); else toast(lvText(index).hint);
   }
 
   // ---------- onboarding (level 1): a ghost hand plays the level once, ~4 s, any tap skips ----------
@@ -398,8 +405,8 @@
     document.body.classList.toggle('coach-tap', show); document.body.classList.toggle('coach-fold', show);
     if (index !== 0) return;
     const goal = cells.flat().find((el) => el.dataset.kind === 'goal');
-    goal.insertAdjacentHTML('beforeend', '<b class="tag">终点</b>');
-    cells[1][1].insertAdjacentHTML('beforeend', '<b class="tag coach tap-tip">点格子走过去</b>');
+    goal.insertAdjacentHTML('beforeend', `<b class="tag" data-i18n="goalTag">${t('goalTag')}</b>`);
+    cells[1][1].insertAdjacentHTML('beforeend', `<b class="tag coach tap-tip" data-i18n="tapTip">${t('tapTip')}</b>`);
   }
   function centerOf(el) { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }
   function thumbAt(a) {
@@ -455,14 +462,14 @@
     ui.toast.textContent = text; ui.toast.classList.add('show');
     clearTimeout(toast.t); toast.t = setTimeout(() => ui.toast.classList.remove('show'), 4200);
   }
-  function hideSheets() { ui.sheetLevels.hidden = true; ui.sheetWin.hidden = true; }
+  function hideSheets() { document.querySelectorAll('.sheet').forEach((el) => (el.hidden = true)); }
 
   function openLevels() {
     ui.levelGrid.innerHTML = '';
     LEVELS.forEach((lv, i) => {
       const b = document.createElement('button');
       b.className = 'lv' + (done.has(i) ? ' done' : '') + (i === index ? ' current' : '');
-      b.innerHTML = `<span>${i + 1}</span>${lv.name}`;
+      b.innerHTML = `<span>${i + 1}</span>${lvText(i).name}`;
       b.onclick = () => go(i);
       ui.levelGrid.appendChild(b);
     });
@@ -509,13 +516,13 @@
     ui.tilt.onclick = async () => {
       sound.ensure();
       if (!tiltOn && typeof DeviceOrientationEvent.requestPermission === 'function') {
-        try { if ((await DeviceOrientationEvent.requestPermission()) !== 'granted') return toast('没有获得体感权限'); }
-        catch { return toast('没有获得体感权限'); }
+        try { if ((await DeviceOrientationEvent.requestPermission()) !== 'granted') return toast(t('tiltDenied')); }
+        catch { return toast(t('tiltDenied')); }
       }
       tiltOn = !tiltOn;
       ui.tilt.classList.toggle('on', tiltOn);
-      ui.tilt.textContent = tiltOn ? '体感：开' : '体感';
-      if (tiltOn) { tiltA = angle; window.addEventListener('deviceorientation', onTilt); toast('左右倾斜手机来折叠'); }
+      ui.tilt.textContent = t(tiltOn ? 'tiltOn' : 'tilt');
+      if (tiltOn) { tiltA = angle; window.addEventListener('deviceorientation', onTilt); toast(t('tiltHow')); }
       else window.removeEventListener('deviceorientation', onTilt);
     };
   }
@@ -529,6 +536,17 @@
     tap: onTap, step: stepDir, foldBy, foldTo, undo, hint, go, layout, endDemo, toast,
     reset: () => go(index), canUndo: () => undoStack.length > 0,
   };
+
+  // ---------- language: switch in place, keep the level, the angle and the moves ----------
+  document.querySelectorAll('[data-lang]').forEach((b) => (b.onclick = () => window.I18N.setLang(b.dataset.lang)));
+  window.I18N.onChange(() => {
+    header(); applyAngle();
+    if (!ui.sheetWin.hidden || won) winTexts();
+    if (!ui.sheetLevels.hidden) { const f = ui.levelGrid.contains(document.activeElement); openLevels(); if (f) ui.levelGrid.querySelector('.current')?.focus(); }
+    ui.tilt.textContent = t(tiltOn ? 'tiltOn' : 'tilt');
+    requestAnimationFrame(layout);
+  });
+  window.I18N.applyStatic();
 
   window.addEventListener('resize', layout);
   build();

@@ -4,60 +4,68 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#ebe7df">
-  <title>折 · Fold</title>
+  <title>折 · 折信</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <button id="a11y-suggest" class="suggest">读屏或闭眼玩？按这里开启声音模式</button>
+  <button id="a11y-suggest" class="suggest" data-i18n="suggest">读屏或闭眼玩？按这里开启声音模式</button>
   <header class="top">
-    <div class="brand"><b>折</b><span>Fold</span></div>
+    <div class="brand"><b lang="zh-CN">折</b><span data-i18n="brandSub">折信</span></div>
     <div class="title">
       <h1 id="level-name"></h1>
       <div id="level-line"></div>
     </div>
-    <nav aria-label="游戏">
-      <button id="btn-levels">关卡</button>
-      <button id="btn-hint" aria-keyshortcuts="H">提示</button>
-      <button id="btn-reset" aria-keyshortcuts="R">重来</button>
-      <button id="btn-a11y">无障碍</button>
-    </nav>
+    <div class="tools">
+      <div class="lang" role="group" data-i18n-label="langGroup" aria-label="语言">
+        <button data-lang="zh" lang="zh-CN" aria-label="中文" aria-pressed="false">中</button>
+        <button data-lang="en" lang="en" aria-label="English" aria-pressed="false">EN</button>
+        <button data-lang="ja" lang="ja" aria-label="日本語" aria-pressed="false">日</button>
+        <button data-lang="ko" lang="ko" aria-label="한국어" aria-pressed="false">한</button>
+      </div>
+      <nav data-i18n-label="navGame" aria-label="游戏">
+        <button id="btn-levels" data-i18n="levels">关卡</button>
+        <button id="btn-hint" aria-keyshortcuts="H" data-i18n="hint">提示</button>
+        <button id="btn-reset" aria-keyshortcuts="R" data-i18n="reset">重来</button>
+        <button id="btn-a11y" data-i18n="a11y">无障碍</button>
+      </nav>
+    </div>
   </header>
 
   <main class="stage" id="stage">
     <div class="book" id="book" aria-hidden="true">
       <div class="page left" id="page-left"><div class="shade"></div></div>
       <div class="page right" id="page-right"><div class="light"></div></div>
-      <div class="grab" id="grab" title="拖动折痕"></div>
+      <div class="grab" id="grab" data-i18n-title="dragCrease" title="拖动折痕"></div>
     </div>
-    <div id="a11y-grid" class="a11y-grid" role="grid" aria-label="书页：第1到4列是左页，第5到8列是右页" aria-describedby="grid-help"></div>
-    <p id="grid-help" class="sr-only">第4列和第5列之间是折痕，合上时右页翻到左页上：第5列叠在第4列，第8列叠在第1列。方向键听每一格，回车走过去，F 折一点，Shift 加 F 展开一点，H 提示，R 重来，U 撤销，问号听全部按键。</p>
+    <div id="a11y-grid" class="a11y-grid" role="grid" data-i18n-label="gridLabel" aria-label="书页：第1到4列是左页，第5到8列是右页" aria-describedby="grid-help"></div>
+    <p id="grid-help" class="sr-only" data-i18n="gridHelp">第4列和第5列之间是折痕，合上时右页翻到左页上：第5列叠在第4列，第8列叠在第1列。方向键听每一格，回车走过去，F 折一点，Shift 加 F 展开一点，H 提示，R 重来，U 撤销，问号听全部按键。</p>
   </main>
 
   <footer class="controls">
-    <div class="readout"><span id="mode-word">打开</span><span id="audio-badge" class="badge" hidden>声音模式</span><span id="angle-num">0°</span></div>
-    <b class="tag coach-slider" aria-hidden="true">拖到合上</b>
-    <input id="fold" type="range" min="0" max="180" step="1" value="0" aria-label="折叠角度" aria-keyshortcuts="F Shift+F">
+    <div class="readout"><span id="mode-word">打开</span><span id="audio-badge" class="badge" hidden data-i18n="audioBadge">声音模式</span><span id="angle-num">0°</span></div>
+    <b class="tag coach-slider" aria-hidden="true" data-i18n="coachSlider">拖到合上</b>
+    <input id="fold" type="range" min="0" max="180" step="1" value="0" data-i18n-label="foldAngle" aria-label="折叠角度" aria-keyshortcuts="F Shift+F">
     <div class="presets">
-      <button data-a="0">展开</button>
-      <button data-a="90">半开</button>
-      <button data-a="180">合上</button>
-      <button id="btn-tilt" class="tilt" hidden>体感</button>
+      <button data-a="0" data-i18n="pre.open">展开</button>
+      <button data-a="90" data-i18n="pre.half">半开</button>
+      <button data-a="180" data-i18n="pre.close">合上</button>
+      <button id="btn-tilt" class="tilt" hidden data-i18n="tilt">体感</button>
     </div>
     <div class="bigbar" id="bigbar" hidden>
-      <div class="bb-fold" role="group" aria-label="折书">
-        <button data-act="fold-">展开一点</button>
-        <button data-act="fold+">折一点</button>
-        <button data-act="open">打开</button>
-        <button data-act="close">合上</button>
-        <button data-act="undo" aria-keyshortcuts="U">撤销</button>
+      <div class="bb-fold" role="group" data-i18n-label="bbFold" aria-label="折书">
+        <button data-act="fold-" data-i18n="foldLess" data-i18n-label="foldLessLabel">展开一点</button>
+        <button data-act="fold+" data-i18n="foldMore" data-i18n-label="foldMoreLabel">折一点</button>
+        <button data-act="open" data-i18n="openAll">打开</button>
+        <button data-act="close" data-i18n="closeAll">合上</button>
+        <button data-act="undo" aria-keyshortcuts="U" data-i18n="undo">撤销</button>
       </div>
-      <div class="bb-walk" role="group" aria-label="走一步">
-        <button data-act="go-1,0" aria-label="向左走一步">左</button>
-        <button data-act="go0,-1" aria-label="向上走一步">上</button>
-        <button data-act="go0,1" aria-label="向下走一步">下</button>
-        <button data-act="go1,0" aria-label="向右走一步">右</button>
-        <button data-act="row" aria-keyshortcuts="L">听一行</button>
-        <button data-act="where" aria-keyshortcuts="W">我在哪</button>
+      <div class="bb-walk" role="group" data-i18n-label="bbWalk" aria-label="走一步">
+        <button data-act="go-1,0" data-i18n-label="stepLeft" data-i18n="left" aria-label="向左走一步">左</button>
+        <button data-act="go0,-1" data-i18n-label="stepUp" data-i18n="up" aria-label="向上走一步">上</button>
+        <button data-act="go0,1" data-i18n-label="stepDown" data-i18n="down" aria-label="向下走一步">下</button>
+        <button data-act="go1,0" data-i18n-label="stepRight" data-i18n="right" aria-label="向右走一步">右</button>
+        <button data-act="row" aria-keyshortcuts="L" data-i18n="bb.row" data-i18n-label="bb.rowLabel">听一行</button>
+        <button data-act="where" aria-keyshortcuts="W" data-i18n="bb.where" data-i18n-label="bb.whereLabel">我在哪</button>
       </div>
     </div>
   </footer>
@@ -67,35 +75,36 @@
 
   <div class="sheet" id="sheet-levels" role="dialog" aria-modal="true" aria-labelledby="levels-title" hidden>
     <div class="card">
-      <h2 id="levels-title">关卡</h2>
+      <h2 id="levels-title" data-i18n="levels">关卡</h2>
       <div class="grid" id="level-grid"></div>
-      <button class="close" data-close>关闭</button>
+      <button class="close" data-close data-i18n="done">关闭</button>
     </div>
   </div>
 
   <div class="sheet" id="sheet-a11y" role="dialog" aria-modal="true" aria-labelledby="a11y-title" hidden>
     <div class="card">
-      <h2 id="a11y-title">无障碍</h2>
+      <h2 id="a11y-title" data-i18n="a11y">无障碍</h2>
       <div class="switches">
-        <button role="switch" data-opt="audio" aria-checked="false"><b>声音模式</b><small>每格有音高和音色，闭眼也能玩（M）</small></button>
-        <button role="switch" data-opt="speak" aria-checked="false"><b>语音朗读</b><small>没有读屏软件时，用系统语音读出提示</small></button>
-        <button role="switch" data-opt="hc" aria-checked="false"><b>高对比</b><small>粗边框、花纹，不只靠颜色</small></button>
-        <button role="switch" data-opt="big" aria-checked="false"><b>大格子</b><small>放大方块</small></button>
-        <button role="switch" data-opt="motor" aria-checked="false"><b>大按钮</b><small>折一点、展开一点、走一步、撤销</small></button>
+        <button role="switch" data-opt="audio" aria-checked="false"><b data-i18n="opt.audio">声音模式</b><small data-i18n="desc.audio">每格有音高和音色，闭眼也能玩（M）</small></button>
+        <button role="switch" data-opt="speak" aria-checked="false"><b data-i18n="opt.speak">语音朗读</b><small data-i18n="desc.speak">没有读屏软件时，用系统语音读出提示</small></button>
+        <button role="switch" data-opt="hc" aria-checked="false"><b data-i18n="opt.hc">高对比</b><small data-i18n="desc.hc">粗边框、花纹，不只靠颜色</small></button>
+        <button role="switch" data-opt="big" aria-checked="false"><b data-i18n="opt.big">大格子</b><small data-i18n="desc.big">放大方块</small></button>
+        <button role="switch" data-opt="motor" aria-checked="false"><b data-i18n="opt.motor">大按钮</b><small data-i18n="desc.motor">折一点、展开一点、走一步、撤销</small></button>
       </div>
       <p class="help" id="a11y-help"></p>
-      <button class="close" data-close>关闭</button>
+      <button class="close" data-close data-i18n="done">关闭</button>
     </div>
   </div>
 
   <div class="sheet" id="sheet-win" role="dialog" aria-labelledby="win-text" hidden>
     <div class="card win">
-      <div class="seal" aria-hidden="true">成</div>
+      <div class="seal" aria-hidden="true" lang="zh-CN">成</div>
       <p id="win-text"></p>
-      <button class="primary" id="btn-next">下一关</button>
+      <button class="primary" id="btn-next" data-i18n="next">下一关</button>
     </div>
   </div>
 
+  <script src="i18n.js"></script>
   <script src="logic.js"></script>
   <script src="levels.js"></script>
   <script src="main.js"></script>

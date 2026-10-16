@@ -215,3 +215,31 @@ Duo 是小众；游戏必须在普通 iPhone / iPad 上同样"像在折一本书
 - **记录**：每关通过时间、提示次数、撤销次数；"卡住"的时刻和原因（听不清位置 / 记不住对页 / 按键太多）；是否说出镜像规则；主观"好玩"1–5 分；最想去掉的一个声音。
 - **两周内要回答的问题**：音高 = 行、音色 = 页是否足够区分？标签里"合上后对面的纸板会落在这里"是帮助还是剧透？终点动机是否烦人？读屏朗读和游戏声音是否打架（是否需要"读屏时游戏声音自动压低"）？
 - **过关标准**：≥3/4 的盲人玩家不看（没法看）提示通过 1–3 关；≥2/4 说出类似"合上后这边会落到那边"；运动障碍玩家全部能用按钮或切换控制通过 1–5 关。
+
+## 10. 多语言
+
+网页原型已做 4 种：简体中文、English、日本語、한국어。所有文字在 `i18n.js`（`t(key, params)`，无库）；按 `navigator.languages` 自动选（zh* → 中，ja → 日，ko → 한，其余 → EN），右上角「中 / EN / 日 / 한」切换并记住；切换时改 `<html lang>`（读屏换声音、CJK 换字形），原地重绘，关卡、角度、撤销都不丢。
+
+### 名字与副标题
+| | 副标题 / App Store 名 | 关键词提案 |
+|---|---|---|
+| zh | 折 ·《折信》 | 折纸, 解谜, 折叠屏, 书, 镜像, 无障碍, 声音解谜 |
+| en | Letterfold | fold, puzzle, foldable, paper, book, mirror, origami, accessible |
+| ja | 折り文（おりぶみ） | 折り紙, パズル, 折りたたみ, 本, 鏡, 謎解き, 音で遊ぶ |
+| ko | 접은 편지 | 종이접기, 퍼즐, 폴더블, 책, 거울, 수수께끼, 접근성 |
+
+- **Letterfold**：letter + fold，一个词，像 letterpress；英文商店里可搜、可注册。
+- **折り文**：本来就是一个词，指旧时折起来的书信，和《折信》意思一样，也有古意。比造个片假名名字好。
+- **접은 편지**（不是提案里的「접는 편지」）：「접는」是正在折（读起来像操作说明），「접은」是已经折好的一封信。它是个名词，有分量，和 折信 / 折り文 对得上。
+- 关卡名按意思和语气译，不逐字：对页 → Facing Page / 見開き / 맞은편；往返 → There and Back / 行き帰り / 오가는 길；立 → Stand / 立つ / 일어서다；影 → Shade（比 Shadow 轻，也有"幽影"的意思）；乘影 → Shadow Ride / 影に乗る / 그림자를 타고；门与桥 → Door, then Bridge（把"先后"译出来）。
+
+### 原生（iOS）
+- **String Catalogs**（`Localizable.xcstrings`）：每个 key 带 comment 说明它在哪里出现、是不是读屏用的；关卡文案单独放一个 `Levels.xcstrings` 表。`String(localized:)` 加 `\(row)` 插值，不拼字符串，这样每种语言都能调语序（「第2行第3列」/ "row 2, column 3" / 「2行3列」/「2행 3열」）。
+- **复数与格式**：英文用 catalog 的 plural variants（"1 step / 2 steps"）；中日韩没有复数，只给 `other`。数字和角度用 `FormatStyle`（`Measurement<UnitAngle>` 显示 "120°"）；列表用 `ListFormatter`（中「、」，英 ", "，日「、」，韩 ", "）。韩文助词（이/가、을/를、으로/로）要看前面字的收音：网页版有个小函数；原生用 iOS 的 automatic grammar agreement 或在 catalog 里给变体。
+- **VoiceOver 语言**：`accessibilityLanguage` 跟随 App 语言；关卡名里出现的「折」「成」印章字单独标 `zh-Hans`，免得英文声音读成 "Chinese character"。公告（`.announcement`）用 `NSAttributedString` 带 `.accessibilitySpeechLanguage`。没有读屏时的语音朗读，`AVSpeechSynthesisVoice(language:)` 按语言选声音。
+- **字体与排版**（只用系统字体，不打包字体文件）：
+  - 中文：PingFang SC；标点用全角「，。；」，不加空格。
+  - 日文：Hiragino Sans / 日文版 SF；**必须**让系统按 `ja` 选字体，否则汉字会显示成中文字形（「直」「骨」等）。`line-break: strict`，句号不落在行首。
+  - 韩文：Apple SD Gothic Neo；`word-break: keep-all`，按词换行，不把一个词拆开。
+  - 英文：SF Pro；字串大约比中文长 2–3 倍，按钮要能放下（已在 390×844 和 1352×760 上查过：不溢出、不截断、按键名不换行）。
+  - 「折」字 logo 在所有语言里保持不变，副标题跟语言变；韩文、日文副标题字距比拉丁字母小一些（0.08em 对 0.14em）。

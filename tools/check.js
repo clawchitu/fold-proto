@@ -71,7 +71,7 @@ LEVELS.forEach((lv, i) => {
   const without = (ch) => solve({ map: lv.map.map((row) => row.replace(ch, '.')) });
   const hasStoneRight = lv.map.some((row) => row.slice(L.N).includes('x'));
   if (!full) ok = false;
-  console.log(`${i + 1} ${lv.name}: ${full ? 'changes=' + full.cost : 'UNSOLVABLE'}` +
+  console.log(`${i + 1} ${lv.id}: ${full ? 'changes=' + full.cost : 'UNSOLVABLE'}` +
     `  needsFold=${!noFold} needsPop=${!noPop}` +
     (hasStoneRight ? `  needsShade=${!noShade} needsRide=${!oneShade}` : '') +
     (lv.map.join('').includes('k') ? `  needsKey=${!without('k')}` : '') +
