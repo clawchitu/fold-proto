@@ -61,6 +61,26 @@ function solve(level, angles = ANGLES) {
   return null;
 }
 
+// Everything the solver knows about one level; tools/export.js ships it to the iOS tests.
+function report(lv) {
+  const full = solve(lv);
+  const noFold = solve(lv, ANGLES.filter((a) => a < L.FOLD_MIN));
+  const noPop = solve(lv, ANGLES.filter((a) => a < L.POP_MIN || a > L.POP_MAX));
+  const noShade = solve(lv, ANGLES.filter((a) => !SHADE.includes(a)));
+  const oneShade = SHADE.some((keep) => solve(lv, ANGLES.filter((a) => !SHADE.includes(a) || a === keep)));
+  const without = (ch) => solve({ map: lv.map.map((row) => row.replace(ch, '.')) });
+  const all = lv.map.join('');
+  const out = { solvable: !!full, changes: full ? full.cost : null, needsFold: !noFold, needsPop: !noPop };
+  if (lv.map.some((row) => row.slice(L.N).includes('x'))) { out.needsShade = !noShade; out.needsRide = !oneShade; }
+  if (all.includes('k')) out.needsKey = !without('k');
+  if (all.includes('i')) out.needsInk = !without('i');
+  out.stepped15 = !!solve(lv, [...Array(13).keys()].map((k) => k * 15));
+  return out;
+}
+
+module.exports = { solve, report, ANGLES };
+if (require.main !== module) return;
+
 let ok = true;
 LEVELS.forEach((lv, i) => {
   const full = solve(lv);

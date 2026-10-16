@@ -325,7 +325,7 @@
   }
 
   window.I18N = {
-    t, level, setLang, applyStatic, langs: Object.keys(S),
+    t, level, setLang, applyStatic, langs: Object.keys(S), strings: S, levelTexts: LV,
     get lang() { return lang; }, get tag() { return TAG[lang]; },
     onChange: (f) => subs.push(f),
   };
