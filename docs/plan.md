@@ -170,3 +170,6 @@ Duo 是小众；游戏必须在普通 iPhone / iPad 上同样"像在折一本书
 | 5 | **RealityKit 做不出纸的光（半透明、软影）还保持 120 fps** | Haoqiang 3 天渲染试验：一页折叠 + 真实投影 + 宣纸透光，与一张 Three.js 参考帧并排比 | 在 iPhone 上 120 fps、影子边缘柔和、透光可见；否则切 Metal 薄层 |
 
 另外两个慢风险：大陆版号（第 7 节）；每页 4 列的关卡空间是否撑得住 36 关——M0 把网页关卡推到 20 关就能看出来，撑不住就在第三章把网格加到 5 列而不是加机制。
+
+---
+**风险 #1 更新（10/16，赤兔查 iOS 27.1 SDK）**：公开 API 已有连续铰链角度。`UIKit/UIHinge.h`：`UIHinge.status`（closed / partiallyOpen / fullyOpen）+ `CGFloat angle`，API_AVAILABLE(ios 27.1)；另有 `UIHingeInteraction`（含 update 回调）。「影」章可按连续角度设计；无铰链设备仍走拖页 / 倾斜方案。真机到货后验证 angle 的精度与刷新率。
