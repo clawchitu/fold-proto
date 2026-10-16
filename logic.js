@@ -11,6 +11,7 @@
   const N = 4;
   const FOLD_MIN = 155;              // folded: stacked tiles connect
   const POP_MIN = 60, POP_MAX = 120; // pop-up tabs stand and bridge the crease
+  const SHADE_MIN = 91;              // leaning page casts shadows onto the flat page until it folds
 
   const mirror = (c) => 2 * N - 1 - c;
   const proj = (c) => (c < N ? c : mirror(c));
@@ -24,12 +25,28 @@
 
   const isFloor = (t) => '.SGkiop'.includes(t);
   const isBlock = (t) => t === 'x' || t === 'D';
+  const isOpaque = (t) => t === 'x';   // stones block the light; paper and ink let it through
+
+  // Shadows: a stone d cells from the hinge on the leaning right page shades the left cell
+  // round(d * -cos a) from the hinge. Flat (<=90) nothing; folded, the stone itself lands there.
+  const shadowOffset = (d, a) => Math.round(d * -Math.cos((a * Math.PI) / 180));
+  const shadowColumn = (c, a) => { const e = shadowOffset(c - N + 1, a); return e < 1 ? -1 : N - e; };
+  function shadows(s, a) {
+    const out = new Map();                       // 'q,r' on the left page -> source column
+    if (a < SHADE_MIN || a >= FOLD_MIN) return out;
+    for (let r = 0; r < s.h; r++) for (let c = N; c < 2 * N; c++) {
+      if (!isOpaque(at(s, c, r))) continue;
+      const q = shadowColumn(c, a);
+      if (q >= 0 && !out.has(q + ',' + r)) out.set(q + ',' + r, c);
+    }
+    return out;
+  }
 
   function create(level) {
     const grid = level.map.map((row) => row.split(''));
     let start = null;
     grid.forEach((row, r) => row.forEach((t, c) => { if (t === 'S') start = { c, r }; }));
-    return { grid, h: grid.length, w: 2 * N, char: start };
+    return { grid, h: grid.length, w: 2 * N, char: { ...start }, start };
   }
 
   const at = (s, c, r) => (r >= 0 && r < s.h && c >= 0 && c < s.w ? s.grid[r][c] : '-');
@@ -54,7 +71,7 @@
 
   // Neighbours of an actual cell when the book is open (one page each, no crease crossing,
   // except pop-up tabs that bridge the crease while standing).
-  function openNeighbours(s, c, r, mode) {
+  function openNeighbours(s, c, r, mode, sh) {
     const out = [];
     for (const [dc, dr] of DIRS) {
       const nc = c + dc, nr = r + dr;
@@ -64,14 +81,25 @@
         if (mode === 'pop' && at(s, c, r) === 'p' && at(s, nc, nr) === 'p') out.push({ c: nc, r: nr });
         continue;
       }
-      if (isFloor(at(s, nc, nr))) out.push({ c: nc, r: nr });
+      const t = at(s, nc, nr);
+      if (isFloor(t) || (sh && sh.has(nc + ',' + nr) && !isBlock(t))) out.push({ c: nc, r: nr });
     }
     return out;
   }
 
-  // One step of movement from the current character cell, in the given mode.
-  function neighbours(s, from, mode) {
-    if (mode !== 'fold') return openNeighbours(s, from.c, from.r, mode);
+  // Standing on nothing but a shadow? Then the shadow carries the character when the angle changes.
+  // Returns the cell the character ends up on, or null when it falls.
+  function ride(s, from, src, a) {
+    if (isFloor(at(s, from.c, from.r))) return from;
+    if (src == null) return null;
+    const q = shadowColumn(src, a);
+    if (q < 0 || a >= FOLD_MIN || isBlock(at(s, q, from.r))) return null;
+    return { c: q, r: from.r };
+  }
+
+  // One step of movement from the current character cell, in the given mode (sh = shadows(s, angle)).
+  function neighbours(s, from, mode, sh) {
+    if (mode !== 'fold') return openNeighbours(s, from.c, from.r, mode, sh);
     const q = proj(from.c), out = [];
     for (const [dq, dr] of DIRS) {
       const nq = q + dq, nr = from.r + dr;
@@ -82,7 +110,7 @@
   }
 
   // BFS from the character to a target cell. When folded, the target is matched by stack (q, r).
-  function findPath(s, target, mode) {
+  function findPath(s, target, mode, sh) {
     const key = (p) => (mode === 'fold' ? proj(p.c) : p.c) + ',' + p.r;
     const goal = key(target);
     const startK = key(s.char);
@@ -92,7 +120,7 @@
     const queue = [s.char];
     while (queue.length) {
       const cur = queue.shift();
-      for (const n of neighbours(s, cur, mode)) {
+      for (const n of neighbours(s, cur, mode, sh)) {
         const k = key(n);
         if (prev.has(k)) continue;
         prev.set(k, key(cur)); cell.set(k, n);
@@ -135,7 +163,7 @@
     return mode === 'fold' && at(s, mirror(c), r) === 'G';
   }
 
-  const api = { N, FOLD_MIN, POP_MIN, POP_MAX, mirror, proj, isRight, modeOf, isFloor, isBlock,
-    create, at, neighbours, findPath, stamp, isWin };
+  const api = { N, FOLD_MIN, POP_MIN, POP_MAX, SHADE_MIN, mirror, proj, isRight, modeOf, isFloor, isBlock,
+    isOpaque, shadowColumn, shadows, ride, create, at, neighbours, findPath, stamp, isWin };
   if (typeof module !== 'undefined') module.exports = api; else root.FoldLogic = api;
 })(this);

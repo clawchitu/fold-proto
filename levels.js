@@ -1,6 +1,8 @@
 // Levels as data. Each map row is 8 columns: 4 on the left page | 4 on the right page.
 // Column c on the right lands on column 7-c on the left when the book closes.
 // Legend: - empty  . paper  S start  G goal  x stone  k key  D door  i ink  p pop-up tab
+// A stone on the right page casts a shadow onto the left page while the book leans (91°–154°);
+// the shadow is walkable and slides towards the stone's mirror cell as the book closes.
 const LEVELS = [
   {
     name: '桥',
@@ -103,6 +105,29 @@ const LEVELS = [
       '--xi-..-',
       '---..---',
       '--Spp---',
+    ],
+  },
+  {
+    name: '影',
+    line: '合上也过不去。可是石头有影子。',
+    hint: '把书慢慢合到一半多一点，右页石头的影子会落在缺口上。影子能走。',
+    map: [
+      '-S------',
+      '-.------',
+      '-------x',
+      '-.------',
+      '-G------',
+    ],
+  },
+  {
+    name: '乘影',
+    line: '缺口太宽，影子太短。',
+    hint: '站到影子上，再慢慢合书：影子会带着你一起滑过去。合到底石头就压下来了。',
+    map: [
+      'G.------',
+      '-.------',
+      '---S---x',
+      '--------',
     ],
   },
 ];

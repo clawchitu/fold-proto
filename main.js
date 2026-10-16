@@ -17,6 +17,7 @@
 
   let index = 0, state, angle = 0, mode = 'open', won = false;
   let cells = [], charEl, tabs = [], walkTimer = null, tween = null;
+  let shade = new Map(), shadowEls = new Map(), rideSrc = null;
 
   // ---------- sound: tiny WebAudio synth ----------
   const sound = (() => {
@@ -58,6 +59,8 @@
       nope() { tone(180, 0.08, 0.08, 0, 'triangle'); },
       stamp() { tone(82, 0.22, 0.45); burst(500, 1, 0.18, 0.4, 'lowpass'); tone(990, 0.3, 0.06, 0.05); },
       win() { [523.3, 659.3, 784, 1046.5].forEach((f, i) => tone(f, 0.7, 0.09, i * 0.09)); },
+      slide() { burst(700, 1.2, 0.08, 0.18, 'lowpass'); },
+      fall() { tone(300, 0.25, 0.12, 0, 'triangle'); tone(150, 0.3, 0.1, 0.12, 'triangle'); },
     };
   })();
 
@@ -85,7 +88,8 @@
     state = F.create(lv);
     won = false;
     stopWalk();
-    for (const page of [ui.left, ui.right]) page.querySelectorAll('.cell, .char, .tab').forEach((e) => e.remove());
+    for (const page of [ui.left, ui.right]) page.querySelectorAll('.cell, .char, .tab, .shadow').forEach((e) => e.remove());
+    shadowEls = new Map(); shade = new Map(); rideSrc = null;
     cells = state.grid.map((row, r) => row.map((_, c) => {
       const el = document.createElement('div');
       el.className = 'cell';
@@ -111,6 +115,7 @@
     layout();
     paintTiles();
     placeChar(true);
+    shade = F.shadows(state, angle);
     applyAngle();
     hideSheets();
     coachMarks();
@@ -152,10 +157,50 @@
       t.classList.toggle('up', mode === 'pop');
       t.style.opacity = (0.35 + 0.65 * pop).toFixed(3);
     });
+    paintShadows();
     ui.book.dataset.mode = mode;
     ui.slider.value = Math.round(a);
     ui.angleNum.textContent = Math.round(a) + '°';
-    ui.modeWord.textContent = MODE_WORD[mode];
+    ui.modeWord.textContent = mode !== 'fold' && a >= F.SHADE_MIN ? '斜起' : MODE_WORD[mode];
+  }
+
+  // Shadows of right-page stones, foreshortened by the lean of the page.
+  function paintShadows() {
+    const squash = Math.max(0.3, -Math.cos((angle * Math.PI) / 180));
+    for (const [key, el] of shadowEls) if (!shade.has(key)) { el.remove(); shadowEls.delete(key); }
+    for (const [key, src] of shade) {
+      let el = shadowEls.get(key);
+      const [q, r] = key.split(',').map(Number);
+      if (!el) {
+        el = document.createElement('div'); el.className = 'shadow';
+        el.style.setProperty('--y', r); ui.left.appendChild(el); shadowEls.set(key, el);
+      }
+      el.style.setProperty('--x', q); el.style.setProperty('--squash', squash.toFixed(3));
+      el.dataset.src = src;
+    }
+  }
+
+  // The angle moved: shadows shift; a character standing on nothing but shadow goes with them.
+  function updateShade() {
+    const before = shade;
+    shade = F.shadows(state, angle);
+    const { c, r } = state.char;
+    const key = c + ',' + r;
+    if (!F.isRight(c) && !F.isFloor(F.at(state, c, r))) {
+      if (rideSrc == null) rideSrc = before.get(key) ?? shade.get(key) ?? null;
+      const to = F.ride(state, state.char, rideSrc, angle);
+      if (!to) return fall();
+      if (to.c !== c) { state.char = to; placeChar(false); sound.slide(); }
+    } else rideSrc = null;
+    if ([...shade.keys()].join() !== [...before.keys()].join() && shade.size) sound.tick();
+  }
+
+  function fall() {
+    stopWalk(); rideSrc = null;
+    sound.fall();
+    charEl.classList.remove('fall'); void charEl.offsetWidth; charEl.classList.add('fall');
+    toast(angle >= F.FOLD_MIN ? '石头压下来了，重新开始' : '影子走了，纸人掉了下去');
+    setTimeout(() => { state.char = { ...state.start }; charEl.classList.remove('fall'); placeChar(true); }, 260);
   }
 
   // ---------- fold angle ----------
@@ -169,6 +214,7 @@
     clearTimeout(setAngle.quiet); setAngle.quiet = setTimeout(() => sound.rustle(0), 90);
     angle = a;
     const next = F.modeOf(a);
+    if (!demo && state) updateShade();
     if (next !== mode) changeMode(mode, next);
     if (next === 'fold' && !demo) document.body.classList.remove('coach-fold');
     applyAngle();
@@ -217,7 +263,7 @@
 
   // gentle magnets at the three postures
   function snap() {
-    if (angle > 140) tweenTo(180, 260);
+    if (angle > 165) tweenTo(180, 260);
     else if (angle > 70 && angle < 110) tweenTo(90, 260);
     else if (angle < 22) tweenTo(0, 260);
   }
@@ -229,7 +275,7 @@
     if (won) return;
     stopWalk();
     const target = { c, r };
-    const path = F.findPath(state, target, mode);
+    const path = F.findPath(state, target, mode, shade);
     if (!path) { sound.nope(); flash(cells[r][c], 'nope'); return; }
     walk(path);
   }
@@ -238,9 +284,10 @@
     const next = () => {
       if (!path.length) { walkTimer = null; return; }
       const n = path.shift();
-      const ok = F.neighbours(state, state.char, mode).some((p) => p.c === n.c && p.r === n.r);
+      const ok = F.neighbours(state, state.char, mode, shade).some((p) => p.c === n.c && p.r === n.r);
       if (!ok) { walkTimer = null; return; }
       state.char = n;
+      rideSrc = F.isFloor(F.at(state, n.c, n.r)) ? null : shade.get(n.c + ',' + n.r) ?? null;
       placeChar(false);
       sound.step();
       if (checkWin()) { walkTimer = null; return; }

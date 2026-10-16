@@ -125,6 +125,21 @@ nav button:hover, .presets button:hover { background: rgba(0, 0, 0, .05); color:
 }
 .tab.up { background: #fde9e1; box-shadow: 0 0 0 1.5px var(--accent), 0 10px 18px -6px rgba(224, 83, 47, .45); }
 
+/* ---------- shadow cast by a stone on the leaning page ---------- */
+.shadow {
+  position: absolute; pointer-events: none; z-index: 1;
+  left: calc(var(--pad) + var(--x) * var(--cell)); top: calc(var(--pad) + var(--y) * var(--cell));
+  width: var(--cell); height: var(--cell); display: grid; place-items: center;
+  transition: left .18s ease-out;
+}
+.shadow::before {
+  content: ""; width: calc(88% * var(--squash)); height: 88%; border-radius: 22%;
+  background: rgba(60, 45, 30, .5); filter: blur(2px);
+  transition: width .15s;
+}
+.cell { z-index: 0; }
+.char { z-index: 3; }
+
 /* ---------- character ---------- */
 .char {
   position: absolute; pointer-events: none;
@@ -142,6 +157,8 @@ nav button:hover, .presets button:hover { background: rgba(0, 0, 0, .05); color:
 .char.joy i { animation: joy .7s ease-out; }
 @keyframes hop { 50% { transform: translateY(-18%) scale(1.04, .96); } }
 @keyframes joy { 30% { transform: translateY(-40%) scale(1.1); } 60% { transform: translateY(0) scale(1.15, .85); } }
+.char.fall i { animation: fall .26s ease-in forwards; }
+@keyframes fall { to { transform: translateY(60%) scale(.4); opacity: 0; } }
 
 /* ---------- controls ---------- */
 .controls {
@@ -154,11 +171,11 @@ nav button:hover, .presets button:hover { background: rgba(0, 0, 0, .05); color:
 }
 #fold::-webkit-slider-runnable-track {
   height: 4px; border-radius: 2px;
-  background: linear-gradient(90deg, #d6cfc2 0 33.3%, #f0b8a6 33.3% 66.7%, #d6cfc2 66.7% 86.1%, var(--accent) 86.1%);
+  background: linear-gradient(90deg, #d6cfc2 0 33.3%, #f0b8a6 33.3% 50.5%, #c9b9b3 50.5% 66.7%, #b9b1ad 66.7% 86.1%, var(--accent) 86.1%);
 }
 #fold::-moz-range-track {
   height: 4px; border-radius: 2px;
-  background: linear-gradient(90deg, #d6cfc2 0 33.3%, #f0b8a6 33.3% 66.7%, #d6cfc2 66.7% 86.1%, var(--accent) 86.1%);
+  background: linear-gradient(90deg, #d6cfc2 0 33.3%, #f0b8a6 33.3% 50.5%, #c9b9b3 50.5% 66.7%, #b9b1ad 66.7% 86.1%, var(--accent) 86.1%);
 }
 #fold::-webkit-slider-thumb {
   -webkit-appearance: none; width: 22px; height: 22px; margin-top: -9px; border-radius: 50%;
