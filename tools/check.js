@@ -77,5 +77,9 @@ LEVELS.forEach((lv, i) => {
     (lv.map.join('').includes('k') ? `  needsKey=${!without('k')}` : '') +
     (lv.map.join('').includes('i') ? `  needsInk=${!without('i')}` : ''));
   if (full) console.log('   ' + full.steps.join(' → '));
+  // accessibility: solvable with only the 15° keyboard / big-button steps (no precise slider)
+  const stepped = solve(lv, [...Array(13).keys()].map((k) => k * 15));
+  if (!stepped) { ok = false; console.log('   NOT solvable with 15° steps'); }
 });
+console.log(ok ? 'all levels solvable, also with 15° steps only' : 'FAIL');
 process.exit(ok ? 0 : 1);

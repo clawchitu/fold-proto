@@ -13,6 +13,12 @@
   };
 
   const MODE_WORD = { open: '打开', pop: '立起', fold: '合上' };
+  const STEP = 15;                                   // keyboard / button fold step, degrees
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const opts = Object.assign({ audio: false, speak: false, hc: matchMedia('(prefers-contrast: more)').matches, big: false, motor: false },
+    JSON.parse(localStorage.getItem('fold.a11y') || '{}'));
+  // tiny event bus: a11y.js listens to the game through it
+  const bus = (() => { const m = {}; return { on: (e, f) => (m[e] ||= []).push(f), emit: (e, d) => (m[e] || []).forEach((f) => f(d)) }; })();
   const done = new Set(JSON.parse(localStorage.getItem('fold.done') || '[]'));
 
   let index = 0, state, angle = 0, mode = 'open', won = false;
@@ -22,8 +28,9 @@
   // ---------- sound: tiny WebAudio synth ----------
   const sound = (() => {
     let ctx, noise, rustleGain;
+    let rustlePan;
     function ensure() {
-      if (ctx) return ctx.state === 'suspended' && ctx.resume();
+      if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return ctx; }
       ctx = new (window.AudioContext || window.webkitAudioContext)();
       const len = ctx.sampleRate * 2, buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0);
       for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
@@ -32,7 +39,9 @@
       const src = ctx.createBufferSource(); src.buffer = noise; src.loop = true;
       const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 2400; bp.Q.value = 0.7;
       rustleGain = ctx.createGain(); rustleGain.gain.value = 0;
-      src.connect(bp).connect(rustleGain).connect(ctx.destination); src.start();
+      rustlePan = ctx.createStereoPanner();
+      src.connect(bp).connect(rustleGain).connect(rustlePan).connect(ctx.destination); src.start();
+      return ctx;
     }
     function burst(freq, q, dur, vol, type = 'bandpass') {
       if (!ctx) return;
@@ -51,12 +60,13 @@
     }
     return {
       ensure,
+      pan(p) { if (rustlePan) rustlePan.pan.setTargetAtTime(p, ctx.currentTime, 0.05); },
       rustle(speed) { if (rustleGain) rustleGain.gain.setTargetAtTime(Math.min(0.22, speed * 0.004), ctx.currentTime, 0.05); },
       crease() { burst(900, 0.9, 0.12, 0.5, 'lowpass'); tone(110, 0.12, 0.35); burst(4200, 2, 0.05, 0.12); },
       unfold() { burst(1600, 0.8, 0.09, 0.2); },
-      tick() { tone(1320, 0.05, 0.05, 0, 'triangle'); },
-      step() { tone(520 + Math.random() * 60, 0.05, 0.05, 0, 'triangle'); },
-      nope() { tone(180, 0.08, 0.08, 0, 'triangle'); },
+      tick() { if (opts.audio) return; tone(1320, 0.05, 0.05, 0, 'triangle'); },
+      step() { if (opts.audio) return; tone(520 + Math.random() * 60, 0.05, 0.05, 0, 'triangle'); },
+      nope() { if (opts.audio) return; tone(180, 0.08, 0.08, 0, 'triangle'); },
       stamp() { tone(82, 0.22, 0.45); burst(500, 1, 0.18, 0.4, 'lowpass'); tone(990, 0.3, 0.06, 0.05); },
       win() { [523.3, 659.3, 784, 1046.5].forEach((f, i) => tone(f, 0.7, 0.09, i * 0.09)); },
       slide() { burst(700, 1.2, 0.08, 0.18, 'lowpass'); },
@@ -70,8 +80,11 @@
     const availW = Math.min(window.innerWidth - 24, 1100);
     const availH = window.innerHeight - document.querySelector('.top').offsetHeight -
       document.querySelector('.controls').offsetHeight - 40;
-    const cell = Math.floor(Math.min(availW / (2 * N + 1.4), availH / (h + 0.7), 92));
+    const k = opts.big ? 0.15 : 0.35;                // page margin, in cells
+    const cell = Math.floor(Math.min(availW / (2 * N + 4 * k), availH / (h + 2 * k), opts.big ? 150 : 92));
     document.documentElement.style.setProperty('--cell', cell + 'px');
+    document.documentElement.style.setProperty('--pad-k', k);
+    bus.emit('layout');
     document.documentElement.style.setProperty('--rows', h);
   }
 
@@ -119,6 +132,8 @@
     applyAngle();
     hideSheets();
     coachMarks();
+    undoStack = [];
+    bus.emit('build');
   }
 
   function paintTiles() {
@@ -162,6 +177,8 @@
     ui.slider.value = Math.round(a);
     ui.angleNum.textContent = Math.round(a) + '°';
     ui.modeWord.textContent = mode !== 'fold' && a >= F.SHADE_MIN ? '斜起' : MODE_WORD[mode];
+    ui.slider.setAttribute('aria-valuetext', `${ui.modeWord.textContent} ${Math.round(a)}°`);
+    bus.emit('angle');
   }
 
   // Shadows of right-page stones, foreshortened by the lean of the page.
@@ -190,9 +207,12 @@
       if (rideSrc == null) rideSrc = before.get(key) ?? shade.get(key) ?? null;
       const to = F.ride(state, state.char, rideSrc, angle);
       if (!to) return fall();
-      if (to.c !== c) { state.char = to; placeChar(false); sound.slide(); }
+      if (to.c !== c) { state.char = to; placeChar(false); sound.slide(); bus.emit('slide'); }
     } else rideSrc = null;
-    if ([...shade.keys()].join() !== [...before.keys()].join() && shade.size) sound.tick();
+    if ([...shade.keys()].join() !== [...before.keys()].join()) {
+      if (shade.size) sound.tick();
+      bus.emit('shade', before);
+    }
   }
 
   function fall() {
@@ -200,7 +220,7 @@
     sound.fall();
     charEl.classList.remove('fall'); void charEl.offsetWidth; charEl.classList.add('fall');
     toast(angle >= F.FOLD_MIN ? '石头压下来了，重新开始' : '影子走了，纸人掉了下去');
-    setTimeout(() => { state.char = { ...state.start }; charEl.classList.remove('fall'); placeChar(true); }, 260);
+    setTimeout(() => { state.char = { ...state.start }; charEl.classList.remove('fall'); placeChar(true); bus.emit('fall'); }, 260);
   }
 
   // ---------- fold angle ----------
@@ -225,6 +245,7 @@
     if (next === 'fold') {
       sound.crease();
       const events = F.stamp(state);
+      lastStamp = events;
       if (events.length) {
         paintTiles();
         setTimeout(() => sound.stamp(), 120);
@@ -233,6 +254,7 @@
       pulseLinks();
     } else if (prev === 'fold') sound.unfold();
     else sound.tick();
+    bus.emit('mode', { prev, next });
     checkWin();
   }
 
@@ -248,14 +270,17 @@
     setTimeout(() => el.classList.remove(cls), 900);
   }
 
+  let lastStamp = [], tweenTarget = 0;
   function tweenTo(target, ms = 650) {
     cancelTween();
+    if (reduced.matches && !demo) ms = 1;
+    tweenTarget = target;
     const from = angle, t0 = performance.now();
     const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
     const step = (now) => {
       const t = Math.min(1, (now - t0) / ms);
       setAngle(from + (target - from) * ease(t), false);
-      if (t < 1) tween = requestAnimationFrame(step); else tween = null;
+      if (t < 1) tween = requestAnimationFrame(step); else { tween = null; bus.emit('settle'); }
     };
     tween = requestAnimationFrame(step);
   }
@@ -276,20 +301,40 @@
     stopWalk();
     const target = { c, r };
     const path = F.findPath(state, target, mode, shade);
-    if (!path) { sound.nope(); flash(cells[r][c], 'nope'); return; }
+    if (!path) { sound.nope(); flash(cells[r][c], 'nope'); bus.emit('blocked', { c, r, why: 'path' }); return; }
+    if (!path.length) { bus.emit('arrive', { already: true }); return; }
+    pushUndo();
     walk(path);
+  }
+
+  // One step in a screen direction (D-pad, Shift+arrows). Folded, the pages are stacked, so
+  // left/right is measured on the projected column.
+  function stepDir(dc, dr) {
+    sound.ensure();
+    if (won || demo) return;
+    stopWalk();
+    const ch = state.char, col = (p) => (mode === 'fold' ? F.proj(p.c) : p.c);
+    const to = F.neighbours(state, ch, mode, shade).find((n) => col(n) === col(ch) + dc && n.r === ch.r + dr);
+    if (!to) {
+      sound.nope();
+      bus.emit('blocked', { c: mode === 'fold' ? col(ch) + dc : ch.c + dc, r: ch.r + dr, why: 'step', dc, dr });
+      return;
+    }
+    pushUndo();
+    walk([to]);
   }
 
   function walk(path) {
     const next = () => {
-      if (!path.length) { walkTimer = null; return; }
+      if (!path.length) { walkTimer = null; bus.emit('arrive', {}); return; }
       const n = path.shift();
       const ok = F.neighbours(state, state.char, mode, shade).some((p) => p.c === n.c && p.r === n.r);
-      if (!ok) { walkTimer = null; return; }
+      if (!ok) { walkTimer = null; bus.emit('arrive', {}); return; }
       state.char = n;
       rideSrc = F.isFloor(F.at(state, n.c, n.r)) ? null : shade.get(n.c + ',' + n.r) ?? null;
       placeChar(false);
       sound.step();
+      bus.emit('step', n);
       if (checkWin()) { walkTimer = null; return; }
       walkTimer = setTimeout(next, 190);
     };
@@ -308,11 +353,39 @@
       ui.winText.textContent = last ? '全部完成。等 Duo 到了，用真的折痕再玩一次。' : `「${LEVELS[index].name}」完成`;
       ui.next.textContent = last ? '回到第一关' : '下一关';
       setTimeout(() => (ui.sheetWin.hidden = false), 300);
+      bus.emit('win', { text: ui.winText.textContent, next: ui.next.textContent });
     }, 180);
     return true;
   }
 
   function go(i) { if (demo) endDemo(false); index = (i + LEVELS.length) % LEVELS.length; build(); if (angle) tweenTo(0, 500); }
+
+  // ---------- undo, stepped folding (no precision or timing needed) ----------
+  let undoStack = [];
+  function pushUndo() {
+    undoStack.push({ grid: state.grid.map((row) => row.slice()), char: { ...state.char }, angle });
+    if (undoStack.length > 200) undoStack.shift();
+  }
+  function undo() {
+    const s = undoStack.pop();
+    if (!s) return false;
+    cancelTween(); stopWalk();
+    state.grid = s.grid; state.char = s.char; angle = s.angle;
+    mode = F.modeOf(angle); shade = F.shadows(state, angle); rideSrc = null; won = false;
+    ui.sheetWin.hidden = true; charEl.classList.remove('joy');
+    paintTiles(); placeChar(true); applyAngle();
+    bus.emit('undo');
+    return true;
+  }
+  function foldTo(a) { sound.ensure(); if (demo) endDemo(true); if (Math.round(a) === Math.round(angle)) return bus.emit('settle'); pushUndo(); tweenTo(a, 380); }
+  function foldBy(dir) {
+    const now = tween ? tweenTarget : angle;
+    const a = dir > 0 ? Math.floor(now / STEP + 1e-6) * STEP + STEP : Math.ceil(now / STEP - 1e-6) * STEP - STEP;
+    foldTo(Math.max(0, Math.min(180, a)));
+  }
+  function hint() {
+    if (index === 0 && !opts.audio) playDemo(); else toast(LEVELS[index].hint);
+  }
 
   // ---------- onboarding (level 1): a ghost hand plays the level once, ~4 s, any tap skips ----------
   let demo = false, demoTimers = [], swallowClick = false;
@@ -378,6 +451,7 @@
 
   // ---------- UI wiring ----------
   function toast(text) {
+    bus.emit('toast', text);
     ui.toast.textContent = text; ui.toast.classList.add('show');
     clearTimeout(toast.t); toast.t = setTimeout(() => ui.toast.classList.remove('show'), 4200);
   }
@@ -396,33 +470,31 @@
   }
 
   $('#btn-levels').onclick = openLevels;
-  $('#btn-hint').onclick = () => (index === 0 ? playDemo() : toast(LEVELS[index].hint));
+  $('#btn-hint').onclick = hint;
   $('#btn-reset').onclick = () => go(index);
   ui.next.onclick = () => go(index + 1);
   document.querySelectorAll('[data-close]').forEach((b) => (b.onclick = hideSheets));
   document.querySelectorAll('.sheet').forEach((s) => s.addEventListener('click', (e) => { if (e.target === s && s.id !== 'sheet-win') hideSheets(); }));
-  document.querySelectorAll('.presets [data-a]').forEach((b) => (b.onclick = () => { sound.ensure(); tweenTo(+b.dataset.a); }));
+  document.querySelectorAll('.presets [data-a]').forEach((b) => (b.onclick = () => { sound.ensure(); pushUndo(); tweenTo(+b.dataset.a); }));
 
-  ui.slider.addEventListener('input', () => { sound.ensure(); setAngle(+ui.slider.value); });
-  ui.slider.addEventListener('change', snap);
+  let sliding = false;
+  ui.slider.addEventListener('input', () => { sound.ensure(); if (!sliding) { sliding = true; pushUndo(); } setAngle(+ui.slider.value); });
+  ui.slider.addEventListener('change', () => { sliding = false; snap(); bus.emit('settle'); });
 
   // drag the crease: pull left to close
   ui.grab.addEventListener('pointerdown', (e) => {
     sound.ensure();
     ui.grab.setPointerCapture(e.pointerId);
+    pushUndo();
     const x0 = e.clientX, a0 = angle, pageW = ui.left.offsetWidth;
     const move = (ev) => setAngle(a0 + ((x0 - ev.clientX) / pageW) * 180);
-    const up = () => { ui.grab.removeEventListener('pointermove', move); ui.grab.removeEventListener('pointerup', up); snap(); };
+    const up = () => { ui.grab.removeEventListener('pointermove', move); ui.grab.removeEventListener('pointerup', up); snap(); bus.emit('settle'); };
     ui.grab.addEventListener('pointermove', move);
     ui.grab.addEventListener('pointerup', up);
   });
 
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'f') tweenTo(angle > 120 ? 0 : 180);
-    if (e.key === 'h') tweenTo(90);
-    if (e.key === 'r') go(index);
-    if (e.key === 'Escape') hideSheets();
-  });
+  // letter shortcuts (F / Shift+F / H / R / U …) live in a11y.js
+  window.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideSheets(); });
 
   // phones: tilt left/right as a stand-in for the hinge sensor
   let tiltOn = false, tiltA = 0;
@@ -448,7 +520,18 @@
     };
   }
 
+  window.FoldGame = {
+    bus, opts, sound, STEP, reduced,
+    get state() { return state; }, get angle() { return angle; }, get mode() { return mode; },
+    get index() { return index; }, get won() { return won; }, get shade() { return shade; }, get demo() { return demo; },
+    get lastStamp() { return lastStamp; }, get tabs() { return tabs; },
+    cells: () => cells, levels: LEVELS,
+    tap: onTap, step: stepDir, foldBy, foldTo, undo, hint, go, layout, endDemo, toast,
+    reset: () => go(index), canUndo: () => undoStack.length > 0,
+  };
+
   window.addEventListener('resize', layout);
   build();
-  if (!localStorage.getItem('fold.intro')) setTimeout(playDemo, 500);
+  // the ghost-hand demo is a visual lesson: skip it for audio mode and reduced motion
+  if (!localStorage.getItem('fold.intro') && !opts.audio && !reduced.matches) setTimeout(() => { if (!opts.audio) playDemo(); }, 500);
 })();
