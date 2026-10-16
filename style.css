@@ -219,3 +219,27 @@ nav button:hover, .presets button:hover { background: rgba(0, 0, 0, .05); color:
 #sheet-win p { margin: 0; }
 .book[data-mode="fold"] .page.right .tile { opacity: .62; }
 .page.right .tile { transition: opacity .3s, background .3s; }
+
+/* ---------- onboarding ---------- */
+.tag {
+  position: absolute; left: 50%; bottom: 100%; transform: translate(-50%, -2px); z-index: 2;
+  padding: 3px 8px; border-radius: 999px; white-space: nowrap; pointer-events: none;
+  background: var(--ink); color: var(--paper); font-size: 11px; font-weight: 500; letter-spacing: .04em;
+}
+.cell .tag { bottom: auto; top: 100%; transform: translate(-50%, 2px); }
+.char .tag { bottom: 88%; }
+.cell .tag.coach, .coach-slider { background: var(--accent); opacity: 0; transition: opacity .4s; }
+.coach-tap .cell .tap-tip.coach, .coach-fold .coach-slider { opacity: 1; animation: bob 1.6s ease-in-out infinite; }
+.cell .tap-tip { top: 50%; left: 100%; transform: translate(4px, -50%); }
+.controls { position: relative; }
+.coach-slider { left: auto; right: 44px; bottom: auto; top: -22px; transform: none; }
+@keyframes bob { 50% { translate: 0 -3px; } }
+.cell.glow .tile { box-shadow: 0 0 0 2px var(--accent), 0 0 26px 6px rgba(224, 83, 47, .35); transition: box-shadow .4s; }
+.finger {
+  position: fixed; left: 0; top: 0; width: 34px; height: 34px; margin: -17px 0 0 -17px; z-index: 50;
+  border-radius: 50%; background: rgba(255, 255, 255, .55); border: 1.5px solid rgba(43, 42, 40, .55);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .18); pointer-events: none; opacity: 0;
+  transition-property: left, top, opacity, transform; transition-timing-function: cubic-bezier(.45, 0, .2, 1);
+}
+.finger.on { opacity: 1; }
+.finger.tap { transform: scale(.78); background: rgba(224, 83, 47, .35); }

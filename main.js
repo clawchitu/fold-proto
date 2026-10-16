@@ -105,7 +105,7 @@
     });
     charEl = document.createElement('div');
     charEl.className = 'char';
-    charEl.innerHTML = '<i></i>';
+    charEl.innerHTML = '<i></i>' + (index === 0 ? '<b class="tag">你</b>' : '');
     ui.name.textContent = `${index + 1} / ${LEVELS.length} · ${lv.name}`;
     ui.line.textContent = lv.line;
     layout();
@@ -113,6 +113,7 @@
     placeChar(true);
     applyAngle();
     hideSheets();
+    coachMarks();
   }
 
   function paintTiles() {
@@ -169,6 +170,7 @@
     angle = a;
     const next = F.modeOf(a);
     if (next !== mode) changeMode(mode, next);
+    if (next === 'fold' && !demo) document.body.classList.remove('coach-fold');
     applyAngle();
   }
 
@@ -223,6 +225,7 @@
   // ---------- movement ----------
   function onTap(c, r) {
     sound.ensure();
+    document.body.classList.remove('coach-tap');
     if (won) return;
     stopWalk();
     const target = { c, r };
@@ -248,7 +251,7 @@
   function stopWalk() { clearTimeout(walkTimer); walkTimer = null; }
 
   function checkWin() {
-    if (won || !F.isWin(state, mode)) return false;
+    if (demo || won || !F.isWin(state, mode)) return false;
     won = true;
     done.add(index); localStorage.setItem('fold.done', JSON.stringify([...done]));
     setTimeout(() => {
@@ -262,7 +265,69 @@
     return true;
   }
 
-  function go(i) { index = (i + LEVELS.length) % LEVELS.length; build(); if (angle) tweenTo(0, 500); }
+  function go(i) { if (demo) endDemo(false); index = (i + LEVELS.length) % LEVELS.length; build(); if (angle) tweenTo(0, 500); }
+
+  // ---------- onboarding (level 1): a ghost hand plays the level once, ~4 s, any tap skips ----------
+  let demo = false, demoTimers = [], swallowClick = false;
+  const finger = document.createElement('div');
+  finger.className = 'finger'; document.body.appendChild(finger);
+
+  function coachMarks() {
+    document.querySelectorAll('.coach').forEach((e) => e.remove());
+    const show = index === 0 && !demo && !done.has(0);
+    document.body.classList.toggle('coach-tap', show); document.body.classList.toggle('coach-fold', show);
+    if (index !== 0) return;
+    const goal = cells.flat().find((el) => el.dataset.kind === 'goal');
+    goal.insertAdjacentHTML('beforeend', '<b class="tag">终点</b>');
+    cells[1][1].insertAdjacentHTML('beforeend', '<b class="tag coach tap-tip">点格子走过去</b>');
+  }
+  function centerOf(el) { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }
+  function thumbAt(a) {
+    const r = ui.slider.getBoundingClientRect();
+    return [r.left + 11 + (r.width - 22) * (a / 180), r.top + r.height / 2];
+  }
+  function moveFinger([x, y], ms) {
+    finger.style.transitionDuration = ms + 'ms, ' + ms + 'ms, 200ms, 200ms';
+    finger.style.left = x + 'px'; finger.style.top = y + 'px';
+  }
+
+  function playDemo() {
+    if (index !== 0) go(0);
+    endDemo(false);
+    build(); setAngle(0, false);
+    demo = true;
+    document.body.classList.remove('coach-tap', 'coach-fold');
+    const at = (ms, fn) => demoTimers.push(setTimeout(fn, ms));
+    moveFinger(thumbAt(0), 0);
+    at(30, () => finger.classList.add('on'));
+    at(350, () => { moveFinger(thumbAt(180), 1100); tweenTo(180, 1100); });
+    at(1480, () => cells[2][6].classList.add('glow'));
+    at(1750, () => moveFinger(centerOf(cells[4][1]), 520));
+    at(2320, () => {
+      finger.classList.add('tap');
+      sound.ensure();
+      walk(F.findPath(state, { c: 1, r: 4 }, mode) || []);
+    });
+    at(3450, () => finger.classList.remove('on', 'tap'));
+    at(3600, () => { build(); demo = true; tweenTo(0, 600); });
+    at(4250, () => endDemo(true));
+    window.addEventListener('pointerdown', skipDemo, true);
+  }
+  function skipDemo(e) { e.stopPropagation(); e.preventDefault(); swallowClick = true; endDemo(true); }
+  function endDemo(finished) {
+    demoTimers.forEach(clearTimeout); demoTimers = [];
+    window.removeEventListener('pointerdown', skipDemo, true);
+    finger.classList.remove('on', 'tap');
+    if (!demo) return;
+    demo = false;
+    cancelTween(); stopWalk();
+    if (finished) {
+      build(); setAngle(0, false);
+      localStorage.setItem('fold.intro', '1');
+      document.body.classList.add('coach-tap', 'coach-fold');
+    }
+  }
+  window.addEventListener('click', (e) => { if (swallowClick) { swallowClick = false; e.stopPropagation(); e.preventDefault(); } }, true);
 
   // ---------- UI wiring ----------
   function toast(text) {
@@ -284,7 +349,7 @@
   }
 
   $('#btn-levels').onclick = openLevels;
-  $('#btn-hint').onclick = () => toast(LEVELS[index].hint);
+  $('#btn-hint').onclick = () => (index === 0 ? playDemo() : toast(LEVELS[index].hint));
   $('#btn-reset').onclick = () => go(index);
   ui.next.onclick = () => go(index + 1);
   document.querySelectorAll('[data-close]').forEach((b) => (b.onclick = hideSheets));
@@ -338,4 +403,5 @@
 
   window.addEventListener('resize', layout);
   build();
+  if (!localStorage.getItem('fold.intro')) setTimeout(playDemo, 500);
 })();
