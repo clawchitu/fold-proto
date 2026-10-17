@@ -62,6 +62,24 @@ const LEVELS = [
     ],
   },
   {
+    id: 'twoBridges',        // 2-2 · 1 posture change · tabs only (design-review-2 §5)
+    map: [
+      'S..pp..-',
+      '-x----.-',
+      '------.-',
+      'G..pp..-',
+    ],
+  },
+  {
+    id: 'standClose',        // 2-3 · stand, then close · the goal is under your feet
+    map: [
+      'S..pp.--',
+      '--x--.--',
+      '-----.--',
+      '--G--.--',
+    ],
+  },
+  {
     id: 'doorBridge',
     map: [
       'S.kppD.-',
