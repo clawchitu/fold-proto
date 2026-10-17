@@ -100,6 +100,12 @@ LEVELS.forEach((lv, i) => {
   // accessibility: solvable with only the 15° keyboard / big-button steps (no precise slider)
   const stepped = solve(lv, [...Array(13).keys()].map((k) => k * 15));
   if (!stepped) { ok = false; console.log('   NOT solvable with 15° steps'); }
+  // fatigue budget (plan.md §12.3): best solution needs ≤ 3 posture changes, of which ≤ 2 full closes
+  if (full) {
+    const closes = full.steps.filter((x, i, arr) => x.startsWith('fold') && (i === 0 || !arr[i - 1].startsWith('fold'))).length;
+    if (full.cost > 3) { ok = false; console.log(`   OVER PAR: ${full.cost} posture changes (max 3)`); }
+    if (closes > 2) { ok = false; console.log(`   OVER PAR: ${closes} full closes (max 2)`); }
+  }
 });
 console.log(ok ? 'all levels solvable, also with 15° steps only' : 'FAIL');
 process.exit(ok ? 0 : 1);
