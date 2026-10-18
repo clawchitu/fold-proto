@@ -202,6 +202,7 @@
     shade = F.shadows(state, angle);
     const { c, r } = state.char;
     const key = c + ',' + r;
+    if (F.crushed(state, state.char, angle)) return fall();
     if (!F.isRight(c) && !F.isFloor(F.at(state, c, r))) {
       if (rideSrc == null) rideSrc = before.get(key) ?? shade.get(key) ?? null;
       const to = F.ride(state, state.char, rideSrc, angle);

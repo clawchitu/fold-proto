@@ -14,12 +14,11 @@ function turn(world, from, a0, a1) {
   const step = a1 > a0 ? 5 : -5;
   for (let a = a0 + step; step > 0 ? a <= a1 : a >= a1; a += step) {
     const w = { ...world, char: cur };
-    if (!L.isRight(cur.c) && !L.isFloor(L.at(w, cur.c, cur.r))) {
-      if (src == null) src = L.shadows(w, a - step).get(cur.c + ',' + cur.r) ?? null;
-      const to = L.ride(w, cur, src, a);
-      if (!to) return null;
-      cur = to;
-    } else src = null;
+    const onShadow = !L.isRight(cur.c) && !L.isFloor(L.at(w, cur.c, cur.r));
+    if (onShadow) { if (src == null) src = L.shadows(w, a - step).get(cur.c + ',' + cur.r) ?? null; } else src = null;
+    const to = L.ride(w, cur, src, a);   // rides, falls, or is crushed when the book closes on a stone
+    if (!to) return null;
+    cur = to;
   }
   return cur;
 }

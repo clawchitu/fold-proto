@@ -121,6 +121,7 @@ const LEVELS = [
   },
   {
     id: 'press',             // 3-2 · 1 change · the card says "close"; closing drops the stone on the road beyond the gap
+                             //       (and crushes you if you are standing there: logic.js crushed, design-review-ch3 §2)
     map: [
       '--------',
       '-.-S-.x-',

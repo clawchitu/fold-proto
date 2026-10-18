@@ -87,9 +87,15 @@
     return out;
   }
 
+  // Closing drops the right page's stones onto their mirror cells: a character on the left page under one
+  // is crushed (design-review-ch3 §2). A ridden shadow ends in that same cell, so the two readings agree.
+  // Stones on the left page never move, so standing on the right page above one only blocks, never crushes.
+  const crushed = (s, from, a) => a >= FOLD_MIN && !isRight(from.c) && isOpaque(at(s, mirror(from.c), from.r));
+
   // Standing on nothing but a shadow? Then the shadow carries the character when the angle changes.
-  // Returns the cell the character ends up on, or null when it falls.
+  // Returns the cell the character ends up on, or null when it falls (or is crushed).
   function ride(s, from, src, a) {
+    if (crushed(s, from, a)) return null;
     if (isFloor(at(s, from.c, from.r))) return from;
     if (src == null) return null;
     const q = shadowColumn(src, a);
@@ -164,6 +170,6 @@
   }
 
   const api = { N, FOLD_MIN, POP_MIN, POP_MAX, SHADE_MIN, mirror, proj, isRight, modeOf, isFloor, isBlock,
-    isOpaque, shadowColumn, shadows, ride, create, at, neighbours, findPath, stamp, isWin };
+    isOpaque, shadowColumn, shadows, crushed, ride, create, at, neighbours, findPath, stamp, isWin };
   if (typeof module !== 'undefined') module.exports = api; else root.FoldLogic = api;
 })(this);
