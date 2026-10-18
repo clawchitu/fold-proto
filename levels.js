@@ -107,8 +107,10 @@ const LEVELS = [
       '--Spp---',
     ],
   },
+  // ---- Chapter 3 「影」 (docs/design-ch3.md): the right page leans towards the lamp (fold 91°–154°), its stones cast
+  // walkable shadows on the left page that slide outward as the book closes. No new tile: one rule, six faces.
   {
-    id: 'shadow',
+    id: 'shadow',            // 3-1 · teaching, no instructions · 1 change · the shadow drops into the gap at 129°–154°
     map: [
       '-S------',
       '-.------',
@@ -118,12 +120,50 @@ const LEVELS = [
     ],
   },
   {
-    id: 'ride',
+    id: 'press',             // 3-2 · 1 change · the card says "close"; closing drops the stone on the road beyond the gap
+    map: [
+      '--------',
+      '-.-S-.x-',
+      '-.------',
+      '-G------',
+    ],
+  },
+  {
+    id: 'lock',              // 3-3 · 1 change · far stones throw their shadows faster: both meet column 2 only at 147°–154°
+    map: [
+      '-S------',
+      '-------x',
+      '------x-',
+      '-.------',
+      '-G------',
+    ],
+  },
+  {
+    id: 'ride',              // 3-4 · 2 changes · stand on the shadow and keep closing: it carries you
     map: [
       'G.------',
       '-.------',
       '---S---x',
       '--------',
+    ],
+  },
+  {
+    id: 'rideBack',          // 3-5 · 2 changes · board at 147°+, then open: the shadow brings you back towards the crease
+    map: [
+      '--------',
+      'S--.--x-',
+      '---.----',
+      '---G----',
+    ],
+  },
+  {
+    id: 'lamp',              // 3-6 · 3 changes · ride, step off before it's too late, then the last close delivers the letter
+    map: [
+      '--------',
+      '---S---x',
+      '------x-',
+      '-.------',
+      '------G-',
     ],
   },
 ];

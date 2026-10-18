@@ -59,6 +59,10 @@
       suggestToast: '闭着眼也能玩：按 M 开启声音模式，按问号听按键说明',
       lvAria: '第{n}关，{name}', lvDone: '已完成', lvCurrent: '当前',
       help: '方向键：在格子间移动并听每一格。回车：走到这一格。Shift 加方向键：走一步。F：折一点；Shift 加 F：展开一点；C：合上；O：打开。L：听这一行；Shift 加 L：听整本书。W：我在哪。H：提示。U：撤销。R：重来。M：声音模式。',
+      // chapter 3 「影」 (docs/design-ch3.md): opener, paper state, VoiceOver, the third letter
+      'ch.3.line': '影子也是路。', 'paper.ch3': '背光的纸，影子能走。', 'paper.lit': '这页纸举到了灯前',
+      'teach.lean': '书可以停在立起和合上之间的任何地方', shadowGap: '影子盖住了第{c}列的缺口',
+      'letter.3.title': '左岸来信', 'letter.3.body': '灯在你那岸。\n你的石头把影子递过河来，\n我踩着它，又近了一点。', 'letter.3.sign': '——左岸',
     },
 
     en: {
@@ -111,6 +115,9 @@
       suggestToast: 'You can play with your eyes closed: M for sound mode, question mark for the keys',
       lvAria: 'level {n}, {name}', lvDone: 'solved', lvCurrent: 'current',
       help: 'Arrow keys: move between squares and hear each one. Enter: walk to that square. Shift+arrow: take one step. F: fold a step; Shift+F: unfold a step; C: close; O: open. L: hear this row; Shift+L: hear the whole book. W: where am I. H: hint. U: undo. R: restart. M: sound mode.',
+      'ch.3.line': 'Shadows are paths too.', 'paper.ch3': 'Paper held to the lamp; shadows can be walked on.', 'paper.lit': 'The page is held up to the lamp',
+      'teach.lean': 'The book can rest anywhere between standing and closed', shadowGap: 'a shadow covers the gap in column {c}',
+      'letter.3.title': 'A Letter from the Left Bank', 'letter.3.body': 'The lamp is on your bank.\nYour stones passed their shadows across the river,\nand I walked on them,\na little closer.', 'letter.3.sign': '— the Left Bank',
     },
 
     ja: {
@@ -163,6 +170,9 @@
       suggestToast: '目を閉じても遊べます。Mでサウンドモード、?でキーの説明',
       lvAria: 'ステージ{n}、{name}', lvDone: 'クリア済み', lvCurrent: '現在',
       help: '矢印キー：マスを移動して聴く。Enter：そのマスへ歩く。Shift+矢印：一歩進む。F：少し折る。Shift+F：少し開く。C：閉じる。O：開く。L：この行を聴く。Shift+L：本全体を聴く。W：現在地。H：ヒント。U：戻す。R：やり直し。M：サウンドモード。',
+      'ch.3.line': '影も、道になる。', 'paper.ch3': '灯にかざした紙。影の上を歩ける。', 'paper.lit': 'ページが灯にかざされた',
+      'teach.lean': '本は、立てた状態と閉じた状態のあいだのどこでも止められる', shadowGap: '影が{c}列目のすき間をふさいだ',
+      'letter.3.title': '左岸からの手紙', 'letter.3.body': '灯はきみの岸にある。\nきみの石が影を川向こうへ差し出し、\nわたしはそれを踏んで、少し近づいた。', 'letter.3.sign': '——左岸より',
     },
 
     ko: {
@@ -215,6 +225,9 @@
       suggestToast: '눈을 감고도 할 수 있어요: M은 소리 모드, 물음표는 키 안내',
       lvAria: '{n}단계, {name}', lvDone: '완료', lvCurrent: '현재',
       help: '방향키: 칸 사이를 옮기며 각 칸 듣기. Enter: 그 칸으로 걷기. Shift+방향키: 한 걸음. F: 조금 접기, Shift+F: 조금 펴기, C: 닫기, O: 열기. L: 이 줄 듣기, Shift+L: 책 전체 듣기. W: 내 위치. H: 힌트. U: 되돌리기. R: 다시. M: 소리 모드.',
+      'ch.3.line': '그림자도 길이 된다.', 'paper.ch3': '등불에 비춘 종이, 그림자 위를 걸을 수 있어요.', 'paper.lit': '페이지를 등불에 비췄어요',
+      'teach.lean': '책은 세운 상태와 닫힌 상태 사이 어디에서든 멈출 수 있어요', shadowGap: '그림자가 {c}열의 틈을 덮었어요',
+      'letter.3.title': '왼쪽 강가에서 온 편지', 'letter.3.body': '등불은 네 쪽 강가에 있다.\n네 돌들이 그림자를 강 건너로 건네주어,\n나는 그것을 밟고 조금 더 가까워졌다.', 'letter.3.sign': '— 왼쪽 강가에서',
     },
   };
 
@@ -232,8 +245,12 @@
       doorBridge: ['门与桥', '先开门，再过桥。', '先合上让钥匙开门，再打开到一半，从立起的纸片走过去。'],
       inkBridge: ['墨与桥', '桥的那头，路断了；终点被压住了。', '合上时石头会压住终点，所以只合一下：让墨印过去，再半开过桥。'],
       crease: ['折痕', '用上你学会的一切。', '先合上一次，钥匙和墨都印过去；再半开过桥，走到门边，最后合上。'],
-      shadow: ['影', '合上也过不去。可是石头有影子。', '把书慢慢合到一半多一点，右页石头的影子会落在缺口上。影子能走。'],
+      shadow: ['影', '灯在纸的后面。', '把书慢慢合到一半多一点，右页石头的影子会落在缺口上。影子能走。'],
+      press: ['压', '纸板在对岸，石头也在。', '合上时纸板盖住缺口，可石头会压在缺口后面的路上。只斜起：石头的影子就是桥。'],
+      lock: ['远近', '远的石头，影子走得快。', '两个缺口要同时有影子。再慢慢合一点，直到两道影子排成一列——就在书快要合上之前。'],
       ride: ['乘影', '缺口太宽，影子太短。', '站到影子上，再慢慢合书：影子会带着你一起滑过去。合到底石头就压下来了。'],
+      rideBack: ['回程', '影子会走，也会回来。', '书几乎合上时，影子才伸到你脚边。站上去，再把书打开：影子带你回到折痕边。'],
+      lamp: ['灯下', '走过影子，再把信合上。', '站上影子慢慢合书；两道影子排成一列时，往下走到纸上。再合上：终点在对页。书合拢之前，一定要先离开影子。'],
     },
     en: {
       bridge: ['Bridge', 'Across the gap, a scrap of card.', 'Close the phone: the card on the right lands exactly over the gap.'],
@@ -247,8 +264,12 @@
       doorBridge: ['Door, then Bridge', 'First the door, then the bridge.', 'Close so the key opens the door, then open halfway and cross on the standing tabs.'],
       inkBridge: ['Ink, then Bridge', 'Past the bridge the path breaks off; the goal is pinned down.', 'Closing drops the stone on the goal, so close only once: let the ink print across, then half-open and cross.'],
       crease: ['Crease', 'Everything you have learned.', 'Close once so the key and the ink carry across; half-open and cross the bridge, walk to the door, then close.'],
-      shadow: ['Shade', 'Even closed, there is no way across. But stones cast shadows.', 'Close the book slowly, a little past halfway: the stone’s shadow falls across the gap. Shadows can be walked on.'],
+      shadow: ['Shade', 'There is a lamp behind the page.', 'Close the book slowly, a little past halfway: the stone’s shadow falls across the gap. Shadows can be walked on.'],
+      press: ['Weight', 'The card is on the far bank. So is the stone.', 'Closing lays the card over the gap, but drops the stone on the road beyond it. Only lean the page: the stone’s shadow is the bridge.'],
+      lock: ['Near and Far', 'The farther the stone, the faster its shadow.', 'Both gaps need a shadow at once. Keep closing slowly until the two shadows line up, just before the book shuts.'],
       ride: ['Shadow Ride', 'The gap too wide, the shadow too short.', 'Stand on the shadow, then close the book slowly: it carries you across. Close all the way and the stone comes down.'],
+      rideBack: ['The Way Back', 'A shadow goes out, and comes back.', 'Only when the book is nearly shut does the shadow reach your feet. Step on, then open the book: the shadow carries you back to the crease.'],
+      lamp: ['By Lamplight', 'Walk the shadows, then fold the letter shut.', 'Stand on a shadow and close slowly; where the two shadows line up, step down onto the paper. Then close: the goal is on the facing page. Get off the shadow before the book shuts.'],
     },
     ja: {
       bridge: ['橋', 'すき間の向こうに、厚紙が一枚。', 'スマホを閉じると、右の厚紙がすき間にぴたりと重なる。'],
@@ -263,8 +284,12 @@
       doorBridge: ['扉と橋', 'まず扉、それから橋。', '閉じて鍵で扉を開け、半分開いて、立った紙片を渡る。'],
       inkBridge: ['墨と橋', '橋の先で道は途切れ、ゴールは押さえられている。', '閉じると石がゴールをふさぐ。だから一度だけ閉じて墨を写し、半分開いて橋を渡る。'],
       crease: ['折り目', '覚えたすべてを。', 'まず一度閉じて鍵と墨を写す。半分開いて橋を渡り、扉まで歩いて、最後に閉じる。'],
-      shadow: ['影', '閉じても、渡れない。でも、石には影がある。', '本をゆっくり、半分より少しだけ閉じると、右ページの石の影がすき間に落ちる。影は歩ける。'],
+      shadow: ['影', '紙のうしろに、灯がある。', '本をゆっくり、半分より少しだけ閉じると、右ページの石の影がすき間に落ちる。影は歩ける。'],
+      press: ['重し', '厚紙は向こう岸に。石も。', '閉じると厚紙がすき間をふさぐが、石がその先の道に落ちてくる。斜めに起こすだけ。石の影が橋になる。'],
+      lock: ['遠近', '遠い石ほど、影は速く動く。', '二つのすき間に、同時に影がいる。ゆっくり閉じていき、二つの影が一列にそろったら止める。閉じきる少し手前。'],
       ride: ['影に乗る', 'すき間は広く、影は短い。', '影の上に立って、ゆっくり本を閉じる。影があなたを乗せて滑っていく。閉じきると石が落ちてくる。'],
+      rideBack: ['帰り道', '影は出ていき、また戻ってくる。', 'ほとんど閉じたときだけ、影が足もとまで届く。乗ったら本を開く。影があなたを折り目のそばまで運ぶ。'],
+      lamp: ['灯の下', '影をわたって、手紙を閉じる。', '影に乗ってゆっくり閉じる。二つの影がそろったら、下の紙へ降りる。それから閉じる。ゴールは向かいのページ。閉じきる前に、かならず影から降りること。'],
     },
     ko: {
       bridge: ['다리', '틈 건너편에 종이판 한 장.', '폰을 닫으면 오른쪽 종이판이 틈을 꼭 덮어요.'],
@@ -279,8 +304,12 @@
       doorBridge: ['문과 다리', '먼저 문, 그다음 다리.', '닫아서 열쇠로 문을 열고, 반쯤 열어 일어선 종이 조각을 건너요.'],
       inkBridge: ['먹과 다리', '다리 너머 길은 끊기고, 도착점은 눌려 있다.', '닫으면 돌이 도착점을 눌러요. 그러니 한 번만 닫아 먹을 찍고, 반쯤 열어 다리를 건너요.'],
       crease: ['접힌 자국', '배운 모든 것을.', '먼저 한 번 닫아 열쇠와 먹을 찍어요. 반쯤 열어 다리를 건너 문까지 걷고, 마지막에 닫아요.'],
-      shadow: ['그림자', '닫아도 건널 수 없다. 하지만 돌에는 그림자가 있다.', '책을 천천히 반보다 조금 더 닫으면 오른쪽 돌의 그림자가 틈에 드리워요. 그림자 위로는 걸을 수 있어요.'],
+      shadow: ['그림자', '종이 뒤에 등불이 있다.', '책을 천천히 반보다 조금 더 닫으면 오른쪽 돌의 그림자가 틈에 드리워요. 그림자 위로는 걸을 수 있어요.'],
+      press: ['누름돌', '종이판은 건너편에 있다. 돌도.', '닫으면 종이판이 틈을 덮지만, 돌이 그 너머 길에 떨어져요. 비스듬히 세우기만 하세요. 돌의 그림자가 다리예요.'],
+      lock: ['멀고 가까운', '먼 돌일수록 그림자는 빨리 움직인다.', '두 틈에 동시에 그림자가 있어야 해요. 천천히 더 닫아 두 그림자가 한 줄로 서면 멈춰요. 다 닫히기 바로 전이에요.'],
       ride: ['그림자를 타고', '틈은 너무 넓고, 그림자는 너무 짧다.', '그림자 위에 서서 책을 천천히 닫아요. 그림자가 나를 태우고 미끄러져요. 끝까지 닫으면 돌이 내려와요.'],
+      rideBack: ['돌아오는 길', '그림자는 나갔다가, 다시 돌아온다.', '거의 닫혔을 때만 그림자가 발밑까지 와요. 올라선 다음 책을 펼쳐요. 그림자가 접는 선 가까이로 데려다줘요.'],
+      lamp: ['등불 아래', '그림자를 건너, 편지를 덮는다.', '그림자 위에 서서 천천히 닫아요. 두 그림자가 나란히 서면 아래 종이로 내려가요. 그다음 닫아요. 도착점은 맞은편 페이지예요. 책이 닫히기 전에 꼭 그림자에서 내려와요.'],
     },
   };
 
