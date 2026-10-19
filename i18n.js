@@ -62,11 +62,11 @@
       // chapter 3 「影」 (docs/design-ch3.md): opener, paper state, VoiceOver, the third letter
       'ch.3.line': '影子也是路。', 'paper.ch3': '背光的纸，影子能走。', 'paper.lit': '这页纸举到了灯前',
       'teach.lean': '书可以停在立起和合上之间的任何地方', shadowGap: '影子盖住了第{c}列的缺口',
-      'letter.3.title': '左岸来信', 'letter.3.body': '灯在你那岸。\n你的石头把影子递过河来，\n我踩着它，又近了一点。', 'letter.3.sign': '——左岸',
+      'letter.3.title': '左岸来信', 'letter.3.body': '灯在你那岸。\n你的石头把影子递过河来，\n我踩着它，又近了一点。', 'letter.3.sign': '——左岸', 'letter.3.end': '第三章完。\n下一封信，还在路上。',
       // chapter 4 「岸」 (docs/design-ch4.md): opener, paper state, the fourth letter — the river is not finished (docs/roadmap.md)
       'ch.4.line': '两岸相触。', 'paper.ch4': '旧纸，折痕发白。', 'paper.worn': '这页纸已经折过很多次',
       'kind.figure': '对岸的人，合上时相遇',
-      'letter.4.title': '右岸来信', 'letter.4.body': '合上的那一下，我们站在同一格里。\n打开，河还在。\n没关系——这本书还有下一页，\n我先翻过去等你。', 'letter.4.sign': '——右岸',
+      'letter.4.title': '右岸来信', 'letter.4.body': '合上的那一下，我们站在同一格里。\n打开，河还在。\n没关系——这本书还有下一页，\n我先翻过去等你。', 'letter.4.sign': '——右岸', 'letter.4.end': '卷一《两岸》完。\n下一页，还在折。',
     },
 
     en: {
@@ -121,10 +121,10 @@
       help: 'Arrow keys: move between squares and hear each one. Enter: walk to that square. Shift+arrow: take one step. F: fold a step; Shift+F: unfold a step; C: close; O: open. L: hear this row; Shift+L: hear the whole book. W: where am I. H: hint. U: undo. R: restart. M: sound mode.',
       'ch.3.line': 'Shadows are paths too.', 'paper.ch3': 'Paper held to the lamp; shadows can be walked on.', 'paper.lit': 'The page is held up to the lamp',
       'teach.lean': 'The book can rest anywhere between standing and closed', shadowGap: 'a shadow covers the gap in column {c}',
-      'letter.3.title': 'A Letter from the Left Bank', 'letter.3.body': 'The lamp is on your bank.\nYour stones passed their shadows across the river,\nand I walked on them,\na little closer.', 'letter.3.sign': '— the Left Bank',
+      'letter.3.title': 'A Letter from the Left Bank', 'letter.3.body': 'The lamp is on your bank.\nYour stones passed their shadows across the river,\nand I walked on them,\na little closer.', 'letter.3.sign': '— the Left Bank', 'letter.3.end': 'End of Chapter Three.\nThe next letter is still on its way.',
       'ch.4.line': 'The two banks touch.', 'paper.ch4': 'Old paper; the crease has gone white.', 'paper.worn': 'This page has been folded many times',
       'kind.figure': 'the other one, on the far bank; you meet when the book is shut',
-      'letter.4.title': 'A Letter from the Right Bank', 'letter.4.body': 'For the moment the book was shut, we stood in the same square.\nOpen it, and the river is still there.\nNever mind: this book has another page.\nI will turn it first, and wait for you there.', 'letter.4.sign': '— the Right Bank',
+      'letter.4.title': 'A Letter from the Right Bank', 'letter.4.body': 'For the moment the book was shut, we stood in the same square.\nOpen it, and the river is still there.\nNever mind: this book has another page.\nI will turn it first, and wait for you there.', 'letter.4.sign': '— the Right Bank', 'letter.4.end': 'End of Book One, The Two Banks.\nThe next page is still being folded.',
     },
 
     ja: {
@@ -179,10 +179,10 @@
       help: '矢印キー：マスを移動して聴く。Enter：そのマスへ歩く。Shift+矢印：一歩進む。F：少し折る。Shift+F：少し開く。C：閉じる。O：開く。L：この行を聴く。Shift+L：本全体を聴く。W：現在地。H：ヒント。U：戻す。R：やり直し。M：サウンドモード。',
       'ch.3.line': '影も、道になる。', 'paper.ch3': '灯にかざした紙。影の上を歩ける。', 'paper.lit': 'ページが灯にかざされた',
       'teach.lean': '本は、立てた状態と閉じた状態のあいだのどこでも止められる', shadowGap: '影が{c}列目のすき間をふさいだ',
-      'letter.3.title': '左岸からの手紙', 'letter.3.body': '灯はきみの岸にある。\nきみの石が影を川向こうへ差し出し、\nわたしはそれを踏んで、少し近づいた。', 'letter.3.sign': '——左岸より',
+      'letter.3.title': '左岸からの手紙', 'letter.3.body': '灯はきみの岸にある。\nきみの石が影を川向こうへ差し出し、\nわたしはそれを踏んで、少し近づいた。', 'letter.3.sign': '——左岸より', 'letter.3.end': '第三章 了。\n次の手紙は、まだ途中。',   // TODO ja review
       'ch.4.line': '両岸がふれる。', 'paper.ch4': '古い紙。折り目が白くなっている。', 'paper.worn': 'このページは何度も折られてきた',
       'kind.figure': '向こう岸の人。閉じると出会う',
-      'letter.4.title': '右岸からの手紙', 'letter.4.body': '閉じたあの一瞬、わたしたちは同じ枡に立っていた。\n開けば、川はまだそこにある。\nいい——この本には、次の頁がある。\n先にめくって、そこで待っている。', 'letter.4.sign': '——右岸より',
+      'letter.4.title': '右岸からの手紙', 'letter.4.body': '閉じたあの一瞬、わたしたちは同じ枡に立っていた。\n開けば、川はまだそこにある。\nいい——この本には、次の頁がある。\n先にめくって、そこで待っている。', 'letter.4.sign': '——右岸より', 'letter.4.end': '第一巻『両岸』了。\n次の頁は、まだ折っている。',   // TODO ja review
     },
 
     ko: {
@@ -237,10 +237,10 @@
       help: '방향키: 칸 사이를 옮기며 각 칸 듣기. Enter: 그 칸으로 걷기. Shift+방향키: 한 걸음. F: 조금 접기, Shift+F: 조금 펴기, C: 닫기, O: 열기. L: 이 줄 듣기, Shift+L: 책 전체 듣기. W: 내 위치. H: 힌트. U: 되돌리기. R: 다시. M: 소리 모드.',
       'ch.3.line': '그림자도 길이 된다.', 'paper.ch3': '등불에 비춘 종이, 그림자 위를 걸을 수 있어요.', 'paper.lit': '페이지를 등불에 비췄어요',
       'teach.lean': '책은 세운 상태와 닫힌 상태 사이 어디에서든 멈출 수 있어요', shadowGap: '그림자가 {c}열의 틈을 덮었어요',
-      'letter.3.title': '왼쪽 강가에서 온 편지', 'letter.3.body': '등불은 네 쪽 강가에 있다.\n네 돌들이 그림자를 강 건너로 건네주어,\n나는 그것을 밟고 조금 더 가까워졌다.', 'letter.3.sign': '— 왼쪽 강가에서',
+      'letter.3.title': '왼쪽 강가에서 온 편지', 'letter.3.body': '등불은 네 쪽 강가에 있다.\n네 돌들이 그림자를 강 건너로 건네주어,\n나는 그것을 밟고 조금 더 가까워졌다.', 'letter.3.sign': '— 왼쪽 강가에서', 'letter.3.end': '제3장 끝.\n다음 편지는 아직 오는 길.',   // TODO ko review
       'ch.4.line': '두 강가가 맞닿는다.', 'paper.ch4': '오래된 종이, 접는 선이 하얗게 바랬어요.', 'paper.worn': '이 페이지는 여러 번 접혔어요',
       'kind.figure': '건너편 사람, 책을 닫으면 만나요',
-      'letter.4.title': '오른쪽 강가에서 온 편지', 'letter.4.body': '책이 닫힌 그 순간, 우리는 같은 칸에 서 있었다.\n펼치면, 강은 여전히 거기 있다.\n괜찮아. 이 책에는 다음 페이지가 있다.\n내가 먼저 넘겨서, 거기서 기다릴게.', 'letter.4.sign': '— 오른쪽 강가에서',
+      'letter.4.title': '오른쪽 강가에서 온 편지', 'letter.4.body': '책이 닫힌 그 순간, 우리는 같은 칸에 서 있었다.\n펼치면, 강은 여전히 거기 있다.\n괜찮아. 이 책에는 다음 페이지가 있다.\n내가 먼저 넘겨서, 거기서 기다릴게.', 'letter.4.sign': '— 오른쪽 강가에서', 'letter.4.end': '제1권 《두 강가》 끝.\n다음 페이지는 아직 접는 중.',   // TODO ko review
     },
   };
 
