@@ -17,7 +17,7 @@ const levels = {
   // Physical page angles for iOS (plan.md §12.1: 180° = flat, 90° = standing, 0° = shut). logic.js and check.js keep
   // the prototype's fold value (= 180 − physical); convert once, here (design-review-2 §4.3).
   thresholds: { closedMax: 180 - L.FOLD_MIN, popMin: 180 - L.POP_MAX, popMax: 180 - L.POP_MIN, shadeMax: 180 - L.SHADE_MIN },
-  levels: LEVELS.map((lv) => ({ id: lv.id, map: lv.map, expect: report(lv) })),
+  levels: LEVELS.map((lv) => ({ id: lv.id, map: lv.map, tier: lv.tier, needs: lv.needs || [], expect: report(lv) })),
 };
 fs.writeFileSync(path.join(out, 'levels.json'), JSON.stringify(levels, null, 2) + '\n');
 
