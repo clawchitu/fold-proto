@@ -9,9 +9,12 @@
 //       --par 4         max posture changes                --closes 2       max full closes
 //       --minpar 3      reject boards below this par       --tiles '.-xg'   tile palette (plus S and G)
 //       --need glue     the mechanics that must be essential: glue | shade | pop | key | ink, joined with '+'
-//       --from id       start every restart from this levels.js id instead of a random board
+//       --from id       start every restart from this levels.js id (or a comma-separated map) instead of a random board
 //       --top 8         how many boards to print           --elements 9     element budget (x k D i p g)
 //       --polish        strip irrelevant cells / noise elements from the winners before ranking
+//       vol. 1 retune (postmortem §6): --nodead (no dead state), --noride (the solution never rides), --leftx (stones on the
+//       left page only), --maxvoid 0.6 (penalise boards with more gap than that), --minlen 12 / --maxlen 14 (penalise solutions outside the band);
+//       --matched (every door has a key facing it, every key a door, every ink a gap); --need also takes fold | ride | made
 //
 // What the search optimises (fitness(), §3 of the postmortem):
 //   long minimal solutions (par, steps), many plausible-but-wrong hinge moves at each decision point (wrong),
@@ -144,6 +147,12 @@ function measure(level) {
   out.voids = [...all].filter((t) => t === '-').length;
   out.paper = [...all].filter((t) => '.Sg'.includes(t)).length;
   out.counts = Object.fromEntries([...ELEMENTS].map((t) => [t, [...all].filter((x) => x === t).length]));
+  // elements that never fire: a door with no key facing it (a wall in disguise), a key facing no door, ink facing paper
+  out.unmatched = 0;
+  for (const row of level.map) for (let q = 0; q < L.N; q++) {
+    const a = row[q], b = row[L.mirror(q)];
+    for (const [x, y] of [[a, b], [b, a]]) { if ((x === 'D' && y !== 'k') || (x === 'k' && y !== 'D') || (x === 'i' && y !== '-')) out.unmatched++; }
+  }
   if (!B.start || !B.goal) return out;
   const g = explore(B);
   out.states = g.nodes.size;
@@ -213,6 +222,8 @@ function measure(level) {
   out.needsGlue = all.includes('g') && !solvableFrom(prep({ map: level.map.map((r) => r.split('g').join('.')) }), B.start);
   out.stepped15 = solvableFrom(B, B.start, STEPPED);
   out.needsPop = !solvableFrom(B, B.start, ANGLES.filter((a) => a < L.POP_MIN || a > L.POP_MAX));
+  out.needsFold = !solvableFrom(B, B.start, ANGLES.filter((a) => a < L.FOLD_MIN));
+  out.needsShade = !solvableFrom(B, B.start, ANGLES.filter((a) => a < L.SHADE_MIN || a >= L.FOLD_MIN));
   out.needsKey = all.includes('k') && !solvableFrom(prep({ map: level.map.map((r) => r.split('k').join('.')) }), B.start);
   out.needsInk = all.includes('i') && !solvableFrom(prep({ map: level.map.map((r) => r.split('i').join('.')) }), B.start);
   // which page switches: the solution lands on the other page after an open (land() chose the far page)
@@ -283,25 +294,33 @@ function full(level, withV2 = true) {
 function fitness(level, opts, m) {
   m = m || measure(level);
   if (!m.solvable) return -1000 + (m.states || 0) * 0.05;
-  const needOne = (n) => n === 'glue' ? m.glueFires || m.needsGlue : n === 'shade' ? m.ride || m.made : n === 'pop' ? m.needsPop : n === 'key' ? m.needsKey : n === 'ink' ? m.needsInk : true;
+  const needOne = (n) => n === 'glue' ? m.glueFires || m.needsGlue : n === 'shade' ? m.needsShade : n === 'ride' ? m.ride : n === 'made' ? m.made
+    : n === 'pop' ? m.needsPop : n === 'key' ? m.needsKey : n === 'ink' ? m.needsInk : n === 'fold' ? m.needsFold : true;
   const need = String(opts.need).split('+').every(needOne);
-  if (m.par > opts.par || m.closes > opts.closes || !m.stepped15 || !need || m.par < opts.minpar) return -500 + m.par * 10 + Math.min(m.steps, 10);
+  // vol. 1 constraints (postmortem §6): --nodead no dead state anywhere; --noride the minimal solution never rides a shadow
+  // (3-3 comes before the ride is taught); --minlen reject short boards early
+  const vol1 = (opts.nodead && m.dead > 0) || (opts.noride && m.ride) || (opts.matched && m.unmatched > 0);
+  if (m.par > opts.par || m.closes > opts.closes || !m.stepped15 || !need || m.par < opts.minpar || vol1) return -500 + m.par * 10 + Math.min(m.steps, 10);
   let f = 12 * m.par + 2 * Math.min(m.steps, 14) - 1.5 * Math.max(0, m.steps - 16);
   f += 4 * Math.min(m.wrong, 10) + 3 * Math.min(m.firstWrong, 4);
   f += 6 * Math.min(m.deadEnds, 2) + 6 * (m.deadFrac >= 0.15 && m.deadFrac <= 0.7 ? 1 : 0);
   f += 8 * (m.before ? 1 : 0) + 6 * (m.made ? 1 : 0) + 3 * (m.ride ? 1 : 0) + 3 * Math.min(m.fatal, 2) + 3 * Math.min(m.pageSwitches, 2);
   f += 4 * m.narrow;
   f -= 3 * Math.max(0, m.elements - opts.elements) + 0.6 * m.elements + 0.3 * Math.max(0, m.paper - 12);
+  if (opts.maxvoid) f -= 60 * Math.max(0, m.voids / (m.rows * m.cols) - opts.maxvoid);   // a board that is mostly gap reads in a glance (§1.1)
+  if (opts.minlen) f -= 5 * Math.max(0, opts.minlen - m.len);   // soft: the tier's solution-length floor
+  if (opts.maxlen) f -= 5 * Math.max(0, m.len - opts.maxlen);   // soft: an easy level must stay easy
+  f -= 8 * m.unmatched;   // a locked door with no key is a wall pretending to be a puzzle
   return f;
 }
 
 // ---------- search ----------
 function rng(seed) { let t = seed >>> 0; return () => { t += 0x6d2b79f5; let r = Math.imul(t ^ (t >>> 15), 1 | t); r ^= r + Math.imul(r ^ (r >>> 7), 61 | r); return ((r ^ (r >>> 14)) >>> 0) / 4294967296; }; }
 
-function randomBoard(R, rows, tiles) {
+function randomBoard(R, rows, tiles, opts) {
   const g = [];
   for (let r = 0; r < rows; r++) { g.push([]); for (let c = 0; c < 2 * L.N; c++) g[r].push(R() < 0.4 ? '-' : R() < 0.75 ? '.' : tiles[Math.floor(R() * tiles.length)]); }
-  fixPairs(g, R);
+  fixPairs(g, R); if (opts && opts.leftx) leftOnly(g);
   const place = (t) => { for (;;) { const c = Math.floor(R() * 2 * L.N), r = Math.floor(R() * rows); if (!'SGp'.includes(g[r][c])) { g[r][c] = t; return; } } };
   place('S'); place('G');
   return { map: g.map((r) => r.join('')) };
@@ -313,24 +332,27 @@ function fixPairs(g, R) {   // pop-up tabs only as pairs across the crease
     if (a !== b) { if (R() < 0.5) { g[r][L.N - 1] = 'p'; g[r][L.N] = 'p'; } else { if (a) g[r][L.N - 1] = '.'; if (b) g[r][L.N] = '.'; } }
   }
 }
-function mutate(level, R, tiles) {
+function leftOnly(g) {   // --leftx: stones only on the left page (chapters 1–2: no shadows, no crush before chapter 3 teaches them)
+  for (const row of g) for (let c = L.N; c < 2 * L.N; c++) if (row[c] === 'x') row[c] = '.';
+}
+function mutate(level, R, tiles, opts) {
   const g = level.map.map((r) => r.split(''));
   const rows = g.length, W = 2 * L.N;
   const pick = () => [Math.floor(R() * W), Math.floor(R() * rows)];
   const k = R();
   if (k < 0.6) {           // repaint one cell
-    const [c, r] = pick(); if ('SG'.includes(g[r][c])) return mutate(level, R, tiles);
+    const [c, r] = pick(); if ('SG'.includes(g[r][c])) return mutate(level, R, tiles, opts);
     const u = R(); g[r][c] = u < 0.35 ? '.' : u < 0.6 ? '-' : tiles[Math.floor(R() * tiles.length)];
   } else if (k < 0.8) {    // swap two cells
     const [c1, r1] = pick(), [c2, r2] = pick(); [g[r1][c1], g[r2][c2]] = [g[r2][c2], g[r1][c1]];
   } else {                 // move S or G
     const t = R() < 0.5 ? 'S' : 'G';
     for (let r = 0; r < rows; r++) for (let c = 0; c < W; c++) if (g[r][c] === t) g[r][c] = '.';
-    const [c, r] = pick(); if ('SG'.includes(g[r][c])) return mutate(level, R, tiles); g[r][c] = t;
+    const [c, r] = pick(); if ('SG'.includes(g[r][c])) return mutate(level, R, tiles, opts); g[r][c] = t;
   }
-  fixPairs(g, R);
+  fixPairs(g, R); if (opts && opts.leftx) leftOnly(g);
   const flat = g.flat();
-  if (flat.filter((t) => t === 'S').length !== 1 || flat.filter((t) => t === 'G').length !== 1) return mutate(level, R, tiles);
+  if (flat.filter((t) => t === 'S').length !== 1 || flat.filter((t) => t === 'G').length !== 1) return mutate(level, R, tiles, opts);
   return { map: g.map((r) => r.join('')) };
 }
 
@@ -338,16 +360,16 @@ function search(opts) {
   const R = rng(opts.seed);
   const tiles = opts.tiles.split('').filter((t) => !'SG'.includes(t));
   const archive = new Map();
-  const seedLevel = opts.from ? LEVELS.find((l) => l.id === opts.from) : null;
+  const seedLevel = opts.from ? (String(opts.from).includes(',') ? { map: String(opts.from).split(',') } : LEVELS.find((l) => l.id === opts.from)) : null;
   if (opts.from && !seedLevel) throw new Error('no level ' + opts.from);
   let evals = 0;
   const t0 = Date.now();
   for (let rs = 0; rs < opts.restarts; rs++) {
-    let cur = seedLevel ? { map: [...seedLevel.map] } : randomBoard(R, opts.rows, tiles);
+    let cur = seedLevel ? { map: [...seedLevel.map] } : randomBoard(R, opts.rows, tiles, opts);
     let curF = fitness(cur, opts); evals++;
     let T = 6;
     for (let it = 0; it < opts.iters; it++) {
-      const cand = mutate(cur, R, tiles);
+      const cand = mutate(cur, R, tiles, opts);
       const m = measure(cand), f = fitness(cand, opts, m); evals++;
       if (f >= curF || R() < Math.exp((f - curF) / T)) { cur = cand; curF = f; }
       if (f > 0) { const sig = cand.map.join('|'); if (!archive.has(sig)) archive.set(sig, { level: cand, f, m }); }
@@ -409,7 +431,7 @@ function fmt(level, m, r, F) {
   lines.push(`  { id: 'TODO', tier: 'TODO', map: [`);
   for (const row of level.map) lines.push(`      '${row}',`);
   lines.push('  ] },');
-  lines.push(`  // par ${m.par} steps ${m.steps} len ${m.len} closes ${m.closes} | wrong ${m.wrong} (first ${m.firstWrong}) narrow ${m.narrow}/${m.par} fatal ${m.fatal} | dead ${m.dead} (${m.deadFrac}) basins ${m.deadEnds} | before ${+m.before} made ${+m.made} ride ${+m.ride} pageSwitch ${m.pageSwitches} | elements ${m.elements} voids ${m.voids}` +
+  lines.push(`  // par ${m.par} steps ${m.steps} len ${m.len} closes ${m.closes} | wrong ${m.wrong} (first ${m.firstWrong}) narrow ${m.narrow}/${m.par} fatal ${m.fatal} | dead ${m.dead} (${m.deadFrac}) basins ${m.deadEnds} | before ${+m.before} made ${+m.made} ride ${+m.ride} pageSwitch ${m.pageSwitches} | elements ${m.elements} voids ${m.voids} needs ${['Fold','Pop','Shade','Key','Ink'].filter((k) => m['needs' + k]).join('+') || '-'}${m.ride ? '+ride' : ''}` +
     (r ? ` | noise ${r.noise} blockers ${r.blockers} load ${r.loadBearing} irrelevant ${r.irrelevant} reuse ${r.reuse}` : '') + (F != null ? ` | F ${F.toFixed(1)}` : ''));
   lines.push(`  // ${m.solution}`);
   if (r && r.decoys.length) lines.push(`  // decoys: ${r.decoys.join(' ')}`);
@@ -430,7 +452,7 @@ function stats() {
 }
 
 function args() {
-  const a = process.argv.slice(2), o = { cmd: a[0] || 'stats', rows: 5, iters: 4000, restarts: 12, seed: 1, par: 4, closes: 2, minpar: 2, tiles: '.-xg', need: 'glue', from: null, top: 8, elements: 9 };
+  const a = process.argv.slice(2), o = { cmd: a[0] || 'stats', rows: 5, iters: 4000, restarts: 12, seed: 1, par: 4, closes: 2, minpar: 2, tiles: '.-xg', need: 'glue', from: null, top: 8, elements: 9, nodead: false, noride: false, leftx: false, maxvoid: 0, minlen: 0, maxlen: 0, matched: false };
   for (let i = 1; i < a.length; i++) {
     if (a[i].startsWith('--') && !a[i].includes(',')) { const k = a[i].slice(2); const v = a[i + 1]; o[k] = v === undefined || v.startsWith('--') ? true : isNaN(+v) ? v : +v; if (!(v === undefined || v.startsWith('--'))) i++; }
     else o.arg = a[i];

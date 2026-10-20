@@ -4,12 +4,14 @@
 // A stone on the right page casts a shadow onto the left page while the book leans (91°–154°);
 // the shadow is walkable and slides towards the stone's mirror cell as the book closes.
 // Glue (vol. 2) is walkable paper; when the book closes it pulls the stone facing it onto itself, once.
-// tier: the difficulty band the level must score in (tools/check.js TIERS, docs/design-difficulty.md §2, metric v2).
-//       Vol. 1 tiers were re-rated under v2 (2026-10-19): the maps are untouched, every level is mid or below —
-//       the owner's verdict on 0.1 (11). Vol. 2 starts where vol. 1 ends.
+// tier: the difficulty band the level must meet (tools/check.js GATES: minimal solution length, wrong turns, decoys;
+//       docs/difficulty-postmortem.md §6). Vol. 1 was retuned 2026-10-19 (postmortem §6): every chapter's first level
+//       is still a ≤ 30 s teach, the second ~1 min, and from the third on each level needs thought (mid → hard → final).
+// len:  the measured minimal solution (posture changes + steps); check.js fails if an edit changes it.
 // needs: solver flags the level must keep true, so a later edit cannot quietly remove the mechanic it teaches.
 const LEVELS = [
-  // ---- Chapter 1 「对页」: close = mirror. Teaching chapter; only 1-3 and 1-5 ask for a second thought.
+  // ---- Chapter 1 「对页」: close = mirror. Stones stay on the left page (no shadows yet). 1-1 teaches; 1-2 ~1 min; 1-3…1-5 are
+  // stack-walking puzzles: which stack you close over and which page you are on when you open (postmortem P5).
   {
     id: 'bridge', tier: 'teach', needs: ['needsFold'],
     map: [
@@ -21,40 +23,42 @@ const LEVELS = [
     ],
   },
   {
-    id: 'facing', tier: 'teach', needs: ['needsFold'],
+    id: 'facing', tier: 'easy', len: 13, needs: ['needsFold'],   // 1-2 · retuned 2026-10-19 (postmortem §6) · start and letter on the same page, the straight stack is walled: which stack do you close over?
     map: [
-      '-----..G',
-      '-----.--',
-      '--x--.--',
-      'S.---.--',
+      '----....',
+      '---x.-..',
+      '---.-.-.',
+      '---xG.-S',
     ],
   },
   {
-    id: 'back', tier: 'teach', needs: ['needsFold'],
+    id: 'back', tier: 'mid', len: 16, needs: ['needsFold'],   // 1-3 · two closes; the stack walk ends on the far page, one step up, and the second close brings you home
     map: [
-      'S.---.--',
-      '--x--.--',
-      '-----..-',
-      '-.----.-',
-      '-G------',
+      'G---S.--',
+      '.--.-.--',
+      'x---..-.',
+      '----.-..',
+      '--.x.-..',
     ],
   },
   {
-    id: 'key', tier: 'teach', needs: ['needsFold', 'needsKey'],
+    id: 'key', tier: 'mid', len: 16, needs: ['needsFold', 'needsKey'],   // 1-4 · the first close opens the door you walk through on the far page; the door at (5,1) has no key in this letter — it is a wall that reads as a door (postmortem §6, to revisit)
     map: [
-      '-S------',
-      '-.------',
-      '-D----k-',
-      '-.------',
-      '-G------',
+      '---G-.-.',
+      '.D.--Dk-',
+      '.---.S--',
+      'x-.-.-..',
+      '.---...-',
     ],
   },
   {
-    id: 'ink', tier: 'easy', needs: ['needsFold', 'needsInk'],   // retuned (design-difficulty.md §3): the ink prints the only road to the letter
+    id: 'ink', tier: 'hard', len: 17, needs: ['needsFold', 'needsInk'],   // 1-5 · chapter end · two closes; the ink printed by the first is the one rung of the stack that leads down to the letter
     map: [
-      'xS----.G',
-      '-.----.-',
-      '-.i-.-.-',
+      '........',
+      '......-.',
+      'i--x.-.-',
+      '---.---.',
+      'Sx--..G-',
     ],
   },
   // ---- Chapter 2 「立」: stand the page (60°–120°), tabs on the crease make a bridge. 8 levels (design-review-2 §5).
@@ -77,58 +81,60 @@ const LEVELS = [
     ],
   },
   {
-    id: 'standClose', tier: 'easy', needs: ['needsFold', 'needsPop'],   // 2-3 · stand, then close · the goal is under your feet
+    id: 'standClose', tier: 'mid', len: 17, needs: ['needsFold', 'needsPop'],   // 2-3 · stand, cross, walk the standing page to its far corner, close, and open on the other page beside the letter
     map: [
-      'S..pp.--',
-      '--x--.--',
-      '-----.--',
-      '--G--.--',
+      '...pp...',
+      'S------.',
+      'x.x--G-.',
+      '-.---.--',
     ],
   },
   {
-    id: 'doorBridge', tier: 'easy', needs: ['needsFold', 'needsPop', 'needsKey'],
+    id: 'doorBridge', tier: 'mid', len: 17, needs: ['needsFold', 'needsPop', 'needsKey'],   // 2-4 · close once for the door, cross the bridge, then close again over the stone's back to drop onto the left page
     map: [
-      'S.kppD.-',
-      '-x----.-',
-      '------.G',
-      '--------',
+      '..kppD..',
+      '.-..---.',
+      'S---.--.',
+      'x.G----.',
     ],
   },
   {
-    id: 'inkBridge', tier: 'easy', needs: ['needsFold', 'needsPop', 'needsInk'],
+    id: 'inkBridge', tier: 'mid', len: 18, needs: ['needsFold', 'needsPop', 'needsInk'],   // 2-5 · the ink beside the start prints across; after the bridge it is the one square that joins the far page to the stone's back you close over
     map: [
-      '--------',
-      '-Sipp---',
-      '--x--G--',
-      '--------',
+      '...pp..-',
+      '.x----.-',
+      '.iS--.--',
+      '--xG-.-.',
     ],
   },
   {
-    id: 'inkTwice', tier: 'mid', needs: ['needsFold', 'needsPop', 'needsInk'],   // 2-6 · close (ink prints onto the wall) → stand and walk it → close onto the goal
+    id: 'inkTwice', tier: 'hard', len: 18, needs: ['needsFold', 'needsPop', 'needsInk'],   // 2-6 · the ink prints the one square that joins the bridge to the far shore; the second close is from the corner
     map: [
-      'S..pp.--',
-      '--i-----',
-      '--x--.--',
-      '--G--.--',
+      '--xS...-',
+      '---i--..',
+      '-.-pp--.',
+      '------..',
+      '--xG-..-',
     ],
   },
   {
-    id: 'crease', tier: 'mid', needs: ['needsFold', 'needsPop', 'needsKey', 'needsInk'],
+    id: 'crease', tier: 'hard', len: 19, needs: ['needsFold', 'needsPop', 'needsKey', 'needsInk'],   // 2-7 · the first close (over the stone's back at the foot of the bridge) opens the door and prints the ink; the stack walk ends at the door, and the second close is from beyond it
     map: [
-      'G.------',
-      '-k----D-',
-      '--xi-..-',
-      '---..---',
-      '--Spp---',
+      'G-S.----',
+      'xk-.--D.',
+      '-.-.--.-',
+      '-i-.---.',
+      '-.xpp.--',
     ],
   },
   {
-    id: 'rightBank', tier: 'mid', needs: ['needsFold', 'needsPop', 'needsKey', 'needsInk'],   // 2-8 · chapter end · the letter is on the standing page
+    id: 'rightBank', tier: 'hard', len: 20, needs: ['needsFold', 'needsPop'],   // 2-8 · chapter end · two bridges, two closes, two page changes; the door at (7,0) has no key — a wall that reads as a door (postmortem §6)
     map: [
-      'S.------',
-      '-k.pp.D-',
-      '-i------',
-      '-xG--..-',
+      '...pp..D',
+      '-----.-.',
+      'x--S..-.',
+      'G--..---',
+      '--.pp---',
     ],
   },
   // ---- Chapter 3 「影」 (docs/design-ch3.md): the right page leans towards the lamp (fold 91°–154°), its stones cast
@@ -144,112 +150,112 @@ const LEVELS = [
     ],
   },
   {
-    id: 'press', tier: 'teach', needs: ['needsShade'],   // 3-2 · retuned: a longer walk around the stone's landing cell; closing while standing there crushes you
+    id: 'press', tier: 'mid', len: 13, needs: ['needsShade'],   // 3-2 · retuned: a stone hangs over the start (close there and it crushes you); the far stone's shadow is the bridge to the corner you close from
     map: [
-      '--.S----',
-      '-.---.x-',
-      '..------',
+      '.-..--x-',
+      '---.---.',
+      '---.---.',
+      '-S...-xG',
+    ],
+  },
+  {
+    id: 'lock', tier: 'hard', len: 16, needs: ['needsShade'],   // 3-3 · near and far: at 100° only the far stone's shadow reaches; at 140° the near one's does. No ride needed
+    map: [
+      'G-.---.-',
+      '---.-x--',
+      '.S-----x',
+      '.-..--.-',
+      '...-----',
+    ],
+  },
+  {
+    id: 'ride', tier: 'mid', len: 17, needs: ['needsShade', 'needsRide'],   // 3-4 · the ride is taught here: step on the far shadow at 130° and OPEN to 110°: it carries you to the strip you close from
+    map: [
+      '--.-x-.-',
+      '--.-Gx.-',
+      '.---...x',
       '.-------',
-      '.G------',
+      '...S----',
     ],
   },
   {
-    id: 'lock', tier: 'teach', needs: ['needsShade'],    // 3-3 · 1 change · far stones throw their shadows faster: both meet column 2 only at 147°–154°
+    id: 'rideBack', tier: 'hard', len: 16, needs: ['needsFold', 'needsShade', 'needsRide'],   // 3-5 · the one square of shore is an island only the shadow reaches; ride it towards the crease, step off, close
     map: [
-      '-S------',
-      '-------x',
-      '------x-',
-      '-.------',
-      '-G------',
+      '...--.--',
+      '.-.S----',
+      '.-.-----',
+      '.--.----',
+      '.---..Gx',
     ],
   },
   {
-    id: 'ride', tier: 'teach', needs: ['needsShade', 'needsRide'],   // 3-4 · 2 changes · stand on the shadow and keep closing: it carries you
+    id: 'lamp', tier: 'hard', len: 18, needs: ['needsFold', 'needsShade', 'needsRide'],   // 3-6 · close over a stone's back to reach the left page; two shadows at two angles; the last close is from the corner, not from under the stone
     map: [
-      'G.------',
-      '-.------',
-      '---S---x',
-      '--------',
-    ],
-  },
-  {
-    id: 'rideBack', tier: 'easy', needs: ['needsShade'],   // 3-5 · retuned: board at 147°+, open, and the shadow brings you back; the far shore is a long walk
-    map: [
-      'S-------',
-      '.--.--x-',
-      '---.----',
-      '---.----',
-      'G...----',
-    ],
-  },
-  {
-    id: 'lamp', tier: 'mid', needs: ['needsFold', 'needsShade', 'needsRide'],   // 3-6 · retuned: a stone now hangs over the start — close first and it crushes you
-    map: [
-      '--------',
-      '---Sx--x',
-      '------x-',
-      '-.------',
-      '------G-',
+      '-..--.x-',
+      '-.x...--',
+      '---..---',
+      '.--.S--x',
+      '.---.-G-',
     ],
   },
   // ---- Chapter 4 「岸」 (docs/design-ch4.md): no new tile, no new posture. Every level needs two or three of the
   // earlier mechanics at once, and the thing you learned in one chapter is the trap in the next.
   {
-    id: 'twoShades', tier: 'mid', needs: ['needsShade', 'needsRide'],   // 4-1 · ride the far shadow out, change to the near one at 150, ride it back in
+    id: 'twoShades', tier: 'easy', len: 11, needs: ['needsShade', 'needsRide'],   // 4-1 · quick: one stone, one gap two squares wide; ride its shadow OUT by opening the book, walk back along the far strip
     map: [
-      '--.Sx---',
-      '-------x',
-      '-.------',
-      '------x-',
-      '--.G----',
+      '-.---.x-',
+      '..-.--.-',
+      '..-.----',
+      'S-G..---',
     ],
   },
   {
-    id: 'bridgeShade', tier: 'easy', needs: ['needsFold', 'needsPop', 'needsShade', 'needsKey'],   // 4-2 · tabs stand ≤ 120, shadows start at 91: only at 100–110 is there a bridge AND a shadow beside it
+    id: 'bridgeShade', tier: 'easy', len: 12, needs: ['needsPop', 'needsShade', 'needsRide'],   // 4-2 · ride the shadow towards the crease by opening to 100°: at that angle the tabs stand too
     map: [
-      '-k-pp.DS',
-      '-------x',
-      '---.x---',
-      '--G.----',
+      'S--.----',
+      '..-pp---',
+      '-.x..G--',
+      '..-----x',
     ],
   },
   {
-    id: 'inkShore', tier: 'mid', needs: ['needsFold', 'needsShade', 'needsInk'],   // 4-3 · the shadow is a road, not a shore: print the shore first, then close from it
+    id: 'inkShore', tier: 'hard', len: 18, needs: ['needsFold', 'needsShade', 'needsRide', 'needsInk'],   // 4-3 · the close prints the shore between two shadows; close over the stone's back, ride one shadow, cross the ink to the other
     map: [
-      '-S--G---',
-      '-.--.-x-',
-      '-.--i--x',
-      '--------',
+      '----...-',
+      '.x--.-.-',
+      '.---..-x',
+      '-----iS-',
+      '-.-.G-x-',
     ],
   },
   {
-    id: 'stoneRain', tier: 'mid', needs: ['needsFold', 'needsShade', 'needsRide', 'needsInk'],   // 4-4 · three stones hang over the road; only one cell is safe to close from
+    id: 'stoneRain', tier: 'hard', len: 19, needs: ['needsFold', 'needsShade', 'needsRide'],   // 4-4 · three stones hang over the stack; the only way to the left page is over the fourth stone's back, then a ride and a long walk to the one safe close
     map: [
-      '-S----x-',
-      '-.----x-',
-      '-.----x-',
-      '-.--i---',
-      '---G----',
+      '--.---G-',
+      '--.--xx-',
+      '-......-',
+      '.x-..-.-',
+      '..--S-x-',
     ],
   },
   {
-    id: 'shadeDoor', tier: 'mid', needs: ['needsFold', 'needsShade', 'needsKey'],   // 4-5 · a shadow cannot pass a locked door: close once for the key, then ride through
+    id: 'shadeDoor', tier: 'final', len: 20, needs: ['needsFold', 'needsShade', 'needsRide', 'needsKey'],   // 4-5 · the ride ends at the door the first close opened; the stone over the top row makes the last close safe from one square only
     map: [
-      'S...----',
-      '---.----',
-      '.D----kx',
-      'G--.----',
-      '-.----x-',
+      '--..x-G-',
+      '---..---',
+      '..xDkSx-',
+      'x.--.x..',
+      '.---...-',
     ],
   },
   {
-    id: 'twoFigures', tier: 'mid', needs: ['needsFold', 'needsShade', 'needsKey'],   // 4-6 · vol. 1 finale (story), mid under v2 · she waits on the far bank; ride back to the shore, and the last close opens the door and puts you in her square
+    id: 'twoFigures', tier: 'final', len: 19, needs: ['needsFold', 'needsShade', 'needsRide', 'needsKey'],   // 4-6 · vol. 1 finale · close over the stone's back to reach the left page, two shadows at two angles, and the last close is from the doorway the first close opened: the stack walk ends in her square
     map: [
-      'S.------',
-      '-.--G---',
-      '-.--.-x-',
-      '-.-Dk---',
-      '---.--x-',
+      '.--..--x',
+      'D--..-Gk',
+      '-.-..Sx-',
+      '-.-x.---',
+      '-.-.-.--',
     ],
   },
   // ---- Vol. 2 「翻页」 · Chapter 5 「胶」 (docs/design-v2c1.md): letter paper with glue on it. One new tile, one sentence:
@@ -266,7 +272,7 @@ const LEVELS = [
     ],
   },
   {
-    id: 'lend', tier: 'mid', needs: ['needsFold', 'needsShade', 'needsGlue'],   // 5-2 · no stone on the far page, so no shadow — until you glue one across. Close, open, lean 30°–50°
+    id: 'lend', tier: 'easy', needs: ['needsFold', 'needsShade', 'needsGlue'],   // 5-2 · no stone on the far page, so no shadow — until you glue one across. Close, open, lean 30°–50°
     map: [
       '-S------',
       '-.------',
@@ -276,7 +282,7 @@ const LEVELS = [
     ],
   },
   {
-    id: 'bridgeGlue', tier: 'mid', needs: ['needsFold', 'needsPop', 'needsShade', 'needsGlue'],   // 5-3 · 4-2 again, but you build the shadow: glue the stone across, then 70°–80° has bridge and shadow at once
+    id: 'bridgeGlue', tier: 'easy', needs: ['needsFold', 'needsPop', 'needsShade', 'needsGlue'],   // 5-3 · 4-2 again, but you build the shadow: glue the stone across, then 70°–80° has bridge and shadow at once
     map: [
       '---pp..S',
       'x------g',

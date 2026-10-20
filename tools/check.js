@@ -10,9 +10,10 @@ const ANGLES = [0, 90, 100, 110, 120, 125, 130, 140, 150, 180];
 const SHADE = ANGLES.filter((a) => a >= L.SHADE_MIN && a < L.FOLD_MIN);
 const STEPPED = [...Array(13).keys()].map((k) => k * 15);   // keyboard / big-button steps
 
-// Difficulty tiers (design-difficulty.md §2, v2): score ranges. Calibrated so that every level of
-// vol. 1 「两岸」 (the owner: "still a bit easy") lands at mid or below; vol. 2 starts where it ends.
-const TIERS = { teach: [0, 2], easy: [3, 4], mid: [5, 7], hard: [8, 10], final: [11, 99] };
+// Difficulty tiers (design-difficulty.md §2, v2): score ranges. The v2 score is a ceiling for teach–mid (a teaching
+// level may not quietly become hard) and only a weak floor for hard / final (difficulty-postmortem.md §1.6, §6): the
+// gates that tracked the owner's time are v3 — solution length, wrong turns, decoys (GATES below).
+const TIERS = { teach: [0, 2], easy: [0, 6], mid: [0, 99], hard: [5, 99], final: [6, 99] };   // mid is gated by v3 alone
 // Posture budget per tier (plan.md §12.3, revised in docs/difficulty-postmortem.md §1.4): the fatigue rule caps the
 // chapter, not every level. teach–mid ≤ 3 changes; hard / final ≤ 4; optional 「暗信」 challenge levels ≤ 6.
 // Full closes ≤ 2 on the main path, ≤ 3 in 「暗信」. A chapter's main path may not exceed 24 changes in total.
@@ -292,8 +293,20 @@ if (require.main !== module) return;
 const GEN = require('./gen.js');   // metric v3 (difficulty-postmortem.md §3): solution length, decoys, wrong turns. Loaded here to avoid a require cycle.
 // Minimal solution length (posture changes + steps) a tier must reach: the one number the owner's play confirmed
 // tracks time-to-solve (postmortem §1.2). Scores below are floors; only teach–mid also have a ceiling.
-const LEN_MIN = { hard: 15, final: 18, dark: 18 };
-const NOISE_MAX = 2;   // elements whose removal leaves the solution unchanged (decoys only a naive player falls for)
+// Per-tier gates (difficulty-postmortem.md §6, 卷一 retune). len = minimal solution (posture changes + steps): the one number
+// the owner's play confirmed tracks time-to-solve. wrong = plausible-but-wrong hinge moves over the solution's decision
+// points. noise = elements whose removal leaves the solution unchanged (decoys only a naive player falls for).
+// Expected first-solve times: teach ≤ 30 s · easy ~1 min · mid 1–3 min · hard 2–4 min (ch.4: 3–6) · final 4–8 min.
+const GATES = {
+  teach: { lenMax: 10 },
+  easy:  { lenMin: 6, noiseMax: 2 },
+  mid:   { lenMin: 11, wrongMin: 3, noiseMax: 2 },
+  hard:  { lenMin: 15, wrongMin: 6, noiseMax: 1 },
+  final: { lenMin: 18, wrongMin: 8, noiseMax: 1 },
+  dark:  { lenMin: 18, noiseMax: 2 },
+};
+const IDLE_MAX = 0.70;          // (gap cells + paper that carries nothing) / all cells, for mid and above (postmortem §1.1; teach / easy boards are allowed to be sparse)
+const DEAD_FREE_CHAPTERS = 4;   // chapters whose levels may have no dead state at all (vol. 1: the game teaches, undo is a courtesy)
 
 let ok = true;
 const fail = (msg) => { ok = false; console.log('   ' + msg); };
@@ -328,15 +341,19 @@ LEVELS.forEach((lv, i) => {
   else if (['teach', 'easy', 'mid'].includes(lv.tier) && d.score > TIERS[lv.tier][1]) fail(`TIER MISMATCH: scored ${d.score} (${d.tier}), declared ${lv.tier} = ${TIERS[lv.tier].join('–')}`);
   // v3 (tools/gen.js): hard and final levels must be long, declared lengths must hold, and decoys are capped
   const m = GEN.full(lv, false);
-  const lenMin = lv.optional ? LEN_MIN.dark : LEN_MIN[lv.tier] || 0;
-  console.log(`   v3 len=${m.len} (par ${m.par} + steps ${m.steps}) wrong=${m.wrong} first=${m.firstWrong} narrow=${m.narrow}/${m.par} dead=${Math.round(m.deadFrac * 100)}% basins=${m.deadEnds} noise=${m.noise} blockers=${m.blockers} irrelevant=${m.irrelevant} reuse=${m.reuse}`);
-  if (m.len < lenMin) fail(`TOO SHORT: minimal solution is ${m.len} actions, ${lv.optional ? '暗信' : lv.tier} needs ≥ ${lenMin}`);
+  const gate = lv.optional ? GATES.dark : GATES[lv.tier] || {}, tierName = lv.optional ? '暗信' : lv.tier;
+  const idle = (m.voids + m.irrelevant) / (m.rows * m.cols);
+  console.log(`   v3 len=${m.len} (par ${m.par} + steps ${m.steps}) wrong=${m.wrong} first=${m.firstWrong} narrow=${m.narrow}/${m.par} dead=${Math.round(m.deadFrac * 100)}% basins=${m.deadEnds} noise=${m.noise} blockers=${m.blockers} irrelevant=${m.irrelevant} idle=${Math.round(idle * 100)}% reuse=${m.reuse}`);
+  if (gate.lenMin && m.len < gate.lenMin) fail(`TOO SHORT: minimal solution is ${m.len} actions, ${tierName} needs ≥ ${gate.lenMin}`);
+  if (gate.lenMax && m.len > gate.lenMax) fail(`TOO LONG for a teaching level: minimal solution is ${m.len} actions, max ${gate.lenMax}`);
+  if (gate.wrongMin && m.wrong < gate.wrongMin) fail(`TOO READABLE: ${m.wrong} wrong turns over the solution, ${tierName} needs ≥ ${gate.wrongMin}`);
   if (lv.len != null && m.len !== lv.len) fail(`LENGTH CHANGED: declared len ${lv.len}, measured ${m.len}`);
-  if (m.noise > NOISE_MAX) fail(`${m.noise} DECOY elements (${m.decoys.join(' ')}), max ${NOISE_MAX}`);
+  if (gate.noiseMax != null && m.noise > gate.noiseMax) fail(`${m.noise} DECOY elements (${m.decoys.join(' ')}), max ${gate.noiseMax} for ${tierName}`);
+  if (!['teach', 'easy'].includes(lv.tier) && idle > IDLE_MAX) fail(`${Math.round(idle * 100)}% of the board carries nothing (${m.voids} gaps + ${m.irrelevant} idle cells), max ${IDLE_MAX * 100}% from mid up`);
   // every level must need the chapter's mechanic it was built on
   for (const need of lv.needs || []) if (!r[need]) fail(`does not need ${need}`);
   // vol. 1 has no dead ends by design (design-difficulty.md §1); from vol. 2 on they are a tool, and the game has undo
-  if (i < 25 && d.dead) fail(`DEAD ENDS in a vol. 1 level: ${d.dead}`);
+  if (chapterOf(lv, i) <= DEAD_FREE_CHAPTERS && d.dead) fail(`DEAD ENDS in a chapter-${chapterOf(lv, i)} level: ${d.dead}`);
   if (lv.optional) return;
 });
 for (const [ch, p] of Object.entries(chapterPar)) if (p > CHAPTER_PAR_MAX) fail(`chapter ${ch}: ${p} posture changes on the main path (max ${CHAPTER_PAR_MAX})`);
