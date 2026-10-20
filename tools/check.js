@@ -13,6 +13,14 @@ const STEPPED = [...Array(13).keys()].map((k) => k * 15);   // keyboard / big-bu
 // Difficulty tiers (design-difficulty.md §2, v2): score ranges. Calibrated so that every level of
 // vol. 1 「两岸」 (the owner: "still a bit easy") lands at mid or below; vol. 2 starts where it ends.
 const TIERS = { teach: [0, 2], easy: [3, 4], mid: [5, 7], hard: [8, 10], final: [11, 99] };
+// Posture budget per tier (plan.md §12.3, revised in docs/difficulty-postmortem.md §1.4): the fatigue rule caps the
+// chapter, not every level. teach–mid ≤ 3 changes; hard / final ≤ 4; optional 「暗信」 challenge levels ≤ 6.
+// Full closes ≤ 2 on the main path, ≤ 3 in 「暗信」. A chapter's main path may not exceed 24 changes in total.
+const PAR_MAX = { teach: 3, easy: 3, mid: 3, hard: 4, final: 4, dark: 6 };
+const CLOSES_MAX = { main: 2, dark: 3 };
+const CHAPTER_PAR_MAX = 24;
+const CHAPTER_START = [0, 5, 13, 19, 25];   // first level index of chapters 1–5 (levels.js comments); later levels may carry `chapter`
+const chapterOf = (lv, i) => lv.chapter || CHAPTER_START.filter((s) => s <= i).length;
 const MECHANICS = ['needsFold', 'needsPop', 'needsShade', 'needsRide', 'needsKey', 'needsInk', 'needsGlue'];
 
 function turn(world, from, a0, a1) {
@@ -204,8 +212,8 @@ function analyse(level) {
       }
       for (const n of nexts.values()) rec(n, depth - 1, [...labels, label(s.a, a)]);
     }
-  })(start, best.cost, []);
-  const dead = deadC.size, forks = seqs.size;
+  })(start, Math.min(best.cost, 4), []);   // the posture-sequence enumeration is exponential in par; past 4 (暗信) report forks as 1
+  const dead = deadC.size, forks = best.cost > 4 ? 1 : seqs.size;
   const explore = new Set([...nodes.values()].map(collapse)).size;   // how much board × posture there is to wander
   // precision: how many sampled lean angles can stand in for the lean the optimal solution uses (0 = it needs a ride)
   const usesLean = best.steps.some((x) => posture(+x.match(/\d+/)[0]) === 'lean');
@@ -281,14 +289,19 @@ function report(lv, withDifficulty = true) {
 
 module.exports = { solve, analyse, report, greedy, turn, grids, goalOf, hOf, posture, ANGLES, STEPPED, SHADE, TIERS };
 if (require.main !== module) return;
+const GEN = require('./gen.js');   // metric v3 (difficulty-postmortem.md §3): solution length, decoys, wrong turns. Loaded here to avoid a require cycle.
+// Minimal solution length (posture changes + steps) a tier must reach: the one number the owner's play confirmed
+// tracks time-to-solve (postmortem §1.2). Scores below are floors; only teach–mid also have a ceiling.
+const LEN_MIN = { hard: 15, final: 18, dark: 18 };
+const NOISE_MAX = 2;   // elements whose removal leaves the solution unchanged (decoys only a naive player falls for)
 
 let ok = true;
 const fail = (msg) => { ok = false; console.log('   ' + msg); };
-const table = [];
+const table = [], chapterPar = {};
 LEVELS.forEach((lv, i) => {
   const r = report(lv);
   const full = solve(lv);
-  console.log(`${i + 1} ${lv.id}: ${full ? 'changes=' + full.cost : 'UNSOLVABLE'}` +
+  console.log(`${i + 1} ${lv.id}${lv.optional ? ' (暗信)' : ''}: ${full ? 'changes=' + full.cost + ' steps=' + full.walk : 'UNSOLVABLE'}` +
     `  needsFold=${r.needsFold} needsPop=${r.needsPop}` +
     ('needsShade' in r ? `  needsShade=${r.needsShade} needsRide=${r.needsRide}` : '') +
     ('needsKey' in r ? `  needsKey=${r.needsKey}` : '') +
@@ -296,24 +309,37 @@ LEVELS.forEach((lv, i) => {
     ('needsGlue' in r ? `  needsGlue=${r.needsGlue} glueFires=${r.glueFires}` : ''));
   if (!full) { fail('UNSOLVABLE'); return; }
   console.log('   ' + full.steps.join(' → '));
-  const d = analyse(lv);
+  const d = lv.optional ? { score: 99, tier: 'final', structure: '-', insight: '-', par: full.cost, walk: full.walk, forks: '-', window: '-', combo: '-', trap: false, greedy: '-', misdirect: false, undo: '-', away: '-', dead: '-', deadEnds: '-', before: false, made: false } : analyse(lv);   // v2 analyse is exponential in par; 暗信 levels are gated by v3 only
   console.log(`   difficulty ${d.score} (${d.tier}) = structure ${d.structure}/2 + insight ${d.insight}  par=${d.par} walk=${d.walk} forks=${d.forks} window=${d.window} combo=${d.combo}${d.trap ? ' trap' : ''}` +
     `  | greedy=${d.greedy}${d.misdirect ? ' misdirect' : ''} undo=${d.undo} away=${d.away} dead=${d.dead} deadEnds=${d.deadEnds}${d.before ? ' before' : ''}${d.made ? ' made' : ''}  declared=${lv.tier}`);
   table.push({ n: i + 1, id: lv.id, d, declared: lv.tier });
   // accessibility: solvable with only the 15° keyboard / big-button steps (no precise slider)
   if (!r.stepped15) fail('NOT solvable with 15° steps');
-  // fatigue budget (plan.md §12.3): best solution needs ≤ 3 posture changes, of which ≤ 2 full closes
+  // fatigue budget (plan.md §12.3, tiered by difficulty-postmortem.md §1.4): posture changes and full closes per tier
   const closes = full.steps.filter((x, i, arr) => x.startsWith('fold') && (i === 0 || !arr[i - 1].startsWith('fold'))).length;
-  if (full.cost > 3) fail(`OVER PAR: ${full.cost} posture changes (max 3)`);
-  if (closes > 2) fail(`OVER PAR: ${closes} full closes (max 2)`);
-  // difficulty: the level must land in the tier its designer declared (design-difficulty.md §2)
+  const parMax = lv.optional ? PAR_MAX.dark : PAR_MAX[lv.tier] || 3, closesMax = lv.optional ? CLOSES_MAX.dark : CLOSES_MAX.main;
+  if (full.cost > parMax) fail(`OVER PAR: ${full.cost} posture changes (max ${parMax} for ${lv.optional ? '暗信' : lv.tier})`);
+  if (closes > closesMax) fail(`OVER PAR: ${closes} full closes (max ${closesMax})`);
+  if (!lv.optional) { const ch = chapterOf(lv, i); chapterPar[ch] = (chapterPar[ch] || 0) + full.cost; }
+  // difficulty: v2 score is a floor for every tier and a ceiling only for teach–mid (postmortem §1.6: the score
+  // over-rates "one new fact" levels, so it may not promote a level; it may still keep a teaching level gentle)
   if (!TIERS[lv.tier]) fail(`no tier declared (one of ${Object.keys(TIERS).join(' / ')})`);
-  else if (d.score < TIERS[lv.tier][0] || d.score > TIERS[lv.tier][1]) fail(`TIER MISMATCH: scored ${d.score} (${d.tier}), declared ${lv.tier} = ${TIERS[lv.tier].join('–')}`);
+  else if (d.score < TIERS[lv.tier][0]) fail(`TIER MISMATCH: scored ${d.score} (${d.tier}), declared ${lv.tier} = ${TIERS[lv.tier].join('–')}`);
+  else if (['teach', 'easy', 'mid'].includes(lv.tier) && d.score > TIERS[lv.tier][1]) fail(`TIER MISMATCH: scored ${d.score} (${d.tier}), declared ${lv.tier} = ${TIERS[lv.tier].join('–')}`);
+  // v3 (tools/gen.js): hard and final levels must be long, declared lengths must hold, and decoys are capped
+  const m = GEN.full(lv, false);
+  const lenMin = lv.optional ? LEN_MIN.dark : LEN_MIN[lv.tier] || 0;
+  console.log(`   v3 len=${m.len} (par ${m.par} + steps ${m.steps}) wrong=${m.wrong} first=${m.firstWrong} narrow=${m.narrow}/${m.par} dead=${Math.round(m.deadFrac * 100)}% basins=${m.deadEnds} noise=${m.noise} blockers=${m.blockers} irrelevant=${m.irrelevant} reuse=${m.reuse}`);
+  if (m.len < lenMin) fail(`TOO SHORT: minimal solution is ${m.len} actions, ${lv.optional ? '暗信' : lv.tier} needs ≥ ${lenMin}`);
+  if (lv.len != null && m.len !== lv.len) fail(`LENGTH CHANGED: declared len ${lv.len}, measured ${m.len}`);
+  if (m.noise > NOISE_MAX) fail(`${m.noise} DECOY elements (${m.decoys.join(' ')}), max ${NOISE_MAX}`);
   // every level must need the chapter's mechanic it was built on
   for (const need of lv.needs || []) if (!r[need]) fail(`does not need ${need}`);
   // vol. 1 has no dead ends by design (design-difficulty.md §1); from vol. 2 on they are a tool, and the game has undo
   if (i < 25 && d.dead) fail(`DEAD ENDS in a vol. 1 level: ${d.dead}`);
+  if (lv.optional) return;
 });
+for (const [ch, p] of Object.entries(chapterPar)) if (p > CHAPTER_PAR_MAX) fail(`chapter ${ch}: ${p} posture changes on the main path (max ${CHAPTER_PAR_MAX})`);
 if (process.argv.includes('--table')) {
   console.log('\n| # | id | par | forks | walk | trap | window | combo | S | greedy | misdirect | undo | away | dead | deadEnds | before | made | I | score | tier |');
   console.log('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');

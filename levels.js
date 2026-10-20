@@ -283,41 +283,83 @@ const LEVELS = [
       '-G..----',
     ],
   },
+  // ---- 5-4 … 5-7 redesigned 2026-10-19 (docs/difficulty-postmortem.md): the owner solved the first cut of this chapter
+  // (v2 scores 8 · 8 · 9 · 14) in seconds. These four come out of tools/gen.js (search + polish, then hand-curated):
+  // minimal solutions of 17–20 actions (chapter average was 7), no decoy elements, every stone with two jobs,
+  // one close that rearranges the board and a chain of shadows you can only read after it.
   {
-    id: 'shadowFirst', tier: 'hard', needs: ['needsFold', 'needsShade', 'glueFires'],   // 5-4 · the glue takes the stone you need: close first and the shadow is gone for good. Lean, cross, then close
+    id: 'oldHome', tier: 'hard', len: 17, needs: ['needsFold', 'needsShade', 'needsRide', 'glueFires'],   // (wiping the glue opens a shortcut over the stone's back, so needsGlue is false by construction)   // 5-4 · no stone on the far page until you send two across; the shadow of one leads back to where it stood
     map: [
-      '-S------',
-      '-.------',
-      'g------x',
-      '-.------',
-      '------G-',
+      '----S...',
+      '-------.',
+      'x----..g',
+      'G-x.-g--',
+      '---.-.--',
     ],
   },
   {
-    id: 'oneClose', tier: 'hard', needs: ['needsFold', 'glueFires'],   // 5-5 · par 1. Closing on the glue crushes you; closing above it drops the stone on your road; only below works
+    id: 'ferry', tier: 'hard', len: 17, needs: ['needsFold', 'needsPop', 'needsShade', 'needsRide', 'needsGlue'],   // 5-5 · cross the stack through a hole, then open the book FURTHER to ride the shadow to the bridge: at 70° the tabs stand and both shadows are there
     map: [
-      '-S------',
-      '-.------',
-      '-g---Gx-',
-      '-.---.--',
+      '.-----..',
+      '.x--S.g.',
+      '.-x---.x',
+      '.--.G-.-',
+      '---pp---',
     ],
   },
   {
-    id: 'rideFirst', tier: 'hard', needs: ['needsFold', 'needsShade', 'needsRide', 'needsKey', 'glueFires'],   // 5-6 · ride the shadow out before the close pulls its stone to this page; the same close opens the door
+    id: 'twiceClosed', tier: 'hard', len: 18, needs: ['needsFold', 'needsShade', 'needsRide', 'needsGlue'],   // 5-6 · three elements, two closes; the second close is only safe from one cell, reached by two shadows
     map: [
-      'g--S---x',
-      '-.------',
-      '-D----k-',
-      '------G-',
+      '-----...',
+      'x--...-g',
+      '.-.--S-.',
+      '.-.--x--',
+      '---.G---',
     ],
   },
   {
-    id: 'stuckPage', tier: 'final', needs: ['needsFold', 'needsShade', 'needsKey', 'needsGlue'],   // 5-7 · finale · two glues fire at once: one cuts the road behind you (and crushes you if you stand on it), the other builds the shadow to her door
+    id: 'twoLamps', tier: 'final', len: 20, needs: ['needsFold', 'needsShade', 'needsRide', 'needsGlue'],   // ink: without it the road still exists but costs 5 postures   // 5-7 · finale · two stones four columns out throw shadows into the same column; the ink patch printed by the close is the only link between them. Open to 60°, then close back to 40°
     map: [
-      'S.------',
-      '-.------',
-      '-gx-G-x-',
-      'x.-Dk--g',
+      'G--x---x',
+      '--..S.--',
+      '---..--.',
+      'x---i..g',
+      '.------.',
+      '.-------',
+    ],
+  },
+  // ---- 「暗信」 hidden letters of chapter 5: optional, par ≤ 6, closes ≤ 3 (check.js PAR_MAX.dark). Not on the main path.
+  {
+    id: 'darkBack', tier: 'final', optional: true, len: 20, needs: ['needsFold', 'needsShade', 'needsRide', 'glueFires'],   // 暗一 · the stack over a left-page stone cannot be entered — but you can stand on the stone's back from the open page and close
+    map: [
+      '.g-...x-',
+      '-.-x.---',
+      '..-.----',
+      'S--.----',
+      '---.--x-',
+      '-G------',
+    ],
+  },
+  {
+    id: 'darkDoor', tier: 'final', optional: true, len: 19, needs: ['needsFold', 'needsShade', 'needsKey', 'glueFires'],   // 暗二 · ride the shadow down onto paper as the book closes; then a stacked walk with four page changes to a door that was locked
+    map: [
+      '..----x-',
+      '.-D--k--',
+      '.x---.G-',
+      '-.-S---.',
+      '---.--.-',
+      'g.-.---x',
+    ],
+  },
+  {
+    id: 'darkInk', tier: 'final', optional: true, len: 22, needs: ['needsFold', 'needsShade', 'needsRide', 'needsInk', 'needsGlue'],   // 暗三 · three closes; the ink prints the hole you cross and the cell you close from; the last close stands on a stone's back
+    map: [
+      '-----xi.',
+      '---..S-.',
+      'x-....-.',
+      '.--xg-G-',
+      '----i---',
+      '---.-.--',
     ],
   },
 ];

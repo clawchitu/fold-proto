@@ -8,9 +8,10 @@
 //       --restarts 12   random restarts                    --seed 1         RNG seed
 //       --par 4         max posture changes                --closes 2       max full closes
 //       --minpar 3      reject boards below this par       --tiles '.-xg'   tile palette (plus S and G)
-//       --need glue     the chapter mechanic must be essential (glueFires or needsGlue)
+//       --need glue     the mechanics that must be essential: glue | shade | pop | key | ink, joined with '+'
 //       --from id       start every restart from this levels.js id instead of a random board
 //       --top 8         how many boards to print           --elements 9     element budget (x k D i p g)
+//       --polish        strip irrelevant cells / noise elements from the winners before ranking
 //
 // What the search optimises (fitness(), §3 of the postmortem):
 //   long minimal solutions (par, steps), many plausible-but-wrong hinge moves at each decision point (wrong),
@@ -211,6 +212,9 @@ function measure(level) {
   out.glueFires = B.events.some((e) => e.type === 'glue');
   out.needsGlue = all.includes('g') && !solvableFrom(prep({ map: level.map.map((r) => r.split('g').join('.')) }), B.start);
   out.stepped15 = solvableFrom(B, B.start, STEPPED);
+  out.needsPop = !solvableFrom(B, B.start, ANGLES.filter((a) => a < L.POP_MIN || a > L.POP_MAX));
+  out.needsKey = all.includes('k') && !solvableFrom(prep({ map: level.map.map((r) => r.split('k').join('.')) }), B.start);
+  out.needsInk = all.includes('i') && !solvableFrom(prep({ map: level.map.map((r) => r.split('i').join('.')) }), B.start);
   // which page switches: the solution lands on the other page after an open (land() chose the far page)
   out.pageSwitches = states.filter((s, i) => i > 0 && L.isRight(s.c) !== L.isRight(states[i - 1].c) && posture(states[i - 1].a) !== 'fold' && posture(s.a) !== 'fold').length;
   return out;
@@ -267,11 +271,11 @@ function roles(level, m) {
   return { noise, blockers, loadBearing, irrelevant, reuse, decoys, stoneRoles: Object.fromEntries([...stoneRoles].map(([k, v]) => [k, [...v].join('+')])) };
 }
 
-function full(level) {
+function full(level, withV2 = true) {
   const m = measure(level);
   const r = m.solvable ? roles(level, m) : {};
   let v2 = null;
-  try { const a = C.analyse(level); if (a) v2 = { score: a.score, tier: a.tier, greedy: a.greedy, forks: a.forks }; } catch (e) { v2 = null; }
+  if (withV2) try { const a = C.analyse(level); if (a) v2 = { score: a.score, tier: a.tier, greedy: a.greedy, forks: a.forks }; } catch (e) { v2 = null; }
   return { ...m, ...r, v2 };
 }
 
@@ -279,7 +283,8 @@ function full(level) {
 function fitness(level, opts, m) {
   m = m || measure(level);
   if (!m.solvable) return -1000 + (m.states || 0) * 0.05;
-  const need = opts.need === 'glue' ? m.glueFires || m.needsGlue : opts.need === 'shade' ? m.ride || m.made : true;
+  const needOne = (n) => n === 'glue' ? m.glueFires || m.needsGlue : n === 'shade' ? m.ride || m.made : n === 'pop' ? m.needsPop : n === 'key' ? m.needsKey : n === 'ink' ? m.needsInk : true;
+  const need = String(opts.need).split('+').every(needOne);
   if (m.par > opts.par || m.closes > opts.closes || !m.stepped15 || !need || m.par < opts.minpar) return -500 + m.par * 10 + Math.min(m.steps, 10);
   let f = 12 * m.par + 2 * Math.min(m.steps, 14) - 1.5 * Math.max(0, m.steps - 16);
   f += 4 * Math.min(m.wrong, 10) + 3 * Math.min(m.firstWrong, 4);
@@ -351,17 +356,51 @@ function search(opts) {
     process.stderr.write(`restart ${rs + 1}/${opts.restarts}: best so far ${[...archive.values()].reduce((b, x) => Math.max(b, x.f), -1e9).toFixed(1)}, ${archive.size} kept, ${evals} evals, ${((Date.now() - t0) / 1000).toFixed(0)}s\n`);
   }
   // expensive re-rank: decoys and irrelevant cells cost; keep diverse signatures
-  const cands = [...archive.values()].sort((a, b) => b.f - a.f).slice(0, opts.top * 6);
-  for (const x of cands) { x.r = roles(x.level, x.m); x.F = x.f - 4 * x.r.noise - 0.8 * x.r.irrelevant + 4 * Math.min(x.r.reuse, 2); }
+  const cands = [...archive.values()].sort((a, b) => b.f - a.f).slice(0, opts.top * (opts.polish ? 3 : 6));
+  for (const x of cands) {
+    if (opts.polish) { const p = polish(x.level, opts); x.level = p.level; x.m = p.m; x.f = p.f; }
+    x.r = roles(x.level, x.m); x.F = x.f - 4 * x.r.noise - 0.8 * x.r.irrelevant + 4 * Math.min(x.r.reuse, 2);
+  }
   cands.sort((a, b) => b.F - a.F);
   const out = [], seenSig = new Set();
   for (const x of cands) {
-    const sig = [x.m.par, x.m.steps, x.m.before, x.m.made, x.m.deadEnds, x.m.wrong].join();
-    if (seenSig.has(sig) && out.length >= opts.top / 2) continue;
+    const sig = x.level.map.join('|');
+    if (seenSig.has(sig)) continue;
     seenSig.add(sig); out.push(x);
     if (out.length >= opts.top) break;
   }
   return out;
+}
+
+// ---------- polish: strip what carries nothing, keep the line of play ----------
+// Greedily turns irrelevant paper into void and noise elements into paper while the fitness does not drop
+// (so traps that make dead basins stay; clutter that only makes the board busier goes).
+function polish(level, opts) {
+  let cur = { map: [...level.map] }, m = measure(cur), f = fitness(cur, opts, m);
+  const sol = m.solution;
+  for (let pass = 0; pass < 3; pass++) {
+    let changed = false;
+    const rows = cur.map.map((r) => r.split(''));
+    for (let r = 0; r < rows.length; r++) for (let c = 0; c < rows[r].length; c++) {
+      const t = rows[r][c];
+      if ('-SGp'.includes(t)) continue;
+      const g = cur.map.map((x) => x.split(''));
+      g[r][c] = ELEMENTS.includes(t) ? '.' : '-';
+      const cand = { map: g.map((x) => x.join('')) }, cm = measure(cand);
+      if (!cm.solvable || cm.solution !== sol) {
+        if (!ELEMENTS.includes(t) || !cm.solvable) continue;
+        g[r][c] = '-'; const cand2 = { map: g.map((x) => x.join('')) }, cm2 = measure(cand2);
+        if (!cm2.solvable || cm2.solution !== sol) continue;
+        const f2 = fitness(cand2, opts, cm2); if (f2 + 0.01 < f) continue;
+        cur = cand2; m = cm2; f = f2; changed = true; continue;
+      }
+      const cf = fitness(cand, opts, cm);
+      if (cf + 0.01 < f) continue;   // the cell was doing work (a trap, a wrong turn)
+      cur = cand; m = cm; f = cf; changed = true;
+    }
+    if (!changed) break;
+  }
+  return { level: cur, m, f };
 }
 
 // ---------- printing ----------
@@ -383,7 +422,7 @@ function stats() {
   console.log('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
   const agg = { len: 0, n: 0 };
   LEVELS.forEach((lv, i) => {
-    const f = full(lv);
+    const f = full(lv, !lv.optional && (full.v2 !== false));
     agg.len += f.len; agg.n++;
     console.log(`| ${i + 1} | ${lv.id}${lv.optional ? ' (暗信)' : ''} | ${f.rows} | ${f.elements} | ${f.voids}/${f.rows * 8} | ${f.irrelevant} | ${f.noise} | ${f.par} | ${f.steps} | **${f.len}** | ${f.closes} | ${f.wrong} | ${f.firstWrong} | ${f.narrow}/${f.par} | ${Math.round(f.deadFrac * 100)} | ${f.deadEnds} | ${+f.before} | ${+f.made} | ${f.v2 ? f.v2.score + ' ' + f.v2.tier : '-'} |`);
   });
@@ -393,7 +432,7 @@ function stats() {
 function args() {
   const a = process.argv.slice(2), o = { cmd: a[0] || 'stats', rows: 5, iters: 4000, restarts: 12, seed: 1, par: 4, closes: 2, minpar: 2, tiles: '.-xg', need: 'glue', from: null, top: 8, elements: 9 };
   for (let i = 1; i < a.length; i++) {
-    if (a[i].startsWith('--')) { const k = a[i].slice(2); const v = a[i + 1]; o[k] = v === undefined || v.startsWith('--') ? true : isNaN(+v) ? v : +v; if (!(v === undefined || v.startsWith('--'))) i++; }
+    if (a[i].startsWith('--') && !a[i].includes(',')) { const k = a[i].slice(2); const v = a[i + 1]; o[k] = v === undefined || v.startsWith('--') ? true : isNaN(+v) ? v : +v; if (!(v === undefined || v.startsWith('--'))) i++; }
     else o.arg = a[i];
   }
   return o;
@@ -404,9 +443,13 @@ if (require.main === module) {
   if (o.cmd === 'stats') stats();
   else if (o.cmd === 'show') {
     const lv = o.arg.includes(',') ? { map: o.arg.split(',') } : LEVELS.find((l) => l.id === o.arg);
-    const f = full(lv);
+    const f = full(lv, !!o.v2);
     console.log(fmt(lv, f, f, null));
     console.log(JSON.stringify({ ...f, solution: undefined, decoys: undefined, stoneRoles: undefined }, null, 0));
+  } else if (o.cmd === 'polish') {
+    const lv = o.arg.includes(',') ? { map: o.arg.split(',') } : LEVELS.find((l) => l.id === o.arg);
+    const p = polish(lv, o), f = full(p.level, false);
+    console.log(fmt(p.level, f, f, p.f));
   } else if (o.cmd === 'search') {
     const res = search(o);
     console.log(`// gen.js search rows=${o.rows} par≤${o.par} closes≤${o.closes} tiles=${o.tiles} need=${o.need} seed=${o.seed}${o.from ? ' from=' + o.from : ''}`);
@@ -414,4 +457,4 @@ if (require.main === module) {
   } else console.log('usage: node tools/gen.js stats | show <id|map> | search [--rows --iters --restarts --seed --par --closes --minpar --tiles --need --from --top --elements]');
 }
 
-module.exports = { prep, explore, measure, roles, full, fitness, search, bestPath, distToWin };
+module.exports = { prep, explore, measure, roles, full, fitness, search, polish, bestPath, distToWin };

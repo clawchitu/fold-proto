@@ -367,7 +367,10 @@
     ui.next.textContent = t(last ? 'first' : 'next');
   }
   function header() {
-    ui.name.textContent = t('levelHead', { n: index + 1, total: LEVELS.length, name: lvText(index).name });
+    const lv = LEVELS[index], mainCount = LEVELS.filter((l) => !l.optional).length;
+    ui.name.textContent = lv.optional
+      ? t('darkHead', { n: LEVELS.slice(0, index + 1).filter((l) => l.optional).length, name: lvText(index).name })
+      : t('levelHead', { n: index + 1, total: mainCount, name: lvText(index).name });
     ui.line.textContent = lvText(index).line;
   }
 
@@ -477,7 +480,7 @@
     LEVELS.forEach((lv, i) => {
       const b = document.createElement('button');
       b.className = 'lv' + (done.has(i) ? ' done' : '') + (i === index ? ' current' : '');
-      b.innerHTML = `<span>${i + 1}</span>${lvText(i).name}`;
+      b.innerHTML = `<span>${lv.optional ? t('darkTag') : i + 1}</span>${lvText(i).name}`;
       b.onclick = () => go(i);
       ui.levelGrid.appendChild(b);
     });
