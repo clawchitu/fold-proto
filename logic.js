@@ -7,6 +7,7 @@
 // Tiles:  -  empty      .  paper      S start    G goal
 //         x  stone      k  key        D door     o opened door
 //         i  ink blot   p  pop-up tab (pairs across the hinge)
+//         g  glue (vol. 2): walkable; when the book closes it pulls the stone facing it onto itself (one use)
 (function (root) {
   const N = 4;
   const FOLD_MIN = 155;              // folded: stacked tiles connect
@@ -23,7 +24,7 @@
     return 'open';
   }
 
-  const isFloor = (t) => '.SGkiop'.includes(t);
+  const isFloor = (t) => '.SGkiopg'.includes(t);
   const isBlock = (t) => t === 'x' || t === 'D';
   const isOpaque = (t) => t === 'x';   // stones block the light; paper and ink let it through
 
@@ -89,8 +90,10 @@
 
   // Closing drops the right page's stones onto their mirror cells: a character on the left page under one
   // is crushed (design-review-ch3 §2). A ridden shadow ends in that same cell, so the two readings agree.
-  // Stones on the left page never move, so standing on the right page above one only blocks, never crushes.
-  const crushed = (s, from, a) => a >= FOLD_MIN && !isRight(from.c) && isOpaque(at(s, mirror(from.c), from.r));
+  // Stones on the left page never move, so standing on the right page above one only blocks, never crushes —
+  // unless you stand on glue: then the stone below is pulled up onto your square (design-v2c1.md §1).
+  const crushed = (s, from, a) => a >= FOLD_MIN && isOpaque(at(s, mirror(from.c), from.r)) &&
+    (!isRight(from.c) || at(s, from.c, from.r) === 'g');
 
   // Standing on nothing but a shadow? Then the shadow carries the character when the angle changes.
   // Returns the cell the character ends up on, or null when it falls (or is crushed).
@@ -141,7 +144,8 @@
     return null;
   }
 
-  // Pressing the pages together: keys open the door they touch, ink prints onto bare paper.
+  // Pressing the pages together: keys open the door they touch, ink prints onto bare paper,
+  // glue pulls the stone it touches onto itself (the stone changes page; the glue is used up).
   function stamp(s) {
     const events = [];
     for (let r = 0; r < s.h; r++) {
@@ -156,6 +160,9 @@
           } else if (A === 'i' && B === '-') {
             s.grid[r][b] = 'i';
             events.push({ type: 'ink', cells: [{ c: a, r }, { c: b, r }] });
+          } else if (A === 'g' && B === 'x') {
+            s.grid[r][a] = 'x'; s.grid[r][b] = '.';
+            events.push({ type: 'glue', cells: [{ c: b, r }, { c: a, r }] });
           }
         }
       }
