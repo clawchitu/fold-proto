@@ -94,12 +94,16 @@
     k: '<svg viewBox="0 0 40 40"><circle cx="14" cy="20" r="6" fill="none" stroke="var(--accent)" stroke-width="3"/><path d="M20 20h13M28 20v5M32 20v4" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/></svg>',
     D: '<svg viewBox="0 0 40 40"><circle cx="20" cy="17" r="3.6" fill="var(--accent)"/><path d="M20 19v8" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/></svg>',
     i: '<svg viewBox="0 0 40 40"><path d="M20 7c6 1 12 5 12 12 1 7-5 13-12 13-8 0-13-5-13-12 0-6 4-9 6-10 2-2 4-3 7-3z" fill="#2b2a28"/><circle cx="33" cy="9" r="2" fill="#2b2a28"/></svg>',
+    // glue (vol. 2): a wet drop with a highlight; the amber smear itself is the tile background (style.css)
+    g: '<svg viewBox="0 0 40 40"><path d="M20 9c4 6 8 10 8 15a8 8 0 0 1-16 0c0-5 4-9 8-15z" fill="none" stroke="#8a5a14" stroke-width="2.2" stroke-linejoin="round"/><path d="M16 24a4 4 0 0 0 3 4" fill="none" stroke="#8a5a14" stroke-width="1.6" stroke-linecap="round"/></svg>',
   };
 
   function build() {
     const lv = LEVELS[index];
     state = F.create(lv);
     won = false;
+    // paper per volume: vol. 1 xuan paper (levels 1–25), vol. 2 letter paper with a printed grid (design-v2c1.md §2)
+    document.body.dataset.paper = index >= 25 ? 'letter' : 'xuan';
     stopWalk();
     for (const page of [ui.left, ui.right]) page.querySelectorAll('.cell, .char, .tab, .shadow').forEach((e) => e.remove());
     shadowEls = new Map(); shade = new Map(); rideSrc = null;
@@ -138,7 +142,7 @@
   function paintTiles() {
     state.grid.forEach((row, r) => row.forEach((t, c) => {
       const el = cells[r][c];
-      const kind = { '-': 'empty', '.': 'floor', S: 'floor', G: 'goal', x: 'stone', k: 'key', D: 'door', o: 'open', i: 'ink', p: 'pop' }[t];
+      const kind = { '-': 'empty', '.': 'floor', S: 'floor', G: 'goal', x: 'stone', k: 'key', D: 'door', o: 'open', i: 'ink', p: 'pop', g: 'glue' }[t];
       if (el.dataset.kind === kind) return;
       el.dataset.kind = kind;
       el.innerHTML = kind === 'empty' ? '' : `<div class="tile">${SVG[t === 'S' ? '' : t] || ''}</div>`;

@@ -123,6 +123,22 @@ nav button:hover, .presets button:hover { background: rgba(0, 0, 0, .05); color:
 .cell[data-kind="open"] .tile { outline: 1.5px dashed var(--accent); outline-offset: -5px; }
 .cell[data-kind="pop"] .tile { background: linear-gradient(90deg, var(--card) 70%, #fbe6dd); }
 .cell[data-kind="ink"] .tile svg { width: 80%; height: 80%; }
+/* glue (vol. 2): an amber smear on the paper, glossy while wet; it is paper, so it stays clickable */
+.cell[data-kind="glue"] .tile {
+  background: radial-gradient(ellipse 58% 48% at 50% 56%, rgba(232, 184, 72, .62) 0 60%, rgba(232, 184, 72, .22) 78%, var(--card) 92%);
+  box-shadow: inset 0 -2px 4px rgba(140, 90, 20, .12), 0 1px 0 rgba(0, 0, 0, .05), 0 8px 14px -10px rgba(70, 50, 25, .45);
+}
+.cell[data-kind="glue"] .tile svg { width: 52%; height: 52%; opacity: .85; }
+/* vol. 2 letter paper: a faint printed grid aligned to the cells, the hinge-side shading kept */
+body[data-paper="letter"] .page {
+  background-color: #f6f3ec;
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 calc(var(--cell) - 1px), rgba(84, 96, 118, .16) calc(var(--cell) - 1px) var(--cell)),
+    repeating-linear-gradient(90deg, transparent 0 calc(var(--cell) - 1px), rgba(84, 96, 118, .16) calc(var(--cell) - 1px) var(--cell));
+  background-position: var(--pad) var(--pad), var(--pad) var(--pad);
+  background-size: 100% calc(var(--cell) * var(--rows)), calc(var(--cell) * 4) 100%;
+  background-repeat: no-repeat;
+}
 
 .cell.flash .tile { animation: flash .9s ease-out; }
 .cell.link .tile { animation: link .9s ease-out; }
@@ -353,6 +369,9 @@ body.hc .cell[data-kind="open"] .tile { outline: 4px dashed #000; outline-offset
 body.hc .cell[data-kind="pop"] .tile { background: repeating-linear-gradient(90deg, #fff 0 6px, #000 6px 8px); }
 body.hc .cell[data-kind="goal"] .tile { border-width: 5px; border-style: double; border-width: 7px; }
 body.hc .cell[data-kind="ink"] .tile { background: radial-gradient(circle, #fff 55%, #ddd 56%); }
+body.hc .cell[data-kind="glue"] .tile { background: radial-gradient(circle, #000 0 2.5px, transparent 3px) 0 0 / 9px 9px; box-shadow: none; }
+body.hc .cell[data-kind="glue"] .tile svg * { stroke: #000; }
+body.hc[data-paper="letter"] .page { background-image: none; }
 body.hc .shadow::before {
   filter: none; border: 3px dashed #000;
   background: repeating-linear-gradient(-45deg, rgba(0, 0, 0, .55) 0 3px, transparent 3px 8px);

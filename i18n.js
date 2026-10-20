@@ -67,6 +67,10 @@
       'ch.4.line': '两岸相触。', 'paper.ch4': '旧纸，折痕发白。', 'paper.worn': '这页纸已经折过很多次',
       'kind.figure': '对岸的人，合上时相遇',
       'letter.4.title': '右岸来信', 'letter.4.body': '合上的那一下，我们站在同一格里。\n打开，河还在。\n没关系——这本书还有下一页，\n我先翻过去等你。', 'letter.4.sign': '——右岸', 'letter.4.end': '卷一《两岸》完。\n下一页，还在折。',
+      // vol. 2 「翻页」 · chapter 5 「胶」 (docs/design-v2c1.md): glue, letter paper, the fifth letter
+      'kind.g': '胶', 'noun.g': '胶', glueTakes: '合上时会把对面的石头粘过来；站在这里会被压住', stoneGlued: '合上时会被胶粘到对页{col}', glued: '胶把石头粘到了对页',
+      'ch.5.line': '粘住的，跟着走。', 'paper.ch5': '信笺，淡格线，有一处胶。', 'paper.letter': '这页是信笺，格线是印好的',
+      'letter.5.title': '左岸来信', 'letter.5.body': '我想跟着你翻过去，可是页角粘住了。\n粘住的东西会跟着走——\n那就让石头先替我过河，\n影子跟着它，我跟着影子。', 'letter.5.sign': '——左岸', 'letter.5.end': '卷二《翻页》第一章完。\n页角还粘着。',
     },
 
     en: {
@@ -125,6 +129,9 @@
       'ch.4.line': 'The two banks touch.', 'paper.ch4': 'Old paper; the crease has gone white.', 'paper.worn': 'This page has been folded many times',
       'kind.figure': 'the other one, on the far bank; you meet when the book is shut',
       'letter.4.title': 'A Letter from the Right Bank', 'letter.4.body': 'For the moment the book was shut, we stood in the same square.\nOpen it, and the river is still there.\nNever mind: this book has another page.\nI will turn it first, and wait for you there.', 'letter.4.sign': '— the Right Bank', 'letter.4.end': 'End of Book One, The Two Banks.\nThe next page is still being folded.',
+      'kind.g': 'glue', 'noun.g': 'glue', glueTakes: 'closing pulls the stone opposite onto this square; stand here and it lands on you', stoneGlued: 'closing, the glue pulls it across to {col}', glued: 'the glue pulled a stone across',
+      'ch.5.line': 'What sticks goes along.', 'paper.ch5': 'Letter paper, a faint ruled grid, a smear of glue.', 'paper.letter': 'This page is letter paper; the grid is printed on',
+      'letter.5.title': 'A Letter from the Left Bank', 'letter.5.body': 'I meant to follow you over, but the corner of the page is stuck.\nWhat is stuck goes where the page goes —\nso let the stone cross the river for me first;\nits shadow follows it, and I follow the shadow.', 'letter.5.sign': '— the Left Bank', 'letter.5.end': 'End of Book Two, chapter one.\nThe corner is still stuck.',
     },
 
     ja: {
@@ -183,6 +190,10 @@
       'ch.4.line': '両岸がふれる。', 'paper.ch4': '古い紙。折り目が白くなっている。', 'paper.worn': 'このページは何度も折られてきた',
       'kind.figure': '向こう岸の人。閉じると出会う',
       'letter.4.title': '右岸からの手紙', 'letter.4.body': '閉じたあの一瞬、わたしたちは同じ枡に立っていた。\n開けば、川はまだそこにある。\nいい——この本には、次の頁がある。\n先にめくって、そこで待っている。', 'letter.4.sign': '——右岸より', 'letter.4.end': '第一巻『両岸』了。\n次の頁は、まだ折っている。',   // TODO ja review
+      // TODO(ja): draft, pending native review (design-v2c1.md §3)
+      'kind.g': '糊', 'noun.g': '糊', glueTakes: '閉じると向かいの石がここに貼りつく。ここに立っていれば押しつぶされる', stoneGlued: '閉じると糊に引かれて向かいの{col}へ移る', glued: '糊が石を向かいのページへ引き寄せた',
+      'ch.5.line': '貼りついたものは、ついてくる。', 'paper.ch5': '便箋。薄い罫線、糊が一か所。', 'paper.letter': 'このページは便箋。枡は印刷されている',
+      'letter.5.title': '左岸からの手紙', 'letter.5.body': 'きみのあとから頁をめくろうとしたのに、頁の角が貼りついていた。\n貼りついたものは、頁と一緒に動く——\nなら、石に先に川を渡らせよう。\n影は石について、わたしは影について。', 'letter.5.sign': '——左岸より', 'letter.5.end': '第二巻『頁をめくる』第一章 了。\n頁の角は、まだ貼りついている。',
     },
 
     ko: {
@@ -241,6 +252,10 @@
       'ch.4.line': '두 강가가 맞닿는다.', 'paper.ch4': '오래된 종이, 접는 선이 하얗게 바랬어요.', 'paper.worn': '이 페이지는 여러 번 접혔어요',
       'kind.figure': '건너편 사람, 책을 닫으면 만나요',
       'letter.4.title': '오른쪽 강가에서 온 편지', 'letter.4.body': '책이 닫힌 그 순간, 우리는 같은 칸에 서 있었다.\n펼치면, 강은 여전히 거기 있다.\n괜찮아. 이 책에는 다음 페이지가 있다.\n내가 먼저 넘겨서, 거기서 기다릴게.', 'letter.4.sign': '— 오른쪽 강가에서', 'letter.4.end': '제1권 《두 강가》 끝.\n다음 페이지는 아직 접는 중.',   // TODO ko review
+      // TODO(ko): draft, pending native review (design-v2c1.md §3)
+      'kind.g': '풀', 'noun.g': '풀', glueTakes: '닫으면 맞은편 돌이 여기에 붙어요. 여기 서 있으면 눌려요', stoneGlued: '닫으면 풀에 붙어 맞은편 {col:으로} 옮겨 가요', glued: '풀이 돌을 맞은편 페이지로 붙여 갔어요',
+      'ch.5.line': '붙은 것은 따라간다.', 'paper.ch5': '편지지, 연한 격자 선, 풀이 한 곳.', 'paper.letter': '이 페이지는 편지지, 격자가 인쇄되어 있어요',
+      'letter.5.title': '왼쪽 강가에서 온 편지', 'letter.5.body': '너를 따라 페이지를 넘기려 했는데, 페이지 모서리가 붙어 버렸다.\n붙은 것은 페이지와 함께 움직인다.\n그러니 돌을 먼저 강 건너로 보내자.\n그림자는 돌을 따르고, 나는 그림자를 따른다.', 'letter.5.sign': '— 왼쪽 강가에서', 'letter.5.end': '제2권 《페이지를 넘기다》 제1장 끝.\n모서리는 아직 붙어 있다.',
     },
   };
 
@@ -273,6 +288,14 @@
       stoneRain: ['石雨', '三块石头悬在路上。', '路上每一格头顶都有石头，只有最后一格没有——合上之前先走到那里。墨印过去以后，斜起到 50° 左右踩上中间的影子，再慢慢打开到 75°：影子带你到墨边，下去。'],
       shadeDoor: ['门下影', '影子过不了锁着的门。', '先合上一次，钥匙开门。再斜起到 75° 踩上影子，慢慢合到 45°：影子带你穿过开着的门，落在门后的纸上。另一道影子通向一座孤岛——别上。'],
       twoFigures: ['两人', '两岸相触。信，到了。', '对岸的人在岸边等。先走到最下面那格纸，别站在石头正对面合书。书快合上时踩上影子，再打开：影子把你送回岸边。在那里合上——钥匙开门，两岸相触，你就站到了那个人的格子里。'],
+      // vol. 2 chapter 5 「胶」 (docs/design-v2c1.md): the first close rearranges the board; what do you do before it?
+      glue: ['胶', '路上有石头，对岸有胶。', '合上一次：对面的胶会把石头粘过去。打开，路就空了。'],
+      lend: ['借石', '对岸没有石头，就没有影子。', '先合上一次，胶把这边的石头粘到对岸去。打开，再斜起到 30°–50°：它的影子落在缺口上。'],
+      bridgeGlue: ['桥与胶', '桥头的缺口，要一道影子。', '先合上一次，把石头粘到对岸。再打开到 75° 左右：纸片桥立着，新石头的影子正好落在桥头。'],
+      shadowFirst: ['影先', '别急着合上。', '这块石头的影子是你唯一的桥——可是合上时胶会把它粘走。先斜起到 40° 左右，走过影子，站到对面那格纸上，再合上。'],
+      oneClose: ['一合', '只合一次。在哪里合？', '站在胶上合，石头落在你头上；站在胶上面合，石头落在路上，你回不去了。先走到胶的下面，再合上。'],
+      rideFirst: ['先乘影', '影子会走，石头也会。', '合上时胶会把石头粘到这边来，影子就没了。所以先斜起到 60°，踩上影子，再慢慢合到 45°：影子带你过去。下到纸上，再合上——钥匙开门。'],
+      stuckPage: ['粘住的页', '两处胶同时粘。信，在门后。', '站在胶上合书会被压住；在胶上面合书，石头会落在路上。先走到胶下面那格纸再合：门开了，石头也粘到了对岸。然后斜起到 60°，踩着新影子走到门口，最后合上。'],
     },
     en: {
       bridge: ['Bridge', 'Across the gap, a scrap of card.', 'Close the phone: the card on the right lands exactly over the gap.'],
@@ -300,6 +323,13 @@
       stoneRain: ['Stone Rain', 'Three stones hang over the road.', 'Every square of the road has a stone above it except the last: get there before you close. Once the ink has printed, lean to about 50°, step onto the middle shadow, then open slowly to 75°: the shadow carries you to the ink. Step down.'],
       shadeDoor: ['Shade at the Door', 'A shadow cannot pass a locked door.', 'Close once: the key opens the door. Lean to 75°, step on the shadow, and close slowly to 45°: it carries you through the open door onto the paper beyond. The other shadow leads to an island. Leave it.'],
       twoFigures: ['Two Figures', 'The two banks touch. The letter has arrived.', 'The other one waits at the edge of the far bank. Walk down to the last square of paper; do not close while standing opposite the stone. When the book is nearly shut, step onto the shadow, then open: it carries you back to the shore. Close there: the key opens the door, the two banks touch, and you are standing in their square.'],
+      glue: ['Glue', 'A stone on your road; glue on the far bank.', 'Close once: the glue opposite pulls the stone across. Open, and the road is clear.'],
+      lend: ['Borrowed Stone', 'No stone on the far page, so no shadow.', 'Close once, and the glue carries this stone to the far page. Open, then lean to 30°–50°: its shadow falls on the gap.'],
+      bridgeGlue: ['Bridge and Glue', 'The gap at the foot of the bridge needs a shadow.', 'Close once to glue the stone across. Then open to about 75°: the tabs stand, and the new stone’s shadow lands at the foot of the bridge.'],
+      shadowFirst: ['Shadow First', 'Do not close yet.', 'This stone’s shadow is your only bridge, and closing lets the glue take the stone. Lean to about 40° first, cross the shadow onto the paper beyond, then close.'],
+      oneClose: ['One Close', 'Close only once. But where?', 'Close on the glue and the stone lands on you; close above it and the stone lands on your road, and you cannot get back. Walk below the glue first, then close.'],
+      rideFirst: ['Ride First', 'Shadows move. So do stones.', 'Closing lets the glue pull the stone to this page, and the shadow goes with it. So lean to 60° first, step on the shadow, and close slowly to 45°: it carries you across. Step down onto the paper, then close: the key opens the door.'],
+      stuckPage: ['The Stuck Page', 'Two glues at once. The letter is behind the door.', 'Close while standing on the glue and you are crushed; close above it and the stone lands on your road. Walk to the paper below the glue, then close: the door opens, and a stone sticks to the far page. Lean to 60°, walk its new shadow to the door, and close.'],
     },
     ja: {
       bridge: ['橋', 'すき間の向こうに、厚紙が一枚。', 'スマホを閉じると、右の厚紙がすき間にぴたりと重なる。'],
@@ -329,6 +359,14 @@
       stoneRain: ['石の雨', '三つの石が道の上に吊られている。', '道のどの枡の上にも石がある。最後の枡だけは違う。閉じる前にそこまで歩く。墨が写ったら、50°ほど傾けて真ん中の影に乗り、ゆっくり75°まで開く。影が墨のそばまで運ぶ。降りる。'],
       shadeDoor: ['扉の下の影', '影は、鍵のかかった扉を通れない。', 'まず一度閉じて鍵で扉を開ける。75°まで傾けて影に乗り、ゆっくり45°まで閉じる。影が開いた扉をくぐって、向こうの紙に降ろしてくれる。もう一つの影は孤島へ続く。乗らないこと。'],
       twoFigures: ['二人', '両岸がふれる。手紙は、届いた。', '向こう岸の人が岸の縁で待っている。いちばん下の紙の枡まで歩く。石の真向かいでは閉じないこと。本がほとんど閉じたとき影に乗り、開く。影が岸まで送り返す。そこで閉じる。鍵が扉を開け、両岸がふれ、あなたはその人の枡に立っている。'],
+      // TODO(ja): draft, pending native review (design-v2c1.md §3)
+      glue: ['糊', '道に石、向こう岸に糊。', '一度閉じる。向かいの糊が石を引き寄せる。開けば、道は空いている。'],
+      lend: ['借りた石', '向こうの頁に石がなければ、影もない。', 'まず一度閉じて、糊でこちらの石を向こう岸へ送る。開いて、30°〜50°まで傾ける。その影がすき間に落ちる。'],
+      bridgeGlue: ['橋と糊', '橋のたもとのすき間には、影がいる。', 'まず一度閉じて石を向こう岸へ貼りつける。75°くらいまで開く。紙片の橋は立ったまま、新しい石の影がたもとに落ちる。'],
+      shadowFirst: ['影が先', 'まだ閉じないで。', 'この石の影がただ一つの橋。けれど閉じれば糊が石を持っていく。まず40°くらいまで傾け、影を渡って向こうの紙に立ち、それから閉じる。'],
+      oneClose: ['一度だけ', '閉じるのは一度。でも、どこで？', '糊の上で閉じれば石が頭に落ちる。糊の上側で閉じれば石が道に落ち、戻れなくなる。まず糊の下まで歩いて、閉じる。'],
+      rideFirst: ['先に影に乗る', '影は動く。石も動く。', '閉じれば糊が石をこちらの頁へ引き寄せ、影も消える。だからまず60°まで傾けて影に乗り、ゆっくり45°まで閉じる。影が運んでくれる。紙に降りて、閉じる。鍵が扉を開ける。'],
+      stuckPage: ['貼りついた頁', '二つの糊が同時に。手紙は扉の向こう。', '糊の上で閉じれば押しつぶされ、糊の上側で閉じれば石が道に落ちる。糊の下の紙まで歩いて閉じる。扉が開き、石が向こう岸に貼りつく。60°まで傾け、新しい影を渡って扉へ、最後に閉じる。'],
     },
     ko: {
       bridge: ['다리', '틈 건너편에 종이판 한 장.', '폰을 닫으면 오른쪽 종이판이 틈을 꼭 덮어요.'],
@@ -358,6 +396,14 @@
       stoneRain: ['돌 비', '돌 세 개가 길 위에 매달려 있다.', '길의 모든 칸 위에 돌이 있어요. 마지막 칸만 빼고요. 닫기 전에 거기까지 걸어가요. 먹이 찍히면 50° 정도 기울여 가운데 그림자에 올라서고, 천천히 75°까지 펼쳐요. 그림자가 먹 옆까지 데려다줘요. 내려가요.'],
       shadeDoor: ['문 아래 그림자', '그림자는 잠긴 문을 지나지 못한다.', '먼저 한 번 닫아 열쇠로 문을 열어요. 75°로 기울여 그림자에 올라서고, 천천히 45°까지 닫아요. 그림자가 열린 문을 지나 너머의 종이에 내려 줘요. 다른 그림자는 외딴 섬으로 이어져요. 타지 마세요.'],
       twoFigures: ['두 사람', '두 강가가 맞닿는다. 편지가, 도착했다.', '건너편 사람이 강가 끝에서 기다려요. 맨 아래 종이 칸까지 걸어가요. 돌 맞은편에서는 닫지 마세요. 책이 거의 닫혔을 때 그림자에 올라서고, 펼쳐요. 그림자가 강가로 돌려보내 줘요. 거기서 닫아요. 열쇠가 문을 열고, 두 강가가 맞닿고, 당신은 그 사람의 칸에 서 있어요.'],
+      // TODO(ko): draft, pending native review (design-v2c1.md §3)
+      glue: ['풀', '길에 돌, 건너편에 풀.', '한 번 닫아요. 맞은편 풀이 돌을 붙여 가요. 펼치면 길이 비어 있어요.'],
+      lend: ['빌린 돌', '건너편 페이지에 돌이 없으면 그림자도 없다.', '먼저 한 번 닫아요. 풀이 이쪽 돌을 건너편으로 보내요. 펼치고 30°~50°로 기울여요. 그 그림자가 틈 위에 떨어져요.'],
+      bridgeGlue: ['다리와 풀', '다리 밑 틈에는 그림자가 필요하다.', '먼저 한 번 닫아 돌을 건너편에 붙여요. 75° 정도로 펼쳐요. 종이 조각 다리는 서 있고, 새 돌의 그림자가 다리 밑에 떨어져요.'],
+      shadowFirst: ['그림자 먼저', '아직 닫지 마세요.', '이 돌의 그림자가 유일한 다리인데, 닫으면 풀이 돌을 가져가요. 먼저 40° 정도로 기울여 그림자를 건너 건너편 종이에 서고, 그다음 닫아요.'],
+      oneClose: ['한 번만', '한 번만 닫아요. 그런데 어디서?', '풀 위에서 닫으면 돌이 머리 위로 떨어져요. 풀 위쪽에서 닫으면 돌이 길에 떨어져 돌아갈 수 없어요. 먼저 풀 아래까지 걸어가서 닫아요.'],
+      rideFirst: ['먼저 그림자를 타다', '그림자는 움직인다. 돌도 움직인다.', '닫으면 풀이 돌을 이쪽 페이지로 붙여 가고 그림자도 사라져요. 그러니 먼저 60°로 기울여 그림자에 올라서고, 천천히 45°까지 닫아요. 그림자가 데려다 줘요. 종이로 내려와서 닫아요. 열쇠가 문을 열어요.'],
+      stuckPage: ['붙은 페이지', '두 풀이 동시에. 편지는 문 뒤에.', '풀 위에서 닫으면 눌리고, 풀 위쪽에서 닫으면 돌이 길에 떨어져요. 풀 아래 종이까지 걸어가서 닫아요. 문이 열리고 돌이 건너편에 붙어요. 60°로 기울여 새 그림자를 밟고 문까지 간 뒤, 마지막으로 닫아요.'],
     },
   };
 

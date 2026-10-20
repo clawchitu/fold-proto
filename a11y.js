@@ -139,12 +139,16 @@
     if (!F.isRight(c)) {
       if (tl === '-' && (F.isFloor(M) || M === 'x')) extra = t('fallsHere', { noun: NOUN(M) });
       else if (tl === 'D' && M === 'k') extra = t('doorKey');
+      else if (tl === 'g' && M === 'x') extra = t('glueTakes');
+      else if (tl === 'x' && M === 'g') extra = t('stoneGlued', { col: t('col', { c: m + 1 }) });
       else if (F.isFloor(tl) && M === 'x') extra = t('crushedHere');
       else if (tl === 'i' && M === '-') extra = t('inkPrints');
       else if (tl === 'p' && c === N - 1 && M === 'p') extra = t('tabBridge');
     } else {
       const col = t('col', { c: m + 1 });
-      if (tl === 'x') extra = t('stoneShadow', { col });
+      if (tl === 'x' && M === 'g') extra = t('stoneGlued', { col });
+      else if (tl === 'x') extra = t('stoneShadow', { col });
+      else if (tl === 'g' && M === 'x') extra = t('glueTakes');
       else if (tl === 'k' && M === 'D') extra = t('keyOpens', { col });
       else if (tl === 'i' && M === '-') extra = t('inkTo', { col });
       else if (tl === 'p' && c === N && M === 'p') extra = t('tabBridge');
@@ -262,7 +266,7 @@
     } else parts.push(t('angle', { a }));
     if (p.connected) parts.push(t('connected'));
     else if (p.lost) parts.push(t('lost'));
-    for (const e of p.stamp) parts.push(t(e.type === 'door' ? 'doorOpened' : 'inkPrinted'));
+    for (const e of p.stamp) parts.push(t(e.type === 'door' ? 'doorOpened' : e.type === 'ink' ? 'inkPrinted' : 'glued'));
     if (p.shade || (G.shade.size && !p.mode)) {
       const st = G.state, on = [...G.shade.keys()].map((k) => k.split(',').map(Number)).filter(([c, r]) => !F.isFloor(F.at(st, c, r)));
       if (on.length) parts.push(t('shadowOn', { cells: on.map(([c, r]) => pos(c, r)).join(t('list')) }));
