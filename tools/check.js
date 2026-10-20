@@ -212,8 +212,8 @@ function analyse(level) {
       }
       for (const n of nexts.values()) rec(n, depth - 1, [...labels, label(s.a, a)]);
     }
-  })(start, Math.min(best.cost, 4), []);   // the posture-sequence enumeration is exponential in par; past 4 (暗信) report forks as 1
-  const dead = deadC.size, forks = best.cost > 4 ? 1 : seqs.size;
+  })(start, Math.min(best.cost, 3), []);   // the posture-sequence enumeration is exponential in par; past 3 report forks as 1 (postmortem §6)
+  const dead = deadC.size, forks = best.cost > 3 ? 1 : seqs.size;
   const explore = new Set([...nodes.values()].map(collapse)).size;   // how much board × posture there is to wander
   // precision: how many sampled lean angles can stand in for the lean the optimal solution uses (0 = it needs a ride)
   const usesLean = best.steps.some((x) => posture(+x.match(/\d+/)[0]) === 'lean');
