@@ -99,6 +99,7 @@
   };
 
   function build() {
+    hintRung = 0;
     const lv = LEVELS[index];
     state = F.create(lv);
     won = false;
@@ -395,8 +396,10 @@
     const a = dir > 0 ? Math.floor(now / STEP + 1e-6) * STEP + STEP : Math.ceil(now / STEP - 1e-6) * STEP - STEP;
     foldTo(Math.max(0, Math.min(180, a)));
   }
+  let hintRung = 0;   // the 「?」 ladder: the level's hint1 first (if it has one), then its hint
   function hint() {
-    if (index === 0 && !opts.audio) playDemo(); else toast(lvText(index).hint);
+    const tx = lvText(index);
+    if (index === 0 && !opts.audio) playDemo(); else toast(tx.hint1 && hintRung++ === 0 ? tx.hint1 : tx.hint);
   }
 
   // ---------- onboarding (level 1): a ghost hand plays the level once, ~4 s, any tap skips ----------

@@ -292,7 +292,7 @@
       glue: ['胶', '路上有石头，对岸有胶。', '合上一次：对面的胶会把石头粘过去。打开，路就空了。'],
       lend: ['借石', '对岸没有石头，就没有影子。', '先合上一次，胶把这边的石头粘到对岸去。打开，再斜起到 30°–50°：它的影子落在缺口上。'],
       bridgeGlue: ['桥与胶', '桥头的缺口，要一道影子。', '先合上一次，把石头粘到对岸。再打开到 75° 左右：纸片桥立着，新石头的影子正好落在桥头。'],
-      shadowFirst: ['影先', '别急着合上。', '这块石头的影子是你唯一的桥——可是合上时胶会把它粘走。先斜起到 40° 左右，走过影子，站到对面那格纸上，再合上。'],
+      shadowFirst: ['影先', '影子只借一次。', '这块石头的影子是你唯一的桥——可是合上时胶会把它粘走。先斜起到 40° 左右，走过影子，站到对面那格纸上，再合上。', '别急着合上。'],
       oneClose: ['一合', '只合一次。在哪里合？', '站在胶上合，石头落在你头上；站在胶上面合，石头落在路上，你回不去了。先走到胶的下面，再合上。'],
       rideFirst: ['先乘影', '影子会走，石头也会。', '合上时胶会把石头粘到这边来，影子就没了。所以先斜起到 60°，踩上影子，再慢慢合到 45°：影子带你过去。下到纸上，再合上——钥匙开门。'],
       stuckPage: ['粘住的页', '两处胶同时粘。信，在门后。', '站在胶上合书会被压住；在胶上面合书，石头会落在路上。先走到胶下面那格纸再合：门开了，石头也粘到了对岸。然后斜起到 60°，踩着新影子走到门口，最后合上。'],
@@ -326,7 +326,7 @@
       glue: ['Glue', 'A stone on your road; glue on the far bank.', 'Close once: the glue opposite pulls the stone across. Open, and the road is clear.'],
       lend: ['Borrowed Stone', 'No stone on the far page, so no shadow.', 'Close once, and the glue carries this stone to the far page. Open, then lean to 30°–50°: its shadow falls on the gap.'],
       bridgeGlue: ['Bridge and Glue', 'The gap at the foot of the bridge needs a shadow.', 'Close once to glue the stone across. Then open to about 75°: the tabs stand, and the new stone’s shadow lands at the foot of the bridge.'],
-      shadowFirst: ['Shadow First', 'Do not close yet.', 'This stone’s shadow is your only bridge, and closing lets the glue take the stone. Lean to about 40° first, cross the shadow onto the paper beyond, then close.'],
+      shadowFirst: ['Shadow First', 'The shadow is lent once.', 'This stone’s shadow is your only bridge, and closing lets the glue take the stone. Lean to about 40° first, cross the shadow onto the paper beyond, then close.', 'Do not close yet.'],
       oneClose: ['One Close', 'Close only once. But where?', 'Close on the glue and the stone lands on you; close above it and the stone lands on your road, and you cannot get back. Walk below the glue first, then close.'],
       rideFirst: ['Ride First', 'Shadows move. So do stones.', 'Closing lets the glue pull the stone to this page, and the shadow goes with it. So lean to 60° first, step on the shadow, and close slowly to 45°: it carries you across. Step down onto the paper, then close: the key opens the door.'],
       stuckPage: ['The Stuck Page', 'Two glues at once. The letter is behind the door.', 'Close while standing on the glue and you are crushed; close above it and the stone lands on your road. Walk to the paper below the glue, then close: the door opens, and a stone sticks to the far page. Lean to 60°, walk its new shadow to the door, and close.'],
@@ -363,7 +363,7 @@
       glue: ['糊', '道に石、向こう岸に糊。', '一度閉じる。向かいの糊が石を引き寄せる。開けば、道は空いている。'],
       lend: ['借りた石', '向こうの頁に石がなければ、影もない。', 'まず一度閉じて、糊でこちらの石を向こう岸へ送る。開いて、30°〜50°まで傾ける。その影がすき間に落ちる。'],
       bridgeGlue: ['橋と糊', '橋のたもとのすき間には、影がいる。', 'まず一度閉じて石を向こう岸へ貼りつける。75°くらいまで開く。紙片の橋は立ったまま、新しい石の影がたもとに落ちる。'],
-      shadowFirst: ['影が先', 'まだ閉じないで。', 'この石の影がただ一つの橋。けれど閉じれば糊が石を持っていく。まず40°くらいまで傾け、影を渡って向こうの紙に立ち、それから閉じる。'],
+      shadowFirst: ['影が先', '影は一度しか借りられない。', 'この石の影がただ一つの橋。けれど閉じれば糊が石を持っていく。まず40°くらいまで傾け、影を渡って向こうの紙に立ち、それから閉じる。', 'まだ閉じないで。'],
       oneClose: ['一度だけ', '閉じるのは一度。でも、どこで？', '糊の上で閉じれば石が頭に落ちる。糊の上側で閉じれば石が道に落ち、戻れなくなる。まず糊の下まで歩いて、閉じる。'],
       rideFirst: ['先に影に乗る', '影は動く。石も動く。', '閉じれば糊が石をこちらの頁へ引き寄せ、影も消える。だからまず60°まで傾けて影に乗り、ゆっくり45°まで閉じる。影が運んでくれる。紙に降りて、閉じる。鍵が扉を開ける。'],
       stuckPage: ['貼りついた頁', '二つの糊が同時に。手紙は扉の向こう。', '糊の上で閉じれば押しつぶされ、糊の上側で閉じれば石が道に落ちる。糊の下の紙まで歩いて閉じる。扉が開き、石が向こう岸に貼りつく。60°まで傾け、新しい影を渡って扉へ、最後に閉じる。'],
@@ -400,7 +400,7 @@
       glue: ['풀', '길에 돌, 건너편에 풀.', '한 번 닫아요. 맞은편 풀이 돌을 붙여 가요. 펼치면 길이 비어 있어요.'],
       lend: ['빌린 돌', '건너편 페이지에 돌이 없으면 그림자도 없다.', '먼저 한 번 닫아요. 풀이 이쪽 돌을 건너편으로 보내요. 펼치고 30°~50°로 기울여요. 그 그림자가 틈 위에 떨어져요.'],
       bridgeGlue: ['다리와 풀', '다리 밑 틈에는 그림자가 필요하다.', '먼저 한 번 닫아 돌을 건너편에 붙여요. 75° 정도로 펼쳐요. 종이 조각 다리는 서 있고, 새 돌의 그림자가 다리 밑에 떨어져요.'],
-      shadowFirst: ['그림자 먼저', '아직 닫지 마세요.', '이 돌의 그림자가 유일한 다리인데, 닫으면 풀이 돌을 가져가요. 먼저 40° 정도로 기울여 그림자를 건너 건너편 종이에 서고, 그다음 닫아요.'],
+      shadowFirst: ['그림자 먼저', '그림자는 한 번만 빌릴 수 있다.', '이 돌의 그림자가 유일한 다리인데, 닫으면 풀이 돌을 가져가요. 먼저 40° 정도로 기울여 그림자를 건너 건너편 종이에 서고, 그다음 닫아요.', '아직 닫지 마세요.'],
       oneClose: ['한 번만', '한 번만 닫아요. 그런데 어디서?', '풀 위에서 닫으면 돌이 머리 위로 떨어져요. 풀 위쪽에서 닫으면 돌이 길에 떨어져 돌아갈 수 없어요. 먼저 풀 아래까지 걸어가서 닫아요.'],
       rideFirst: ['먼저 그림자를 타다', '그림자는 움직인다. 돌도 움직인다.', '닫으면 풀이 돌을 이쪽 페이지로 붙여 가고 그림자도 사라져요. 그러니 먼저 60°로 기울여 그림자에 올라서고, 천천히 45°까지 닫아요. 그림자가 데려다 줘요. 종이로 내려와서 닫아요. 열쇠가 문을 열어요.'],
       stuckPage: ['붙은 페이지', '두 풀이 동시에. 편지는 문 뒤에.', '풀 위에서 닫으면 눌리고, 풀 위쪽에서 닫으면 돌이 길에 떨어져요. 풀 아래 종이까지 걸어가서 닫아요. 문이 열리고 돌이 건너편에 붙어요. 60°로 기울여 새 그림자를 밟고 문까지 간 뒤, 마지막으로 닫아요.'],
@@ -438,7 +438,8 @@
       return part ? (lang === 'ko' ? josa(v, part) : v) : v;
     });
   }
-  const level = (id) => { const [name, line, hint] = (LV[lang][id] || LV.en[id]); return { name, line, hint }; };
+  // an optional 4th entry is the first rung of the 「?」 ladder (design-review-v2c1 §2: 5-4's old line); then the hint
+  const level = (id) => { const [name, line, hint, hint1] = (LV[lang][id] || LV.en[id]); return { name, line, hint, hint1 }; };
 
   function applyStatic(root = document) {
     document.documentElement.lang = TAG[lang];
