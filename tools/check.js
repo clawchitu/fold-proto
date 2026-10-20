@@ -279,7 +279,7 @@ function report(lv, withDifficulty = true) {
   return out;
 }
 
-module.exports = { solve, analyse, report, greedy, ANGLES, TIERS };
+module.exports = { solve, analyse, report, greedy, turn, grids, goalOf, hOf, posture, ANGLES, STEPPED, SHADE, TIERS };
 if (require.main !== module) return;
 
 let ok = true;
