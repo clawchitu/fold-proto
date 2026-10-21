@@ -95,6 +95,63 @@
   const crushed = (s, from, a) => a >= FOLD_MIN && isOpaque(at(s, mirror(from.c), from.r)) &&
     (!isRight(from.c) || at(s, from.c, from.r) === 'g');
 
+  // Why the book crushed you (for the on-screen / spoken reason): 'glue' when you stood on glue and it pulled the
+  // stone below up onto your square, 'stone' when a right-page stone came down on you, null when you are safe.
+  const crushCause = (s, from, a) => (!crushed(s, from, a) ? null : isRight(from.c) ? 'glue' : 'stone');
+
+  // Why a cell cannot be entered, in the given mode (c is the actual column; folded, its stack is used):
+  // 'edge' | 'stone' | 'card' (a paper card lying on a stone: folded, the stack is blocked) | 'door' | 'gap' | null.
+  function cellBlock(s, c, r, mode, sh) {
+    if (r < 0 || r >= s.h || c < 0 || c >= s.w) return 'edge';
+    if (mode === 'fold') {
+      const q = proj(c), L = at(s, q, r), R = at(s, mirror(q), r);
+      if (foldOpen(s, q, r)) return null;
+      if (R === 'x' || (L === 'x' && !isFloor(R))) return 'stone';
+      if (L === 'x') return 'card';
+      if (L === 'D' || R === 'D') return 'door';
+      return 'gap';
+    }
+    const t = at(s, c, r);
+    if (t === 'x') return 'stone';
+    if (t === 'D') return 'door';
+    if (isFloor(t) || (sh && sh.has(c + ',' + r))) return null;
+    return 'gap';
+  }
+
+  // Why one step (dc, dr) from the character is refused, or null if it is allowed. Folded, dc moves along the stack.
+  // Returns { why, c, r } with c the actual column (folded: the left-page column of the stack).
+  function stepBlock(s, from, dc, dr, mode, sh) {
+    const col = (p) => (mode === 'fold' ? proj(p.c) : p.c);
+    if (neighbours(s, from, mode, sh).some((n) => col(n) === col(from) + dc && n.r === from.r + dr)) return null;
+    const c = col(from) + dc, r = from.r + dr;
+    if (r < 0 || r >= s.h || c < 0 || c >= (mode === 'fold' ? N : s.w)) return { why: 'edge', c, r };
+    if (mode !== 'fold' && ((from.c === N - 1 && dc === 1) || (from.c === N && dc === -1))) return { why: 'crease', c, r };
+    return { why: cellBlock(s, c, r, mode, sh) || 'gap', c, r };
+  }
+
+  // Why the character cannot walk to target: the target itself, or else the blocker on the edge of where you can
+  // reach that lies closest to the target (stones, cards and doors before gaps on a tie). null if a path exists.
+  function pathBlock(s, target, mode, sh) {
+    if (findPath(s, target, mode, sh)) return null;
+    const fold = mode === 'fold', col = (c) => (fold ? proj(c) : c);
+    const own = cellBlock(s, target.c, target.r, mode, sh);
+    if (own) return { why: own, c: col(target.c), r: target.r };
+    const key = (p) => col(p.c) + ',' + p.r;
+    const seen = new Set([key(s.char)]), queue = [s.char], cands = [];
+    while (queue.length) {
+      const cur = queue.shift();
+      for (const n of neighbours(s, cur, mode, sh)) if (!seen.has(key(n))) { seen.add(key(n)); queue.push(n); }
+      for (const [dc, dr] of DIRS) {
+        const b = stepBlock(s, cur, dc, dr, mode, sh);
+        if (b && b.why !== 'edge') cands.push(b);
+      }
+    }
+    const rank = { door: 0, card: 1, stone: 2, crease: 3, gap: 4 };
+    const dist = (b) => Math.abs(b.c - col(target.c)) + Math.abs(b.r - target.r);
+    cands.sort((a, b) => dist(a) - dist(b) || rank[a.why] - rank[b.why]);
+    return cands[0] || { why: 'gap', c: col(target.c), r: target.r };
+  }
+
   // Standing on nothing but a shadow? Then the shadow carries the character when the angle changes.
   // Returns the cell the character ends up on, or null when it falls (or is crushed).
   function ride(s, from, src, a) {
@@ -177,6 +234,6 @@
   }
 
   const api = { N, FOLD_MIN, POP_MIN, POP_MAX, SHADE_MIN, mirror, proj, isRight, modeOf, isFloor, isBlock,
-    isOpaque, shadowColumn, shadows, crushed, ride, create, at, neighbours, findPath, stamp, isWin };
+    isOpaque, shadowColumn, shadows, crushed, crushCause, cellBlock, stepBlock, pathBlock, ride, create, at, neighbours, findPath, stamp, isWin };
   if (typeof module !== 'undefined') module.exports = api; else root.FoldLogic = api;
 })(this);

@@ -105,6 +105,8 @@
     won = false;
     // paper per volume: vol. 1 xuan paper (levels 1–25), vol. 2 letter paper with a printed grid (design-v2c1.md §2)
     document.body.dataset.paper = index >= 25 ? 'letter' : 'xuan';
+    // from chapter 3 the lamp is lit: a Lean preset (135°) lands where the shadows show (Half, 90°, casts none)
+    $('#btn-lean').hidden = index < 13;
     stopWalk();
     for (const page of [ui.left, ui.right]) page.querySelectorAll('.cell, .char, .tab, .shadow').forEach((e) => e.remove());
     shadowEls = new Map(); shade = new Map(); rideSrc = null;
@@ -224,7 +226,10 @@
     stopWalk(); rideSrc = null;
     sound.fall();
     charEl.classList.remove('fall'); void charEl.offsetWidth; charEl.classList.add('fall');
-    toast(t(angle >= F.FOLD_MIN ? 'crushed' : 'fell'));
+    // say why: the glue pulled the stone onto you, a stone came down on you, or the shadow you stood on slid away
+    const cause = F.crushCause(state, state.char, angle), text = t(cause === 'glue' ? 'crushedGlue' : cause ? 'crushed' : 'fell');
+    toast(text);
+    bus.emit('crush', { cause: cause || 'fell', text });
     setTimeout(() => { state.char = { ...state.start }; charEl.classList.remove('fall'); placeChar(true); bus.emit('fall'); }, 260);
   }
 
@@ -306,7 +311,14 @@
     stopWalk();
     const target = { c, r };
     const path = F.findPath(state, target, mode, shade);
-    if (!path) { sound.nope(); flash(cells[r][c], 'nope'); bus.emit('blocked', { c, r, why: 'path' }); return; }
+    if (!path) {
+      sound.nope(); flash(cells[r][c], 'nope');
+      const b = F.pathBlock(state, target, mode, shade) || { why: 'gap', c, r };
+      const text = t('cantReachWhy', { why: t('why.' + b.why), pos: t('pos', { r: b.r + 1, c: b.c + 1 }) });
+      toast(text);
+      bus.emit('blocked', { c, r, why: 'path', reason: b.why, text });
+      return;
+    }
     if (!path.length) { bus.emit('arrive', { already: true }); return; }
     pushUndo();
     walk(path);
@@ -322,7 +334,10 @@
     const to = F.neighbours(state, ch, mode, shade).find((n) => col(n) === col(ch) + dc && n.r === ch.r + dr);
     if (!to) {
       sound.nope();
-      bus.emit('blocked', { c: mode === 'fold' ? col(ch) + dc : ch.c + dc, r: ch.r + dr, why: 'step', dc, dr });
+      const b = F.stepBlock(state, ch, dc, dr, mode, shade) || { why: 'step' };
+      const text = t('no.' + b.why);
+      toast(text);
+      bus.emit('blocked', { c: mode === 'fold' ? col(ch) + dc : ch.c + dc, r: ch.r + dr, why: 'step', reason: b.why, dc, dr, text });
       return;
     }
     pushUndo();
@@ -475,9 +490,17 @@
   }
   function hideSheets() { document.querySelectorAll('.sheet').forEach((el) => (el.hidden = true)); }
 
+  // chapter headings in the Levels sheet: first level index of each chapter (tools/check.js CHAPTER_START), its volume
+  const CHAPTERS = [{ at: 0, vol: 1, ch: 1 }, { at: 5, ch: 2 }, { at: 13, ch: 3 }, { at: 19, ch: 4 }, { at: 25, vol: 2, ch: 5 }];
   function openLevels() {
     ui.levelGrid.innerHTML = '';
+    const head = (cls, text) => { const h = document.createElement('h3'); h.className = cls; h.textContent = text; ui.levelGrid.appendChild(h); };
+    const firstDark = LEVELS.findIndex((l) => l.optional);
     LEVELS.forEach((lv, i) => {
+      const chap = CHAPTERS.find((x) => x.at === i);
+      if (chap && chap.vol) head('lv-vol', t('vol.' + chap.vol));
+      if (chap) head('lv-ch', t('chHead.' + chap.ch));
+      if (i === firstDark) head('lv-ch', t('chHead.dark'));
       const b = document.createElement('button');
       b.className = 'lv' + (done.has(i) ? ' done' : '') + (i === index ? ' current' : '');
       b.innerHTML = `<span>${lv.optional ? t('darkTag') : i + 1}</span>${lvText(i).name}`;

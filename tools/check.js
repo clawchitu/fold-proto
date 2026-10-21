@@ -290,6 +290,7 @@ function report(lv, withDifficulty = true) {
 
 module.exports = { solve, analyse, report, greedy, turn, grids, goalOf, hOf, posture, ANGLES, STEPPED, SHADE, TIERS };
 if (require.main !== module) return;
+require('./test.js');   // logic.js unit tests (crush causes, block reasons); throws on failure
 const GEN = require('./gen.js');   // metric v3 (difficulty-postmortem.md §3): solution length, decoys, wrong turns. Loaded here to avoid a require cycle.
 // Minimal solution length (posture changes + steps) a tier must reach: the one number the owner's play confirmed
 // tracks time-to-solve (postmortem §1.2). Scores below are floors; only teach–mid also have a ceiling.

@@ -87,7 +87,8 @@
     return [...Array(2 * N).keys()].map((c) => ({ c, x: spot(c, r).x })).sort((a, b) => a.x - b.x || a.c - b.c);
   }
   function scanRow(r) {
-    if (!sfx()) return say(t('needAudio'));
+    say(rowWords(r));
+    if (!sfx()) return;
     let at = 0, lastX = null;
     for (const { c, x } of cellsByX(r)) {
       if (lastX !== null && Math.abs(x - lastX) > 0.05) at += 0.11;   // stacked cells sound together
@@ -95,8 +96,33 @@
     }
     busyUntil = performance.now() + at * 1000 + 600;
   }
+  // the board in words, row by row (Shift+L; L reads one row): what a sighted player sees, in the current posture
+  function rowWords(r) {
+    const st = G.state, fold = G.mode === 'fold', bits = [];
+    for (let c = 0; c < (fold ? N : st.w); c++) {
+      const top = fold ? F.mirror(c) : c, under = c;
+      const tl = F.at(st, top, r), bl = F.at(st, under, r), shaded = !fold && G.shade.has(c + ',' + r);
+      let w;
+      if (fold) {
+        if (tl === '-' && bl === '-') continue;
+        w = tl === '-' ? KIND(bl) : bl === '-' ? KIND(tl) : t('onTop', { top: KIND(tl), under: KIND(bl) });
+      } else {
+        if (tl === '-' && !shaded) continue;
+        w = tl === '-' ? t('kindShadow') : KIND(tl);
+      }
+      const ch = st.char, here = ch.r === r && (fold ? F.proj(ch.c) === c : ch.c === c);
+      bits.push(t('col', { c: c + 1 }) + ' ' + w + (here ? t('sep') + t('hereYou') : ''));
+    }
+    return t('rowWords', { r: r + 1, cells: bits.join(t('list')) || t('rowEmpty') });
+  }
+  function readBoard(rows) {
+    const st = G.state, fold = G.mode === 'fold', a = Math.round(G.angle);
+    const head = fold ? t('book.closed') + t('sep') + t('foldedCols') : a === 0 ? t('book.opened') : t(a >= F.SHADE_MIN ? 'book.lean' : 'book.open', { a });
+    say(head + t('semi') + rows.map(rowWords).join(t('semi')));
+  }
   function scanAll() {
-    if (!sfx()) return say(t('needAudio'));
+    readBoard([...Array(G.state.h).keys()]);
+    if (!sfx()) return;
     let at = 0;
     for (let r = 0; r < G.state.h; r++) {
       let lastX = null;
@@ -246,7 +272,7 @@
     if (gained) { pend.connected = true; pend.lost = false; const s = sfx(); if (s) s.chord(); buzz([18, 40, 30]); }
     else if (lost && !pend.connected) pend.lost = true;
   }
-  const newPend = () => ({ mode: false, connected: false, lost: false, shade: false, stamp: [] });
+  const newPend = () => ({ mode: false, connected: false, lost: false, shade: false, stamp: [], fell: '' });
   pend = newPend();
 
   let flushT, saidAngle = 0, intro = null;
@@ -255,7 +281,7 @@
     clearTimeout(flushT);
     const a = Math.round(G.angle), mode = G.mode, p = pend; pend = newPend();
     if (intro && !G.demo) { if (a === 0) { say(intro); intro = null; saidAngle = 0; rebase(); relabel(); } return; }
-    if (G.demo || (a === saidAngle && !p.mode && !p.connected && !p.shade && !p.stamp.length)) return;
+    if (G.demo || (a === saidAngle && !p.mode && !p.connected && !p.shade && !p.stamp.length && !p.fell)) return;
     saidAngle = a;
     const parts = [];
     if (p.mode) {
@@ -264,6 +290,7 @@
       else if (a === 0) parts.push(t('book.opened'));
       else parts.push(t(a >= F.SHADE_MIN ? 'book.lean' : 'book.open', { a }));
     } else parts.push(t('angle', { a }));
+    if (p.fell) { parts.push(...new Set(p.stamp.map((e) => t(e.type === 'door' ? 'doorOpened' : e.type === 'ink' ? 'inkPrinted' : 'glued'))), p.fell); say(parts.join(t('sep'))); relabel(); return; }
     if (p.connected) parts.push(t('connected'));
     else if (p.lost) parts.push(t('lost'));
     for (const e of p.stamp) parts.push(t(e.type === 'door' ? 'doorOpened' : e.type === 'ink' ? 'inkPrinted' : 'glued'));
@@ -327,10 +354,11 @@
     const stack = G.mode === 'fold' && F.isRight(ch.c) ? t('stack', { c: F.mirror(ch.c) + 1 }) : '';
     say(t(e.already ? 'already' : 'arrived', { pos: pos(ch.c, ch.r) }) + stack);
   });
-  bus.on('blocked', ({ c, r, why, dc }) => {
+  bus.on('blocked', ({ c, r, why, dc, text }) => {
     const st = G.state, s = sfx();
     const pc = Math.max(0, Math.min(st.w - 1, c));
     if (s) s.thud(panOf(pc, Math.max(0, Math.min(st.h - 1, r))));
+    if (text) return;                       // main.js showed the reason as a toast, which is announced
     if (why === 'path') return say(t('cantReach'));
     const ch = st.char;
     let reason = 'step';
@@ -345,6 +373,8 @@
     say(t('no.' + reason));
   });
   bus.on('slide', () => { const ch = G.state.char; say(t('slid', { pos: pos(ch.c, ch.r) })); rebase(); relabel(); });
+  // crushed / fell: the reason goes at the end of the fold announcement so "a path connects" cannot drown it
+  bus.on('crush', ({ text }) => { pend.fell = text; pend.connected = false; soon(); });
   bus.on('fall', () => { rebase(); relabel(); const ch = G.state.char; if (gridActive) focusCell(ch.c, ch.r); });
   bus.on('undo', () => { clearTimeout(flushT); pend = newPend(); saidAngle = Math.round(G.angle); rebase(); relabel(); place(); const ch = G.state.char; say(t('undone', { pos: pos(ch.c, ch.r), a: Math.round(G.angle) })); });
   bus.on('toast', (t) => say(t));
