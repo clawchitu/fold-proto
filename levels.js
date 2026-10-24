@@ -416,13 +416,13 @@ const LEVELS = [
     ],
   },
   {
-    id: 'margin', tier: 'hard', chapter: 6, len: 16, needs: ['needsFold', 'needsShade', 'needsFlip'],   // 6-5 · the long bottom road ends under a stone; the shadow of the far stone at 55° is the one rung up to the square you close and turn from
+    id: 'bleed', tier: 'hard', chapter: 6, len: 18, needs: ['needsFold', 'needsShade', 'needsRide', 'needsFlip'],   // 6-5 · replaced 「页边」 after the 10/24 blind playtest (two samplers solved it in 3 calls) · closing first glues the top-left stone away and with it the only shadow (before): lean 55° at the top-left, ride OUT to 70° onto column 4, step down, close, turn
     map: [
-      '----....-...',
-      '.-.-....-.-.',
-      '---.x.x-.xG.',
-      '---..-.--.--',
-      'S.......---.',
+      '.g----x--G--',
+      '.x--.--x-.--',
+      '.--..-.--.--',
+      '.-------.---',
+      '...S..--x.--',
     ],
   },
   {

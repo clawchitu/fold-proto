@@ -289,6 +289,7 @@
     mode = next;
     if (next === 'fold') {
       sound.crease();
+      if (state.pages > 2 && !localStorage.getItem('fold.layerRule')) { localStorage.setItem('fold.layerRule', '1'); toast(t('layerRule')); }
       const events = F.stamp(state);
       lastStamp = events;
       if (events.length) {
@@ -349,7 +350,8 @@
     if (!path) {
       sound.nope(); flash(cells[r][c], 'nope');
       const b = F.pathBlock(state, target, mode, shade) || { why: 'gap', c, r };
-      const text = t('cantReachWhy', { why: t('why.' + b.why), pos: t('pos', { r: b.r + 1, c: b.c + 1 }) });
+      const why = mode === 'fold' && b.why === 'stone' ? 'stoneTop' : mode === 'fold' && b.why === 'card' ? 'stoneUnder' : b.why;
+      const text = t('cantReachWhy', { why: t('why.' + why), pos: t('pos', { r: b.r + 1, c: b.c + 1 }) });
       toast(text);
       bus.emit('blocked', { c, r, why: 'path', reason: b.why, text });
       return;
