@@ -404,7 +404,15 @@ body.hc .toast { background: #000; border: 3px solid #ffd400; }
 /* vol. 2 ch. 6 「翻页」: the third page is the back of the right leaf — a shade warmer, and the printed grid runs the other
    way, so the turned face reads as "the other side of the same sheet" (design-ch6.md §2). The turn itself is a short flip. */
 body[data-face="1"] .page.right { filter: sepia(.18) brightness(.985); }
-body[data-face="1"][data-paper="letter"] .page.right { background-image: repeating-linear-gradient(90deg, rgba(84, 92, 118, .16) 0 1px, transparent 1px var(--cell)); }
+/* the front's writing bleeds through the letter paper (透光 0.14), mirrored because we see it from behind; no extra grid
+   lines — they competed with the tiles. High contrast: no bleed (the dashed frame below says which face this is). */
+body[data-face="1"][data-paper="letter"] .page.right::after {
+  content: ''; position: absolute; inset: 6% 8%; pointer-events: none; opacity: .14; transform: scaleX(-1);
+  background: repeating-linear-gradient(0deg, transparent 0 .62em, rgba(31, 27, 23, .9) .62em .7em, transparent .7em 1.25em) 0 0 / 100% 1.25em,
+    repeating-linear-gradient(90deg, rgba(31, 27, 23, 0) 0 .9em, rgba(31, 27, 23, .55) .9em 1.2em, rgba(31, 27, 23, 0) 1.2em 1.7em);
+  -webkit-mask: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+body.hc[data-face="1"] .page.right::after { display: none; }
 .page.right.turned { animation: turned .5s ease-out; }
 @keyframes turned { 0% { opacity: .2; } 100% { opacity: 1; } }
 .presets .flip { font-weight: 600; }
