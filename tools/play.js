@@ -97,7 +97,7 @@ for (const act of actions) {
       const { events, crush } = L.flip(s);
       say((s.face ? 'Turned over: the left page now faces the third page' : 'Turned back: the left page faces the right page again') +
         (events.length ? '; ' + events.map((e) => ({ door: 'the key opened the door', ink: 'the ink printed', glue: 'the glue pulled a stone across' })[e.type]).join(', ') : ''));
-      if (crush) die('The page you turned to has a stone over your square.');
+      if (crush) { L.restart(s); say('The page you turned to has a stone over your square. Back to the start, the book turned back as the level began.'); }
       else if (L.isWin(s, mode())) won = true;
     }
   } else if (verb === 'walk' || verb === 'step') {

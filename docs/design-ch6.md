@@ -133,7 +133,7 @@
 
 **VoiceOver**：
 - 控件：「翻」按钮（`pre.flip`），只在合上时可用；键 **T**；大按钮栏里同名。按不了时读原因：`no.flip.open`「先合上，才能翻」、`no.flip.leaf`「你站在要翻的那一页上」、`no.flip.single`「这封信只有两页」。
-- 翻那一拍（`bus 'flip'`）：`turned`「翻过来了：左页对着第三页」/ `turnedBack`「翻回来了：左页又对着右页」+ 压印事件（`doorOpened` / `inkPrinted` / `glued`）+ `connected` / `lost`（翻之后立刻跑一次 `checkReach()`——死局进入点在这里，不是在合上）+ 被压 `crushedFlip`「翻过来的那页上有石头，正压在你这格。回到起点」。
+- 翻那一拍（`bus 'flip'`）：`turned`「翻过来了：左页对着第三页」/ `turnedBack`「翻回来了：左页又对着右页」+ 压印事件（`doorOpened` / `inkPrinted` / `glued`）+ `connected` / `lost`（翻之后立刻跑一次 `checkReach()`——死局进入点在这里，不是在合上）+ 被压 `crushedFlip`「翻过来的那页上有石头，正压在你这格。书翻回原样，回到起点」——翻被压 = 关卡重来（`restart`：格子、朝向回到开局，人回起点；书仍合着，撤销仍可退回翻之前），否则 6-3 起点正在第三页石头下，一打开又被压，循环。
 - 「我在哪」报 `thirdPage`「第三页」；格子标签经 `F.at()` 自动读对着 L 的那页，不用新字；进章 `paper.ch6`。
 - 待建造：翻的 ARIA 网格说明（`gridHelp`）补一句"T 翻页"。
 

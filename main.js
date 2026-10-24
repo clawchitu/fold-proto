@@ -181,7 +181,12 @@
       const text = t(crush === 'glue' ? 'crushedGlue' : 'crushedFlip');
       sound.fall(); charEl.classList.remove('fall'); void charEl.offsetWidth; charEl.classList.add('fall');
       toast(text); bus.emit('crush', { cause: crush, text });
-      setTimeout(() => { state.char = { ...state.start }; charEl.classList.remove('fall'); placeChar(true); bus.emit('fall'); }, 260);
+      // a crush by the turn starts the level again: grids, face and figure as they began (else on 6-3 the next opening
+      // crushes her again under the same third-page stone). The book stays shut; undo still steps back before the turn.
+      setTimeout(() => {
+        F.restart(state); document.body.dataset.face = state.face; shade = F.shadows(state, angle); rideSrc = null;
+        charEl.classList.remove('fall'); paintTiles(); buildTabs(); applyAngle(); placeChar(true); bus.emit('fall');
+      }, 260);
       return;
     }
     checkWin();

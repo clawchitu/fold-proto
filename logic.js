@@ -54,7 +54,14 @@
     let start = null;
     grid.forEach((row, r) => row.forEach((t, c) => { if (t === 'S') start = { c, r }; }));
     // pages: 2 (left | right) or 3 (left | right | third, the back of the right leaf). The start is on the first spread.
-    return { grid, h: grid.length, w: 2 * N, pages: grid[0].length / N, face: 0, char: { ...start }, start };
+    return { grid, h: grid.length, w: 2 * N, pages: grid[0].length / N, face: 0, char: { ...start }, start, init: level.map };
+  }
+
+  // Back to how the level began: the grids as drawn, the right page facing the left page again, the figure on the start.
+  // A crush by the turn (flip) does this — the face it turned to stays put otherwise, and on a board whose start lies
+  // under a third-page stone (6-3) the next opening would crush her again, and again.
+  function restart(s) {
+    s.grid = s.init.map((row) => row.split('')); s.face = 0; s.char = { ...s.start };
   }
 
   // The grid column behind a visible column: the facing page's columns N..2N-1 read from the third page when turned.
@@ -250,11 +257,12 @@
   // Turn the closed book over: the other face of the right leaf now presses on the left page. Pressing stamps as a
   // close does (keys, ink, glue — between the left page and the page now facing it). Returns { events, crush }:
   // crush is what the new facing page did to you the moment it came down ('stone' | 'glue' | null), judged before the
-  // stamp, exactly as a close is. The caller decides what a crush means (back to the start).
+  // stamp, exactly as a close is. A crush stamps nothing: the caller sends everything back with restart (the grids, the
+  // face as at the start of the level, the figure on the start), once the stone has been seen coming down.
   function flip(s) {
     s.face ^= 1;
     const crush = crushCause(s, s.char, FOLD_MIN);
-    const events = stamp(s);
+    const events = crush ? [] : stamp(s);
     return { events, crush };
   }
 
@@ -265,7 +273,7 @@
   }
 
   const api = { N, FOLD_MIN, POP_MIN, POP_MAX, SHADE_MIN, mirror, proj, isRight, modeOf, isFloor, isBlock,
-    isOpaque, shadowColumn, shadows, crushed, crushCause, cellBlock, stepBlock, pathBlock, ride, create, at, colOf, neighbours, findPath, stamp,
+    isOpaque, shadowColumn, shadows, crushed, crushCause, cellBlock, stepBlock, pathBlock, ride, create, restart, at, colOf, neighbours, findPath, stamp,
     flipBlock, flip, isWin };
   if (typeof module !== 'undefined') module.exports = api; else root.FoldLogic = api;
 })(this);

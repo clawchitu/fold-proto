@@ -66,7 +66,11 @@ const mk = (map) => L.create({ map });
   // turning onto a stone crushes you, like a close does
   const t = mk(['-S..-...' + '--x-']);
   t.char = { c: 1, r: 0 };
-  assert.strictEqual(L.flip(t).crush, 'stone');
+  const tf = L.flip(t);
+  assert.strictEqual(tf.crush, 'stone'); assert.deepStrictEqual(tf.events, [], 'a crush presses nothing');
+  // ...and the level starts again: face, grids and figure as they began (no crush loop on 6-3)
+  L.restart(t);
+  assert.strictEqual(t.face, 0); assert.deepStrictEqual(t.char, t.start); assert.strictEqual(t.grid[0].join(''), '-S..-...--x-');
   // the goal may live on the third page: visible only once turned
   const u = mk(['S...-...' + '...G']);
   u.char = { c: 3, r: 0 };
@@ -77,5 +81,19 @@ const mk = (map) => L.create({ map });
   assert.strictEqual(L.isWin(u, 'fold'), true, 'closed and turned, the goal is in the stack');
   assert.strictEqual(L.flipBlock(u, 180), null, 'turning back is allowed too');
   L.flip(u); assert.strictEqual(u.face, 0); assert.strictEqual(L.isWin(u, 'fold'), false);
+}
+// 6-3: the start lies under the third page's stone. A turn that crushes her must not leave the third page facing,
+// or the next opening crushes her again at the start (the crush loop).
+{
+  const lv = require('../levels.js').find((l) => l.id === 'twoFaces');
+  const s = L.create(lv);
+  s.char = { ...s.start };
+  const f = L.flip(s);
+  assert.strictEqual(f.crush, 'stone', '6-3: turning while standing on the start brings the third-page stone down');
+  L.restart(s);
+  assert.strictEqual(s.face, 0, 'back to the right page facing');
+  assert.deepStrictEqual(s.char, s.start);
+  assert.strictEqual(L.crushed(s, s.char, 180), false, 'closed at the start, nothing comes down: no loop');
+  assert.deepStrictEqual(s.grid.map((r) => r.join('')), lv.map);
 }
 console.log('logic tests passed');
