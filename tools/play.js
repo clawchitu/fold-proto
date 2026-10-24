@@ -36,6 +36,7 @@ function render() {
     for (let c = 0; c < s.w; c++) {
       let t = L.at(s, c, r);
       if (s.char.c === c && s.char.r === r) t = '@';
+      else if (t === 'x' && sh.has(c + ',' + r)) t = 'x';   // a stone under a shadow still prints as the stone
       else if (t === '-' && sh.has(c + ',' + r)) t = '░';
       else if (L.isFloor(t) && sh.has(c + ',' + r)) t = '▒';
       else if (t === 'S') t = '.';
@@ -43,9 +44,9 @@ function render() {
     }
     rows.push(line);
   }
-  rows.push('legend: @ you  . paper  - gap  ░ shadow over a gap (walkable while it lasts)  ▒ shadow over paper  x stone  k key  D locked door  o open door  i ink  p tab  g glue  G the letter');
+  rows.push('legend: @ you  . paper  - gap  ░ shadow over a gap (walkable while it lasts; it carries you when the hinge moves)  ▒ shadow over paper (a shadow over paper is just paper: it does not carry you)  x stone  k key  D locked door  o open door  i ink  p tab  g glue  G the letter');
   if (mode() === 'fold') {
-    rows.push(`closed: the ${s.face ? 'third' : 'right'} page lies on the left page. Stacks (walk and step by STACK column 1–4; each cell = upper page / left page):`);
+    rows.push(`closed: the ${s.face ? 'third' : 'right'} page lies ON TOP of the left page (the 8-column print above is only the unfolded map). Stacks (walk and step by STACK column 1–4; each cell = upper page / left page):`);
     rows.push('        1       2       3       4');
     for (let r = 0; r < s.h; r++) {
       let line = `row ${r + 1} `;
@@ -62,7 +63,7 @@ function render() {
 }
 function reach() { const set = new Set(); const q = [s.char]; const key = (p) => p.c + ',' + p.r; set.add(key(s.char)); while (q.length) { const x = q.shift(); for (const n of L.neighbours({ ...s, char: x }, x, mode(), shade())) if (!set.has(key(n))) { set.add(key(n)); q.push(n); } } return set; }
 function push() { undo.push({ grid: s.grid.map((r) => r.slice()), char: { ...s.char }, angle, face: s.face }); }
-function die(why) { say(why + ' Back to the start.'); s.char = { ...s.start }; }
+function die(why) { say(why + ` Back to the start (col ${s.start.c + 1}, row ${s.start.r + 1}; the book stays as it is${s.face ? ', third page still turned towards the left page' : ''}).`); s.char = { ...s.start }; }
 function setAngle(target) {
   target = Math.max(0, Math.min(180, Math.round(target / 5) * 5));
   const a0 = fold(), a1 = 180 - target, step = a1 > a0 ? 5 : -5;
