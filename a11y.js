@@ -136,7 +136,7 @@
   }
   function goalCell() {
     const st = G.state;
-    for (let r = 0; r < st.h; r++) for (let c = 0; c < st.w; c++) if (st.grid[r][c] === 'G') return { c, r };
+    for (let r = 0; r < st.h; r++) for (let c = 0; c < st.w; c++) if (F.at(st, c, r) === 'G') return { c, r };
     return null;
   }
   // the goal hums its motif every few seconds, louder the closer you are (3-D distance, so folding counts)
@@ -313,6 +313,7 @@
   const bus = G.bus;
   bus.on('build', () => {
     const lv = I.level(G.levels[G.index].id), st = G.state, g = goalCell();
+    $('#bb-flip').hidden = st.pages < 3;   // 「翻」 only in books with a third page (vol. 2 ch. 6)
     buildGrid(); rebase(); pend = newPend(); saidAngle = Math.round(G.angle);
     intro = t('intro', { n: G.index + 1, name: lv.name, line: lv.line, you: pos(st.char.c, st.char.r), goal: g ? pos(g.c, g.r) : t('elsewhere') });
     if (!G.angle) { say(intro); intro = null; }      // otherwise said once the book has swung open
@@ -331,6 +332,18 @@
     if (next === 'fold') pend.stamp = G.lastStamp.slice();
     if (next === 'fold' && G.lastStamp.length) buzz([30, 30, 30]);
     checkReach(); soon();
+  });
+  // the closed book was turned over: say which page now faces, what the press did, and whether a road broke
+  bus.on('flip', ({ face, events, crush }) => {
+    buzz([20, 40, 20]);
+    pend.stamp = events.slice();
+    if (crush) { pend.fell = t(crush === 'glue' ? 'crushedGlue' : 'crushedFlip'); }
+    const parts = [t(face ? 'turned' : 'turnedBack')];
+    checkReach();
+    if (pend.connected) parts.push(t('connected')); else if (pend.lost) parts.push(t('lost'));
+    for (const e of pend.stamp) parts.push(t(e.type === 'door' ? 'doorOpened' : e.type === 'ink' ? 'inkPrinted' : 'glued'));
+    if (pend.fell) parts.push(pend.fell);
+    pend = newPend(); say(parts.join(t('sep'))); rebase(); relabel();
   });
   bus.on('shade', () => {
     if (intro) return soon();
@@ -400,7 +413,7 @@
       if (dx) bits.push(t('goalSteps', { dir: t(dx > 0 ? 'dir.right' : 'dir.left'), n: Math.abs(dx) }));
       goal = t('goal', { opp: F.isRight(g.c) === F.isRight(ch.c) || G.mode === 'fold' ? '' : t('goalOpp'), bits: bits.join(t('sep')) || t('here') });
     }
-    say(t('where', { pos: pos(ch.c, ch.r), page: t(F.isRight(ch.c) ? 'rightPage' : 'leftPage'), ways: ways.join(t('list')) || t('nowhere'), a: Math.round(G.angle), goal }));
+    say(t('where', { pos: pos(ch.c, ch.r), page: t(F.isRight(ch.c) ? (G.state.face ? 'thirdPage' : 'rightPage') : 'leftPage'), ways: ways.join(t('list')) || t('nowhere'), a: Math.round(G.angle), goal }));
     if (gridActive) focusCell(ch.c, ch.r);
   }
 
@@ -419,6 +432,7 @@
     const act = {
       KeyF: () => G.foldBy(e.shiftKey ? -1 : 1),
       KeyC: () => G.foldTo(180), KeyO: () => G.foldTo(0),
+      KeyT: () => G.flip(),
       KeyH: () => G.hint(), KeyR: () => G.reset(),
       KeyU: () => doUndo(), KeyZ: () => doUndo(),
       KeyL: () => (e.shiftKey ? scanAll() : scanRow(gridEl.contains(document.activeElement) ? focus.r : G.state.char.r)),
@@ -462,6 +476,7 @@
     else if (a === 'fold-') G.foldBy(-1);
     else if (a === 'close') G.foldTo(180);
     else if (a === 'open') G.foldTo(0);
+    else if (a === 'flip') G.flip();
     else if (a === 'undo') doUndo();
     else if (a === 'row') scanRow(G.state.char.r);
     else if (a === 'where') whereAmI();

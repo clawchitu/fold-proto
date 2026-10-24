@@ -105,12 +105,16 @@
     won = false;
     // paper per volume: vol. 1 xuan paper (levels 1–25), vol. 2 letter paper with a printed grid (design-v2c1.md §2)
     document.body.dataset.paper = index >= 25 ? 'letter' : 'xuan';
+    document.body.dataset.face = 0;
     // from chapter 3 the lamp is lit: a Lean preset (135°) lands where the shadows show (Half, 90°, casts none)
     $('#btn-lean').hidden = index < 13;
+    // from chapter 6 the book has a third page: 「翻」 turns the closed book over (logic.js flip)
+    $('#btn-flip').hidden = state.pages < 3;
     stopWalk();
     for (const page of [ui.left, ui.right]) page.querySelectorAll('.cell, .char, .tab, .shadow').forEach((e) => e.remove());
     shadowEls = new Map(); shade = new Map(); rideSrc = null;
-    cells = state.grid.map((row, r) => row.map((_, c) => {
+    // one cell per visible column: the right page shows whichever face of the leaf is turned towards the left page
+    cells = Array.from({ length: state.h }, (_, r) => Array.from({ length: 2 * N }, (_, c) => {
       const el = document.createElement('div');
       el.className = 'cell';
       el.style.setProperty('--x', c % N); el.style.setProperty('--y', r);
@@ -119,14 +123,7 @@
       (c < N ? ui.left : ui.right).appendChild(el);
       return el;
     }));
-    tabs = [];
-    state.grid.forEach((row, r) => {
-      if (row[N - 1] === 'p' && row[N] === 'p') {
-        const t = document.createElement('div');
-        t.className = 'tab'; t.style.setProperty('--y', r);
-        ui.left.appendChild(t); tabs.push(t);
-      }
-    });
+    buildTabs();
     charEl = document.createElement('div');
     charEl.className = 'char';
     charEl.innerHTML = '<i></i>' + (index === 0 ? `<b class="tag" data-i18n="you">${t('you')}</b>` : '');
@@ -143,13 +140,51 @@
   }
 
   function paintTiles() {
-    state.grid.forEach((row, r) => row.forEach((t, c) => {
-      const el = cells[r][c];
+    cells.forEach((row, r) => row.forEach((el, c) => {
+      const t = F.at(state, c, r);
       const kind = { '-': 'empty', '.': 'floor', S: 'floor', G: 'goal', x: 'stone', k: 'key', D: 'door', o: 'open', i: 'ink', p: 'pop', g: 'glue' }[t];
       if (el.dataset.kind === kind) return;
       el.dataset.kind = kind;
       el.innerHTML = kind === 'empty' ? '' : `<div class="tile">${SVG[t === 'S' ? '' : t] || ''}</div>`;
     }));
+  }
+  function buildTabs() {
+    tabs.forEach((t) => t.remove()); tabs = [];
+    for (let r = 0; r < state.h; r++) {
+      if (F.at(state, N - 1, r) === 'p' && F.at(state, N, r) === 'p') {
+        const t = document.createElement('div');
+        t.className = 'tab'; t.style.setProperty('--y', r);
+        ui.left.appendChild(t); tabs.push(t);
+      }
+    }
+  }
+
+  // 「翻」: turn the closed book over. The page facing the left page changes; keys, ink and glue between the two now
+  // pressed pages fire; a stone on the new facing page over your square comes down on you (design-ch6.md §1).
+  function flipBook() {
+    sound.ensure();
+    if (won || demo) return;
+    const why = F.flipBlock(state, angle);
+    if (why) { sound.nope(); const text = t('no.flip.' + why); toast(text); bus.emit('blocked', { why: 'flip', reason: why, text }); return; }
+    stopWalk(); cancelTween();
+    pushUndo();
+    const { events, crush } = F.flip(state);
+    document.body.dataset.face = state.face;
+    ui.right.classList.remove('turned'); void ui.right.offsetWidth; ui.right.classList.add('turned');
+    sound.crease();
+    lastStamp = events;
+    paintTiles(); buildTabs(); applyAngle();
+    if (events.length) { setTimeout(() => sound.stamp(), 120); events.forEach((e) => e.cells.forEach(({ c, r }) => flash(cells[r][c]))); }
+    pulseLinks();
+    bus.emit('flip', { face: state.face, events, crush });
+    if (crush) {
+      const text = t(crush === 'glue' ? 'crushedGlue' : 'crushedFlip');
+      sound.fall(); charEl.classList.remove('fall'); void charEl.offsetWidth; charEl.classList.add('fall');
+      toast(text); bus.emit('crush', { cause: crush, text });
+      setTimeout(() => { state.char = { ...state.start }; charEl.classList.remove('fall'); placeChar(true); bus.emit('fall'); }, 260);
+      return;
+    }
+    checkWin();
   }
 
   function placeChar(instant) {
@@ -382,10 +417,10 @@
     ui.next.textContent = t(last ? 'first' : 'next');
   }
   function header() {
-    const lv = LEVELS[index], mainCount = LEVELS.filter((l) => !l.optional).length;
+    const lv = LEVELS[index], main = LEVELS.filter((l) => !l.optional), mainCount = main.length;
     ui.name.textContent = lv.optional
       ? t('darkHead', { n: LEVELS.slice(0, index + 1).filter((l) => l.optional).length, name: lvText(index).name })
-      : t('levelHead', { n: index + 1, total: mainCount, name: lvText(index).name });
+      : t('levelHead', { n: main.indexOf(lv) + 1, total: mainCount, name: lvText(index).name });
     ui.line.textContent = lvText(index).line;
   }
 
@@ -394,17 +429,18 @@
   // ---------- undo, stepped folding (no precision or timing needed) ----------
   let undoStack = [];
   function pushUndo() {
-    undoStack.push({ grid: state.grid.map((row) => row.slice()), char: { ...state.char }, angle });
+    undoStack.push({ grid: state.grid.map((row) => row.slice()), char: { ...state.char }, angle, face: state.face });
     if (undoStack.length > 200) undoStack.shift();
   }
   function undo() {
     const s = undoStack.pop();
     if (!s) return false;
     cancelTween(); stopWalk();
-    state.grid = s.grid; state.char = s.char; angle = s.angle;
+    state.grid = s.grid; state.char = s.char; angle = s.angle; state.face = s.face;
+    document.body.dataset.face = state.face;
     mode = F.modeOf(angle); shade = F.shadows(state, angle); rideSrc = null; won = false;
     ui.sheetWin.hidden = true; charEl.classList.remove('joy');
-    paintTiles(); placeChar(true); applyAngle();
+    paintTiles(); buildTabs(); placeChar(true); applyAngle();
     bus.emit('undo');
     return true;
   }
@@ -491,7 +527,8 @@
   function hideSheets() { document.querySelectorAll('.sheet').forEach((el) => (el.hidden = true)); }
 
   // chapter headings in the Levels sheet: first level index of each chapter (tools/check.js CHAPTER_START), its volume
-  const CHAPTERS = [{ at: 0, vol: 1, ch: 1 }, { at: 5, ch: 2 }, { at: 13, ch: 3 }, { at: 19, ch: 4 }, { at: 25, vol: 2, ch: 5 }];
+  const CHAPTERS = [{ at: 0, vol: 1, ch: 1 }, { at: 5, ch: 2 }, { at: 13, ch: 3 }, { at: 19, ch: 4 }, { at: 25, vol: 2, ch: 5 },
+    { at: LEVELS.findIndex((l) => l.chapter === 6), ch: 6 }];
   function openLevels() {
     ui.levelGrid.innerHTML = '';
     const head = (cls, text) => { const h = document.createElement('h3'); h.className = cls; h.textContent = text; ui.levelGrid.appendChild(h); };
@@ -517,6 +554,7 @@
   document.querySelectorAll('[data-close]').forEach((b) => (b.onclick = hideSheets));
   document.querySelectorAll('.sheet').forEach((s) => s.addEventListener('click', (e) => { if (e.target === s && s.id !== 'sheet-win') hideSheets(); }));
   document.querySelectorAll('.presets [data-a]').forEach((b) => (b.onclick = () => { sound.ensure(); pushUndo(); tweenTo(+b.dataset.a); }));
+  $('#btn-flip').onclick = flipBook;
 
   let sliding = false;
   ui.slider.addEventListener('input', () => { sound.ensure(); if (!sliding) { sliding = true; pushUndo(); } setAngle(+ui.slider.value); });
@@ -567,7 +605,7 @@
     get index() { return index; }, get won() { return won; }, get shade() { return shade; }, get demo() { return demo; },
     get lastStamp() { return lastStamp; }, get tabs() { return tabs; },
     cells: () => cells, levels: LEVELS,
-    tap: onTap, step: stepDir, foldBy, foldTo, undo, hint, go, layout, endDemo, toast,
+    tap: onTap, step: stepDir, foldBy, foldTo, flip: flipBook, undo, hint, go, layout, endDemo, toast,
     reset: () => go(index), canUndo: () => undoStack.length > 0,
   };
 

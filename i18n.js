@@ -63,7 +63,7 @@
       nothingToUndo: '没有可以撤销的',
       suggestToast: '闭着眼也能玩：按 M 开启声音模式，按问号听按键说明',
       lvAria: '第{n}关，{name}', lvDone: '已完成', lvCurrent: '当前',
-      help: '方向键：在格子间移动并听每一格。回车：走到这一格。Shift 加方向键：走一步。F：折一点；Shift 加 F：展开一点；C：合上；O：打开。L：听这一行；Shift 加 L：听整本书。W：我在哪。H：提示。U：撤销。R：重来。M：声音模式。',
+      help: '方向键：在格子间移动并听每一格。回车：走到这一格。Shift 加方向键：走一步。F：折一点；Shift 加 F：展开一点；C：合上；O：打开；T：翻页（合上时）。L：听这一行；Shift 加 L：听整本书。W：我在哪。H：提示。U：撤销。R：重来。M：声音模式。',
       // chapter 3 「影」 (docs/design-ch3.md): opener, paper state, VoiceOver, the third letter
       'ch.3.line': '影子也是路。', 'paper.ch3': '背光的纸，影子能走。', 'paper.lit': '这页纸举到了灯前',
       'teach.lean': '书可以停在立起和合上之间的任何地方', shadowGap: '影子盖住了第{c}列的缺口',
@@ -76,6 +76,13 @@
       'kind.g': '胶', 'noun.g': '胶', glueTakes: '合上时会把对面的石头粘过来；站在这里会被压住', stoneGlued: '合上时会被胶粘到对页{col}', glued: '胶把石头粘到了对页',
       'ch.5.line': '粘住的，跟着走。', 'paper.ch5': '信笺，淡格线，有一处胶。', 'paper.letter': '这页是信笺，格线是印好的',
       'letter.5.title': '左岸来信', 'letter.5.body': '我想跟着你翻过去，可是页角粘住了。\n粘住的东西会跟着走——\n那就让石头先替我过河，\n影子跟着它，我跟着影子。', 'letter.5.sign': '——左岸', 'letter.5.end': '卷二《翻页》第一章完。\n页角还粘着。',
+      // vol. 2 「翻页」 · chapter 6 「翻」 (docs/design-ch6.md): the third page, the turn, the sixth letter
+      'pre.flip': '翻', 'chHead.6': '六 · 翻', thirdPage: '第三页',
+      'no.flip.open': '先合上，才能翻', 'no.flip.leaf': '你站在要翻的那一页上', 'no.flip.single': '这封信只有两页',
+      turned: '翻过来了：左页对着第三页', turnedBack: '翻回来了：左页又对着右页',
+      crushedFlip: '翻过来的那页上有石头，正压在你这格。回到起点',
+      'ch.6.line': '合上，翻过来，再打开。', 'paper.ch6': '信笺，两面都写了字。', 'paper.turned': '这一面是信笺的背面',
+      'letter.6.title': '右岸来信', 'letter.6.body': '你翻过来了。\n我在这一页等了很久，久到字都写到了背面。\n不要紧——合上的时候，\n哪一面对着你，由你定。', 'letter.6.sign': '——右岸', 'letter.6.end': '卷二《翻页》第二章完。\n背面还有字。',
     },
 
     en: {
@@ -132,7 +139,7 @@
       nothingToUndo: 'nothing to undo',
       suggestToast: 'You can play with your eyes closed: M for sound mode, question mark for the keys',
       lvAria: 'level {n}, {name}', lvDone: 'solved', lvCurrent: 'current',
-      help: 'Arrow keys: move between squares and hear each one. Enter: walk to that square. Shift+arrow: take one step. F: fold a step; Shift+F: unfold a step; C: close; O: open. L: hear this row; Shift+L: hear the whole book. W: where am I. H: hint. U: undo. R: restart. M: sound mode.',
+      help: 'Arrow keys: move between squares and hear each one. Enter: walk to that square. Shift+arrow: take one step. F: fold a step; Shift+F: unfold a step; C: close; O: open; T: turn the page (when closed). L: hear this row; Shift+L: hear the whole book. W: where am I. H: hint. U: undo. R: restart. M: sound mode.',
       'ch.3.line': 'Shadows are paths too.', 'paper.ch3': 'Paper held to the lamp; shadows can be walked on.', 'paper.lit': 'The page is held up to the lamp',
       'teach.lean': 'The book can rest anywhere between standing and closed', shadowGap: 'a shadow covers the gap in column {c}',
       'letter.3.title': 'A Letter from the Left Bank', 'letter.3.body': 'The lamp is on your bank.\nYour stones passed their shadows across the river,\nand I walked on them,\na little closer.', 'letter.3.sign': '— the Left Bank', 'letter.3.end': 'End of Chapter Three.\nThe next letter is still on its way.',
@@ -142,6 +149,12 @@
       'kind.g': 'glue', 'noun.g': 'glue', glueTakes: 'closing pulls the stone opposite onto this square; stand here and it lands on you', stoneGlued: 'closing, the glue pulls it across to {col}', glued: 'the glue pulled a stone across',
       'ch.5.line': 'What sticks goes along.', darkHead: 'Hidden letter {n} · {name}', darkTag: 'hidden', 'paper.ch5': 'Letter paper, a faint ruled grid, a smear of glue.', 'paper.letter': 'This page is letter paper; the grid is printed on',
       'letter.5.title': 'A Letter from the Left Bank', 'letter.5.body': 'I meant to follow you over, but the corner of the page is stuck.\nWhat is stuck goes where the page goes —\nso let the stone cross the river for me first;\nits shadow follows it, and I follow the shadow.', 'letter.5.sign': '— the Left Bank', 'letter.5.end': 'End of Book Two, chapter one.\nThe corner is still stuck.',
+      'pre.flip': 'Turn', 'chHead.6': 'Chapter 6 · Turn', thirdPage: 'third page',
+      'no.flip.open': 'Close the book first, then turn it over', 'no.flip.leaf': 'You are standing on the leaf you would turn', 'no.flip.single': 'This letter has only two pages',
+      turned: 'Turned over: the left page now faces the third page', turnedBack: 'Turned back: the left page faces the right page again',
+      crushedFlip: 'The page you turned to has a stone over your square. Back to the start.',
+      'ch.6.line': 'Close, turn it over, open.', 'paper.ch6': 'Letter paper, written on both sides.', 'paper.turned': 'This face is the back of the letter paper',
+      'letter.6.title': 'A Letter from the Right Bank', 'letter.6.body': 'You turned the page.\nI waited on this one so long the writing ran onto the back.\nNever mind — when the book is shut,\nwhich face is towards you is yours to choose.', 'letter.6.sign': '— the Right Bank', 'letter.6.end': 'End of Book Two, chapter two.\nThere is more on the back.',
     },
 
     ja: {
@@ -209,6 +222,12 @@
       'kind.g': '糊', 'noun.g': '糊', darkHead: '隠された手紙 {n} · {name}', darkTag: '隠', glueTakes: '閉じると向かいの石がここに貼りつく。ここに立っていれば押しつぶされる', stoneGlued: '閉じると糊に引かれて向かいの{col}へ移る', glued: '糊が石を向かいのページへ引き寄せた',
       'ch.5.line': '貼りついたものは、ついてくる。', 'paper.ch5': '便箋。薄い罫線、糊が一か所。', 'paper.letter': 'このページは便箋。枡は印刷されている',
       'letter.5.title': '左岸からの手紙', 'letter.5.body': 'きみのあとから頁をめくろうとしたのに、頁の角が貼りついていた。\n貼りついたものは、頁と一緒に動く——\nなら、石に先に川を渡らせよう。\n影は石について、わたしは影について。', 'letter.5.sign': '——左岸より', 'letter.5.end': '第二巻『頁をめくる』第一章 了。\n頁の角は、まだ貼りついている。',
+      'pre.flip': 'めくる', 'chHead.6': '六 · 頁', thirdPage: '三枚目の頁',   // TODO ja review
+      'no.flip.open': '閉じてから、めくる', 'no.flip.leaf': 'めくる頁の上に立っている', 'no.flip.single': 'この手紙は二頁しかない',
+      turned: 'めくった。左頁の向かいは三枚目の頁', turnedBack: 'めくり戻した。左頁の向かいはまた右頁',
+      crushedFlip: 'めくった頁の石が、このマスに落ちてきた。はじめに戻る',
+      'ch.6.line': '閉じて、裏返して、開く。', 'paper.ch6': '便箋。両面に字がある。', 'paper.turned': 'この面は便箋の裏',
+      'letter.6.title': '右岸からの手紙', 'letter.6.body': 'めくってくれたね。\nこの頁で長く待ちすぎて、字が裏まで続いた。\nかまわない——閉じたとき、\nどちらの面がきみに向くかは、きみが決める。', 'letter.6.sign': '——右岸より', 'letter.6.end': '第二巻『頁をめくる』第二章 了。\n裏にも、まだ字がある。',
     },
 
     ko: {
@@ -276,6 +295,12 @@
       'kind.g': '풀', 'noun.g': '풀', darkHead: '숨은 편지 {n} · {name}', darkTag: '숨', glueTakes: '닫으면 맞은편 돌이 여기에 붙어요. 여기 서 있으면 눌려요', stoneGlued: '닫으면 풀에 붙어 맞은편 {col:으로} 옮겨 가요', glued: '풀이 돌을 맞은편 페이지로 붙여 갔어요',
       'ch.5.line': '붙은 것은 따라간다.', 'paper.ch5': '편지지, 연한 격자 선, 풀이 한 곳.', 'paper.letter': '이 페이지는 편지지, 격자가 인쇄되어 있어요',
       'letter.5.title': '왼쪽 강가에서 온 편지', 'letter.5.body': '너를 따라 페이지를 넘기려 했는데, 페이지 모서리가 붙어 버렸다.\n붙은 것은 페이지와 함께 움직인다.\n그러니 돌을 먼저 강 건너로 보내자.\n그림자는 돌을 따르고, 나는 그림자를 따른다.', 'letter.5.sign': '— 왼쪽 강가에서', 'letter.5.end': '제2권 《페이지를 넘기다》 제1장 끝.\n모서리는 아직 붙어 있다.',
+      'pre.flip': '넘기기', 'chHead.6': '6장 · 넘김', thirdPage: '세 번째 페이지',   // TODO ko review
+      'no.flip.open': '먼저 닫아야 넘길 수 있어요', 'no.flip.leaf': '넘길 페이지 위에 서 있어요', 'no.flip.single': '이 편지는 두 페이지뿐이에요',
+      turned: '넘겼어요. 왼쪽 페이지가 세 번째 페이지와 마주 봐요', turnedBack: '되돌렸어요. 왼쪽 페이지가 다시 오른쪽 페이지와 마주 봐요',
+      crushedFlip: '넘긴 페이지의 돌이 이 칸에 떨어졌어요. 처음으로 돌아가요',
+      'ch.6.line': '닫고, 뒤집고, 펼친다.', 'paper.ch6': '편지지, 양면에 글이 있다.', 'paper.turned': '이 면은 편지지의 뒷면',
+      'letter.6.title': '오른쪽 강가에서 온 편지', 'letter.6.body': '네가 페이지를 넘겼구나.\n이 페이지에서 너무 오래 기다려 글이 뒷면까지 이어졌다.\n괜찮아. 책을 닫았을 때\n어느 면이 너를 향할지는 네가 정하니까.', 'letter.6.sign': '— 오른쪽 강가에서', 'letter.6.end': '제2권 《페이지를 넘기다》 제2장 끝.\n뒷면에 글이 더 있다.',
     },
   };
 

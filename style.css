@@ -400,3 +400,13 @@ body.hc .toast { background: #000; border: 3px solid #ffd400; }
   .cell.link .tile, .cell.flash .tile { outline: 3px solid var(--accent); outline-offset: 2px; }
   .coach-tap .cell .tap-tip.coach, .coach-fold .coach-slider { animation: none; }
 }
+
+/* vol. 2 ch. 6 「翻页」: the third page is the back of the right leaf — a shade warmer, and the printed grid runs the other
+   way, so the turned face reads as "the other side of the same sheet" (design-ch6.md §2). The turn itself is a short flip. */
+body[data-face="1"] .page.right { filter: sepia(.18) brightness(.985); }
+body[data-face="1"][data-paper="letter"] .page.right { background-image: repeating-linear-gradient(90deg, rgba(84, 92, 118, .16) 0 1px, transparent 1px var(--cell)); }
+.page.right.turned { animation: turned .5s ease-out; }
+@keyframes turned { 0% { opacity: .2; } 100% { opacity: 1; } }
+.presets .flip { font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { .page.right.turned { animation: none; } }
+body.hc[data-face="1"] .page.right { filter: none; outline: 3px dashed #000; outline-offset: -6px; }

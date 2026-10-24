@@ -15,7 +15,8 @@
 //       vol. 1 retune (postmortem §6): --nodead (no dead state), --noride (the solution never rides), --leftx (stones on the
 //       left page only), --maxvoid 0.6 (penalise boards with more gap than that), --minlen 12 / --maxlen 14 (penalise solutions outside the band);
 //       --matched (every door has a key facing it, every key a door, every ink a gap); --need also takes fold | ride | made
-//       vol. 2 ch. 6 (docs/design-ch6.md): --pages 3 (12-column boards with a third page), --need flip (the turn is essential)
+//       vol. 2 ch. 6 (docs/design-ch6.md): --pages 3 (12-column boards with a third page), --need flip (the turn is essential),
+//       --goalT (the letter lies on the third page), --minflips 2 (the solution turns the book at least twice)
 //
 // What the search optimises (fitness(), §3 of the postmortem):
 //   long minimal solutions (par, steps), many plausible-but-wrong hinge moves at each decision point (wrong),
@@ -173,6 +174,7 @@ function measure(level) {
     if (partner(b) && row[q] !== partner(b)) out.unmatched++;
     if (partner(a) && f === 0 && ![...Array(pages - 1).keys()].some((ff) => row[L.mirror(q) + ff * L.N] === partner(a))) out.unmatched++;
   }
+  out.goalFace = B.goal ? B.goal.face : null;
   if (!B.start || !B.goal) return out;
   const g = explore(B);
   out.states = g.nodes.size;
@@ -325,7 +327,8 @@ function fitness(level, opts, m) {
   const need = String(opts.need).split('+').every(needOne);
   // vol. 1 constraints (postmortem §6): --nodead no dead state anywhere; --noride the minimal solution never rides a shadow
   // (3-3 comes before the ride is taught); --minlen reject short boards early
-  const vol1 = (opts.nodead && m.dead > 0) || (opts.noride && m.ride) || (opts.matched && m.unmatched > 0);
+  const vol1 = (opts.nodead && m.dead > 0) || (opts.noride && m.ride) || (opts.matched && m.unmatched > 0)
+    || (opts.goalT && m.goalFace !== 1) || (opts.minflips && (m.flips || 0) < opts.minflips);
   if (m.par > opts.par || m.closes > opts.closes || !m.stepped15 || !need || m.par < opts.minpar || vol1) return -500 + m.par * 10 + Math.min(m.steps, 10);
   let f = 12 * m.par + 2 * Math.min(m.steps, 14) - 1.5 * Math.max(0, m.steps - 16);
   f += 4 * Math.min(m.wrong, 10) + 3 * Math.min(m.firstWrong, 4);
@@ -463,7 +466,7 @@ function fmt(level, m, r, F) {
   lines.push(`  // par ${m.par} steps ${m.steps} len ${m.len} closes ${m.closes}${m.flips ? ' flips ' + m.flips : ''} | wrong ${m.wrong} (first ${m.firstWrong}) narrow ${m.narrow}/${m.par} fatal ${m.fatal} | dead ${m.dead} (${m.deadFrac}) basins ${m.deadEnds} | before ${+m.before} made ${+m.made} ride ${+m.ride} pageSwitch ${m.pageSwitches} | elements ${m.elements} voids ${m.voids} needs ${['Fold','Pop','Shade','Key','Ink','Glue','Flip'].filter((k) => m['needs' + k]).join('+') || '-'}${m.ride ? '+ride' : ''}` +
     (r ? ` | noise ${r.noise} blockers ${r.blockers} load ${r.loadBearing} irrelevant ${r.irrelevant} reuse ${r.reuse}` : '') + (F != null ? ` | F ${F.toFixed(1)}` : ''));
   lines.push(`  // ${m.solution}`);
-  if (r && r.decoys.length) lines.push(`  // decoys: ${r.decoys.join(' ')}`);
+  if (r && r.decoys && r.decoys.length) lines.push(`  // decoys: ${r.decoys.join(' ')}`);
   if (r && r.stoneRoles) lines.push(`  // stones: ${Object.entries(r.stoneRoles).map(([k, v]) => k + ':' + v).join('  ')}`);
   return lines.join('\n');
 }
@@ -481,7 +484,7 @@ function stats() {
 }
 
 function args() {
-  const a = process.argv.slice(2), o = { cmd: a[0] || 'stats', rows: 5, iters: 4000, restarts: 12, seed: 1, par: 4, closes: 2, minpar: 2, tiles: '.-xg', need: 'glue', from: null, top: 8, elements: 9, nodead: false, noride: false, leftx: false, maxvoid: 0, minlen: 0, maxlen: 0, matched: false, pages: 2 };
+  const a = process.argv.slice(2), o = { cmd: a[0] || 'stats', rows: 5, iters: 4000, restarts: 12, seed: 1, par: 4, closes: 2, minpar: 2, tiles: '.-xg', need: 'glue', from: null, top: 8, elements: 9, nodead: false, noride: false, leftx: false, maxvoid: 0, minlen: 0, maxlen: 0, matched: false, pages: 2, goalT: false, minflips: 0 };
   for (let i = 1; i < a.length; i++) {
     if (a[i].startsWith('--') && !a[i].includes(',')) { const k = a[i].slice(2); const v = a[i + 1]; o[k] = v === undefined || v.startsWith('--') ? true : isNaN(+v) ? v : +v; if (!(v === undefined || v.startsWith('--'))) i++; }
     else o.arg = a[i];
