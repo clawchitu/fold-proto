@@ -1,5 +1,6 @@
 // Levels as data; names, lines and hints live in i18n.js under each id. Each map row is 8 columns: 4 on the left page | 4 on the right page.
 // Column c on the right lands on column 7-c on the left when the book closes.
+// From chapter 6 a row may be 12 columns: a third page (the back of the right leaf) follows the right page; turned, it faces the left page the same way.
 // Legend: - empty  . paper  S start  G goal  x stone  k key  D door  i ink  p pop-up tab
 // A stone on the right page casts a shadow onto the left page while the book leans (91°–154°);
 // the shadow is walkable and slides towards the stone's mirror cell as the book closes.
@@ -366,6 +367,82 @@ const LEVELS = [
       '.--xg-G-',
       '----i---',
       '---.-.--',
+    ],
+  },
+  // ---- Vol. 2 · Chapter 6 「翻」 (docs/design-ch6.md): the book has a third page. Rows are 12 columns: left page | right
+  // page | third page (the back of the right leaf). 「翻」 turns the CLOSED book over: the third page now faces the left
+  // page, the right page is away. You can only turn while standing on the left page (the leaf under your feet will not
+  // turn); the press stamps like a close (keys / ink / glue between the two pages now touching); a third-page stone over
+  // your square comes down on you. Each turn is one posture change (par). Main path: `chapter: 6` — unlocked only when
+  // all seven main levels of chapter 5 are cleared (the 暗信 above are not required); the 暗信 of this chapter come later.
+  {
+    id: 'turn', tier: 'teach', chapter: 6, needs: ['needsFold', 'needsFlip'],   // 6-1 · teaching · the letter is not on this spread: close, turn the book over, and the stack leads onto the third page
+    map: [
+      '-S----------',
+      '-.----------',
+      '-.----------',
+      '-.----------',
+      '----------G-',
+    ],
+  },
+  {
+    id: 'overleaf', tier: 'easy', chapter: 6, len: 9, needs: ['needsFold', 'needsFlip'],   // 6-2 · you start on the right leaf, and the leaf under your feet will not turn: closed, step into the one stack whose right-page cell is a gap, land on the left page, then turn
+    map: [
+      '-..--S..----',
+      '-.----------',
+      '-.----------',
+      '-...--------',
+      '---.----G---',
+    ],
+  },
+  {
+    id: 'twoFaces', tier: 'mid', chapter: 6, len: 16, needs: ['needsFold', 'needsShade', 'needsFlip'],   // 6-3 · the right page's stone throws the shadow you walk to the one square you can close from; the third page's stone is the wall that makes it the only one
+    map: [
+      'S-----..-.Gx',
+      '.-------..--',
+      '.--.--..----',
+      '..----x.----',
+      '-...--------',
+    ],
+  },
+  {
+    id: 'inlay', tier: 'hard', chapter: 6, len: 16, needs: ['needsFold', 'needsShade', 'needsFlip'],   // 6-4 · two shadows at one angle pave the top row; close in the corner, turn, and the third page's stone is a wall beside the two-step stack walk down to the letter
+    map: [
+      '-.-.--x..-..',
+      '-.--.-.-..x-',
+      '.----.-x-G-.',
+      '.x-.....--..',
+      '...S....-.--',
+    ],
+  },
+  {
+    id: 'margin', tier: 'hard', chapter: 6, len: 16, needs: ['needsFold', 'needsShade', 'needsFlip'],   // 6-5 · the long bottom road ends under a stone; the shadow of the far stone at 55° is the one rung up to the square you close and turn from
+    map: [
+      '----....-...',
+      '.-.-....-.-.',
+      '---.x.x-.xG.',
+      '---..-.--.--',
+      'S.......---.',
+    ],
+  },
+  {
+    id: 'pressedFlower', tier: 'hard', chapter: 6, len: 19, needs: ['needsFold', 'needsShade', 'needsRide', 'needsFlip'],   // 6-6 · closing first glues a stone across and breaks the road (before): lean 40°, ride the shadow out at 60°, then close in the one safe square and turn
+    map: [
+      '-.S---------',
+      '..-..-------',
+      '.x--.x-x.---',
+      '.-.--..-.x--',
+      'g------x.G--',
+    ],
+  },
+  {
+    id: 'lastPage', tier: 'final', chapter: 6, len: 18, needs: ['needsFold', 'needsShade', 'needsRide', 'needsFlip'],   // 6-7 · chapter end · the letter is on the third page: a shadow at 55°, a ride to 50° onto the far strip, close there, turn — and the stack walk ends on her page
+    map: [
+      'S...--------',
+      '--..--------',
+      '.--.--------',
+      '.--.---xx---',
+      '--------G...',
     ],
   },
 ];

@@ -284,11 +284,11 @@ function analyse(level) {
   }
   // insight moves along the optimal path: hinge moves with no step between, and steps away from the goal
   let undo = 0, away = 0;
-  const hinge = (p, s) => s.a !== p.a || s.face !== p.face;
+  // a turn of the closed book is not counted as a hinge move here: close → turn is the rule, not a fold used as a tool
   for (let i = 1; i < best.path.length; i++) {
     const p = best.path[i - 1], s = best.path[i];
-    if (hinge(p, s)) { const n = best.path[i + 1]; if (n && hinge(s, n)) undo++; }
-    else if (hOf(s, g) > hOf(p, g)) away++;
+    if (s.a !== p.a) { const n = best.path[i + 1]; if (n && n.a !== s.a) undo++; }
+    else if (s.face === p.face && hOf(s, g) > hOf(p, g)) away++;
   }
   // twist: the mechanic used in a way its teaching level did not show
   const stampedStart = solve(level, ANGLES, { ...start, g: B.press(0, 0) }, { B });
@@ -353,6 +353,7 @@ const GATES = {
   dark:  { lenMin: 18, noiseMax: 2 },
 };
 const IDLE_MAX = 0.70;          // (gap cells + paper that carries nothing) / all cells, for mid and above (postmortem §1.1; teach / easy boards are allowed to be sparse)
+const IDLE_MAX_3 = 0.80;        // three-page boards: only two of the three pages face at any moment, so the same absolute density (≥ 12 carrying cells on 5 rows) is 20% of 60 cells
 const DEAD_FREE_CHAPTERS = 4;   // chapters whose levels may have no dead state at all (vol. 1: the game teaches, undo is a courtesy)
 
 let ok = true;
@@ -398,7 +399,8 @@ LEVELS.forEach((lv, i) => {
   if (gate.wrongMin && m.wrong < gate.wrongMin) fail(`TOO READABLE: ${m.wrong} wrong turns over the solution, ${tierName} needs ≥ ${gate.wrongMin}`);
   if (lv.len != null && m.len !== lv.len) fail(`LENGTH CHANGED: declared len ${lv.len}, measured ${m.len}`);
   if (gate.noiseMax != null && m.noise > gate.noiseMax) fail(`${m.noise} DECOY elements (${m.decoys.join(' ')}), max ${gate.noiseMax} for ${tierName}`);
-  if (!['teach', 'easy'].includes(lv.tier) && idle > IDLE_MAX) fail(`${Math.round(idle * 100)}% of the board carries nothing (${m.voids} gaps + ${m.irrelevant} idle cells), max ${IDLE_MAX * 100}% from mid up`);
+  const idleMax = lv.map[0].length > 2 * L.N ? IDLE_MAX_3 : IDLE_MAX;
+  if (!['teach', 'easy'].includes(lv.tier) && idle > idleMax) fail(`${Math.round(idle * 100)}% of the board carries nothing (${m.voids} gaps + ${m.irrelevant} idle cells), max ${idleMax * 100}% from mid up`);
   // every level must need the chapter's mechanic it was built on
   for (const need of lv.needs || []) if (!r[need]) fail(`does not need ${need}`);
   // vol. 1 has no dead ends by design (design-difficulty.md §1); from vol. 2 on they are a tool, and the game has undo

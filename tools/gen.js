@@ -158,7 +158,7 @@ function closure(g, k) {
 // ---------- cheap metrics (one graph) ----------
 function measure(level) {
   const B = prep(level);
-  const out = { rows: B.h, cols: B.w, solvable: false };
+  const out = { rows: B.h, cols: level.map[0].length, solvable: false };   // cols counts every page (12 with a third page)
   const all = level.map.join('');
   out.elements = [...all].filter((t) => ELEMENTS.includes(t)).length;
   out.voids = [...all].filter((t) => t === '-').length;
@@ -478,7 +478,7 @@ function stats() {
   LEVELS.forEach((lv, i) => {
     const f = full(lv, !lv.optional && (full.v2 !== false));
     agg.len += f.len; agg.n++;
-    console.log(`| ${i + 1} | ${lv.id}${lv.optional ? ' (暗信)' : ''} | ${f.rows} | ${f.elements} | ${f.voids}/${f.rows * 8} | ${f.irrelevant} | ${f.noise} | ${f.par} | ${f.steps} | **${f.len}** | ${f.closes} | ${f.wrong} | ${f.firstWrong} | ${f.narrow}/${f.par} | ${Math.round(f.deadFrac * 100)} | ${f.deadEnds} | ${+f.before} | ${+f.made} | ${f.v2 ? f.v2.score + ' ' + f.v2.tier : '-'} |`);
+    console.log(`| ${i + 1} | ${lv.id}${lv.optional ? ' (暗信)' : ''} | ${f.rows} | ${f.elements} | ${f.voids}/${f.rows * f.cols} | ${f.irrelevant} | ${f.noise} | ${f.par} | ${f.steps} | **${f.len}** | ${f.closes} | ${f.wrong} | ${f.firstWrong} | ${f.narrow}/${f.par} | ${Math.round(f.deadFrac * 100)} | ${f.deadEnds} | ${+f.before} | ${+f.made} | ${f.v2 ? f.v2.score + ' ' + f.v2.tier : '-'} |`);
   });
   console.log(`\nmean solution length (par + steps) over ${agg.n} levels: ${(agg.len / agg.n).toFixed(1)}`);
 }

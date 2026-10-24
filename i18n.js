@@ -349,6 +349,14 @@
       darkBack: ['背', '……先别过河。', '先斜起到 40°，踩着影子走到左页顶上的纸。合上：胶把那块石头粘过来。合着走到右页顶格，打开，往下走一格——你站在一块左页石头的背上。再合上：这一叠进不来，但出得去。往下走到左页第 5 行，打开到 55°，踩影子，合到 30°，下到终点。', '石头的背上也是纸。'],
       darkDoor: ['门', '……门后没有人。', '斜起到 60°，踩上右下石头的影子，然后一直合上——影子把你放在左页的纸上，书合拢，钥匙开门，胶把石头粘走。合着走到左页顶上（要换四次页）。打开到 50°，踩影子穿过开着的门，再合上，从门那一叠走到右页，打开，她就在旁边。', '乘着影子合上。'],
       darkInk: ['墨', '……墨干了再合。', '先走到右页的墨上合书：墨印到左页，胶把石头粘到右页。合着走到左页的墨印，打开到 55°，沿第 4 列走到顶上的影子，打开到 40°，影子带你到第 3 列，走到另一处墨印。在墨印上合书，合着走到右页顶格，打开，往下一格，再合——你站在左页石头的背上，从那里走到她的那一叠。', '三次合上，两处墨。'],
+      // vol. 2 chapter 6 「翻」 (docs/design-ch6.md). Names are objects and images; the order of moves lives in the hint.
+      turn: ['翻', '这一页上没有信。', '合上，翻过来，再合着往下走：信在第三页。', '合上的书，还能翻个面。'],
+      overleaf: ['背面', '你站着的那一页，翻不动。', '合上。合着走到右页是缺口的那一叠，你就到了左页——在那里翻。然后合着一直走到底，她在第三页的角上。'],
+      twoFaces: ['两面', '灯照着的是这一面。', '沿左页走到左下角，斜起到 60°：石头的影子接到第 4 列。顺着影子走到第 3 行，合上、翻过来，合着往上走到顶——信在第三页的顶行。', '先用这一面的影子，再翻。'],
+      inlay: ['夹层', '两块石头，一个角度。', '走到左页第 3 行的左端，斜起到 40°：两块石头的影子一起铺到顶行。走到右上角那格纸，合上、翻过来，合着往下走两格。', '顶行是走过去的，不是合过去的。'],
+      margin: ['页边', '底下那条路，尽头是石头。', '沿底行走到第 4 列，上到第 3 行，斜起到 55°：远处石头的影子落在第 2 行。踩上去，合上、翻过来，合着往下一格。', '先别合上。'],
+      pressedFlower: ['压花', '页角有胶。别急。', '先合上的话，胶把石头粘过来，路就断了。从起点走到左下角，斜起到 40° 踩上影子，再打开到 60°：影子带你到第 2 列。走到第 4 列第 2 行，合上、翻过来，合着往下走到底。', '合上之前，先把影子走完。'],
+      lastPage: ['末页', '翻到最后一页。', '走到左页右下角，斜起到 55°：影子接上第 3 列。踩上去，再合到 50°：影子带你到左上那条窄岸。在第 3 行合上——只有那一格安全——翻过来，合着往右走：她在末页的角上。', '两块石头，哪一块的影子送你回岸？'],
     },
     en: {
       bridge: ['Bridge', 'Across the gap, a scrap of card.', 'Close the phone: the card on the right lands exactly over the gap.'],
@@ -390,6 +398,13 @@
       darkBack: ['Back', '…do not cross yet.', 'Lean to 40° first and walk the shadow to the paper at the top of the left page. Close: the glue takes that stone. Closed, walk to the top of the right page, open, step down one: you stand on the back of a left-page stone. Close again: that stack cannot be entered, but it can be left. Walk down to row 5 of the left page, open to 55°, step on the shadow, close to 30°, step down to the letter.', 'A stone’s back is paper too.'],
       darkDoor: ['Door', '…nobody behind the door.', 'Lean to 60°, step onto the lower-right stone’s shadow, then keep closing: the shadow sets you on paper as the book shuts; the key opens the door, the glue takes the stone. Closed, walk to the top of the left page (you change pages four times). Open to 50°, walk the shadow through the open door, close again, walk that stack onto the right page, open: she is beside you.', 'Ride the shadow into the close.'],
       darkInk: ['Ink', '…close when the ink is dry.', 'Walk onto the right page’s ink and close: it prints onto the left page, the glue pulls the stone across. Closed, walk to the printed ink, open to 55°, up column 4 to the shadow at the top, open to 40°: it carries you to column 3 and the other ink print. Close on the ink, walk the stack to the top of the right page, open, step down one, close again: you stand on a left-page stone’s back. From there, walk to her stack.', 'Three closes, two inks.'],
+      turn: ['Turn', 'The letter is not on this page.', 'Close, turn the book over, and walk the stack down: the letter is on the third page.', 'A closed book can be turned over.'],
+      overleaf: ['Overleaf', 'The page under your feet will not turn.', 'Close. Closed, walk into the stack whose right-page cell is a gap: you land on the left page — turn there. Then walk the stack to the bottom; she is in the corner of the third page.'],
+      twoFaces: ['Two Faces', 'The lamp lights this face.', 'Walk the left page to its bottom-left, lean to 60°: the stone’s shadow reaches column 4. Follow the shadow up to row 3, close, turn, and walk the stack to the top — the letter is in the third page’s top row.', 'Use this face’s shadow first, then turn.'],
+      inlay: ['Inlay', 'Two stones, one angle.', 'Walk to the left end of row 3 on the left page, lean to 40°: both shadows pave the top row at once. Walk to the top-right paper, close, turn, and walk the stack two steps down.', 'The top row is walked to, not closed to.'],
+      margin: ['Margin', 'The low road ends under a stone.', 'Walk the bottom row to column 4, up to row 3, lean to 55°: the far stone’s shadow falls in row 2. Step on, close, turn, and step down once.', 'Do not close yet.'],
+      pressedFlower: ['Pressed Flower', 'Glue in the corner. No hurry.', 'Close first and the glue pulls a stone across: the road breaks. From the start walk to the bottom-left, lean to 40° onto the shadow, then open to 60°: it carries you to column 2. Walk to column 4, row 2, close, turn, and walk the stack to the bottom.', 'Finish the shadow before you close.'],
+      lastPage: ['Last Page', 'Turn to the last page.', 'Walk to the bottom-right of the left page, lean to 55°: a shadow reaches column 3. Step on, then close to 50°: it carries you to the narrow strip at the top-left. Close in row 3 — only that square is safe — turn, and walk the stack right: she is in the corner of the last page.', 'Two stones: whose shadow carries you back to shore?'],
     },
     ja: {
       bridge: ['橋', 'すき間の向こうに、厚紙が一枚。', 'スマホを閉じると、右の厚紙がすき間にぴたりと重なる。'],
