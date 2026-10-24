@@ -356,7 +356,7 @@
       inlay: ['夹层', '两块石头，一个角度。', '走到左页第 3 行的左端，斜起到 40°：两块石头的影子一起铺到顶行。走到右上角那格纸，合上、翻过来，合着往下走两格。', '顶行是走过去的，不是合过去的。'],
       margin: ['页边', '底下那条路，尽头是石头。', '沿底行走到第 4 列，上到第 3 行，斜起到 55°：远处石头的影子落在第 2 行。踩上去，合上、翻过来，合着往下一格。', '先别合上。'],
       pressedFlower: ['压花', '页角有胶。别急。', '先合上的话，胶把石头粘过来，路就断了。从起点走到左下角，斜起到 40° 踩上影子，再打开到 60°：影子带你到第 2 列。走到第 4 列第 2 行，合上、翻过来，合着往下走到底。', '合上之前，先把影子走完。'],
-      lastPage: ['末页', '翻到最后一页。', '走到左页右下角，斜起到 55°：影子接上第 3 列。踩上去，再合到 50°：影子带你到左上那条窄岸。在第 3 行合上——只有那一格安全——翻过来，合着往右走：她在末页的角上。', '两块石头，哪一块的影子送你回岸？'],
+      lastPage: ['末页', '翻到最后一页。', '沿右页走到底行再合上：胶把左页的石头粘过去。合着走到左页第 6 行第 3 列，打开到 40°：刚过河的那块石头投下影子，顺着它走到左边那条窄路，上到第 5 行第 1 列。在那里合上、翻过来，合着沿第 1 列走到顶——她在末页的右上角。', '被胶粘走的石头，影子也跟着去了对岸。'],
     },
     en: {
       bridge: ['Bridge', 'Across the gap, a scrap of card.', 'Close the phone: the card on the right lands exactly over the gap.'],
@@ -404,7 +404,7 @@
       inlay: ['Inlay', 'Two stones, one angle.', 'Walk to the left end of row 3 on the left page, lean to 40°: both shadows pave the top row at once. Walk to the top-right paper, close, turn, and walk the stack two steps down.', 'The top row is walked to, not closed to.'],
       margin: ['Margin', 'The low road ends under a stone.', 'Walk the bottom row to column 4, up to row 3, lean to 55°: the far stone’s shadow falls in row 2. Step on, close, turn, and step down once.', 'Do not close yet.'],
       pressedFlower: ['Pressed Flower', 'Glue in the corner. No hurry.', 'Close first and the glue pulls a stone across: the road breaks. From the start walk to the bottom-left, lean to 40° onto the shadow, then open to 60°: it carries you to column 2. Walk to column 4, row 2, close, turn, and walk the stack to the bottom.', 'Finish the shadow before you close.'],
-      lastPage: ['Last Page', 'Turn to the last page.', 'Walk to the bottom-right of the left page, lean to 55°: a shadow reaches column 3. Step on, then close to 50°: it carries you to the narrow strip at the top-left. Close in row 3 — only that square is safe — turn, and walk the stack right: she is in the corner of the last page.', 'Two stones: whose shadow carries you back to shore?'],
+      lastPage: ['Last Page', 'Turn to the last page.', 'Walk the right page down to the bottom row and close there: the glue pulls the left page’s stone across. Closed, walk to row 6, column 3 of the left page, then open to 40°: the stone that just crossed casts a shadow; follow it onto the narrow road at the left and up to row 5, column 1. Close there, turn, and walk the stack up column 1 — she is in the top-right corner of the last page.', 'A stone the glue takes brings its shadow with it.'],
     },
     ja: {
       bridge: ['橋', 'すき間の向こうに、厚紙が一枚。', 'スマホを閉じると、右の厚紙がすき間にぴたりと重なる。'],

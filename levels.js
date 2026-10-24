@@ -436,13 +436,14 @@ const LEVELS = [
     ],
   },
   {
-    id: 'lastPage', tier: 'final', chapter: 6, len: 18, needs: ['needsFold', 'needsShade', 'needsRide', 'needsFlip'],   // 6-7 · chapter end · the letter is on the third page: a shadow at 55°, a ride to 50° onto the far strip, close there, turn — and the stack walk ends on her page
+    id: 'lastPage', tier: 'final', chapter: 6, len: 20, needs: ['needsFold', 'needsShade', 'needsGlue', 'needsFlip'],   // 6-7 · chapter end (re-searched 10/24, Chitu: real dead ends) · the first close must be made from the bottom of the right page: the glue ferries the left-page stone across, and only that stone's shadow (40°) reaches the narrow road to the one square you can close and turn from; the stack walk up column 1 ends on her page
     map: [
-      'S...--------',
-      '--..--------',
-      '.--.--------',
-      '.--.---xx---',
-      '--------G...',
+      '----.S.---.G',
+      '-.----..----',
+      '-..-...----.',
+      '------..---.',
+      '.x---.g..---',
+      'x-..----..-.',
     ],
   },
 ];
