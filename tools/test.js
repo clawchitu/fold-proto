@@ -39,4 +39,43 @@ const mk = (map) => L.create({ map });
   const u = mk(['S...G...']);
   assert.strictEqual(L.pathBlock(u, { c: 4, r: 0 }, 'open').why, 'crease');
 }
+// Turning the page (vol. 2 ch. 6): a 12-column row is left | right | third page; the third page is the back of the right
+// leaf and faces the left page once the closed book is turned over (face = 1).
+{
+  const s = mk(['.S.-..x-' + '---x',      // row 0: right page has a stone at c6; third page has one at its c3 (grid c11)
+                '.g.-....' + '..x.',      // row 1: glue on the left at c1 faces paper on the right, a stone on the third page (its index 2)
+                '..k-....' + '.D..']);    // row 2: a key on the left at c2 faces paper on the right, a door on the third page (index 1)
+  assert.strictEqual(s.pages, 3); assert.strictEqual(s.face, 0); assert.strictEqual(s.w, 8, 'only two pages are visible');
+  assert.strictEqual(L.at(s, 6, 0), 'x'); assert.strictEqual(L.at(s, 5, 0), '.');
+  assert.strictEqual(L.flipBlock(s, 180), null, 'closed, standing on the left page: may turn');
+  assert.strictEqual(L.flipBlock(s, 120), 'open');
+  assert.strictEqual(L.flipBlock({ ...s, char: { c: 5, r: 0 } }, 180), 'leaf', 'standing on the right leaf: cannot turn it');
+  assert.strictEqual(L.flipBlock(mk(['S......x']), 180), 'single', 'a two-page book has nothing to turn to');
+  // shadows at face 0 come from the right page, at face 1 from the third page
+  assert.deepStrictEqual([...L.shadows(s, 140).keys()], ['2,0'], 'right-page stone at c6 shades column 2 at 140');
+  const f = L.flip(s);
+  assert.strictEqual(s.face, 1);
+  assert.strictEqual(L.at(s, 7, 0), 'x', 'visible column 7 now reads the third page'); assert.strictEqual(L.at(s, 6, 0), '-');
+  assert.strictEqual(f.crush, null, 'the third-page stone comes down on column 0, not on the start (1,0)');
+  // the press stamped the left page against the third page: glue pulled the stone, the key opened the door
+  assert.deepStrictEqual(f.events.map((e) => e.type).sort(), ['door', 'glue']);
+  assert.strictEqual(L.at(s, 1, 1), 'x', 'glue at (1,1) took the third-page stone facing it'); assert.strictEqual(L.at(s, 6, 1), '.');
+  assert.strictEqual(L.at(s, 5, 2), 'o'); assert.strictEqual(L.at(s, 2, 2), '.');
+  assert.strictEqual(s.grid[1][10], '.', 'the stamp wrote through to the third page'); assert.strictEqual(s.grid[0][6], 'x', 'the right page is untouched');
+  assert.deepStrictEqual([...L.shadows(s, 140).keys()], ['1,0'], 'third-page stone at c7 shades column 1 at 140');
+  // turning onto a stone crushes you, like a close does
+  const t = mk(['-S..-...' + '--x-']);
+  t.char = { c: 1, r: 0 };
+  assert.strictEqual(L.flip(t).crush, 'stone');
+  // the goal may live on the third page: visible only once turned
+  const u = mk(['S...-...' + '...G']);
+  u.char = { c: 3, r: 0 };
+  assert.strictEqual(L.isWin(u, 'fold'), false);
+  L.flip(u);
+  assert.strictEqual(L.isWin(u, 'fold'), false, 'stacked over column 0 of the facing page, not column 3');
+  u.char = { c: 0, r: 0 };
+  assert.strictEqual(L.isWin(u, 'fold'), true, 'closed and turned, the goal is in the stack');
+  assert.strictEqual(L.flipBlock(u, 180), null, 'turning back is allowed too');
+  L.flip(u); assert.strictEqual(u.face, 0); assert.strictEqual(L.isWin(u, 'fold'), false);
+}
 console.log('logic tests passed');

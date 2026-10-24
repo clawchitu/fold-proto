@@ -8,6 +8,12 @@
 //         x  stone      k  key        D door     o opened door
 //         i  ink blot   p  pop-up tab (pairs across the hinge)
 //         g  glue (vol. 2): walkable; when the book closes it pulls the stone facing it onto itself (one use)
+//
+// Pages (vol. 2 ch. 6 「翻页」, docs/design-ch6.md): a map row is 8 columns (left page | right page) or 12 columns
+// (left page | right page | third page). The third page is the back of the right leaf. Turning the closed book over and
+// opening it again shows the left page with the third page facing it instead (s.face = 1); turn it over again and the
+// right page is back. Whichever page faces the left page is read through columns N..2N-1 (at / put), so every rule
+// below — stacks, stamps, shadows, crushing — applies to the facing page without knowing which face it is.
 (function (root) {
   const N = 4;
   const FOLD_MIN = 155;              // folded: stacked tiles connect
@@ -47,10 +53,14 @@
     const grid = level.map.map((row) => row.split(''));
     let start = null;
     grid.forEach((row, r) => row.forEach((t, c) => { if (t === 'S') start = { c, r }; }));
-    return { grid, h: grid.length, w: 2 * N, char: { ...start }, start };
+    // pages: 2 (left | right) or 3 (left | right | third, the back of the right leaf). The start is on the first spread.
+    return { grid, h: grid.length, w: 2 * N, pages: grid[0].length / N, face: 0, char: { ...start }, start };
   }
 
-  const at = (s, c, r) => (r >= 0 && r < s.h && c >= 0 && c < s.w ? s.grid[r][c] : '-');
+  // The grid column behind a visible column: the facing page's columns N..2N-1 read from the third page when turned.
+  const colOf = (s, c) => (s.face && c >= N ? c + N : c);
+  const at = (s, c, r) => (r >= 0 && r < s.h && c >= 0 && c < s.w ? s.grid[r][colOf(s, c)] : '-');
+  const put = (s, c, r, t) => { s.grid[r][colOf(s, c)] = t; };
 
   // Walkable stacked position (q in 0..N-1) when folded.
   function foldOpen(s, q, r) {
@@ -210,21 +220,42 @@
         const m = mirror(q);
         const pair = [[q, m], [m, q]];
         for (const [a, b] of pair) {
-          const A = s.grid[r][a], B = s.grid[r][b];
+          const A = at(s, a, r), B = at(s, b, r);
           if (A === 'k' && B === 'D') {
-            s.grid[r][a] = '.'; s.grid[r][b] = 'o';
+            put(s, a, r, '.'); put(s, b, r, 'o');
             events.push({ type: 'door', cells: [{ c: a, r }, { c: b, r }] });
           } else if (A === 'i' && B === '-') {
-            s.grid[r][b] = 'i';
+            put(s, b, r, 'i');
             events.push({ type: 'ink', cells: [{ c: a, r }, { c: b, r }] });
           } else if (A === 'g' && B === 'x') {
-            s.grid[r][a] = 'x'; s.grid[r][b] = '.';
+            put(s, a, r, 'x'); put(s, b, r, '.');
             events.push({ type: 'glue', cells: [{ c: b, r }, { c: a, r }] });
           }
         }
       }
     }
     return events;
+  }
+
+  // Turning the page (vol. 2 ch. 6): only a closed book can be turned over, and only by someone standing on the page
+  // that stays — the left page. The leaf under your feet cannot be turned. Why not, or null when allowed:
+  // 'single' (this book has no third page) | 'open' (the book is not closed) | 'leaf' (you stand on the right leaf).
+  function flipBlock(s, a) {
+    if (s.pages < 3) return 'single';
+    if (a < FOLD_MIN) return 'open';
+    if (isRight(s.char.c)) return 'leaf';
+    return null;
+  }
+
+  // Turn the closed book over: the other face of the right leaf now presses on the left page. Pressing stamps as a
+  // close does (keys, ink, glue — between the left page and the page now facing it). Returns { events, crush }:
+  // crush is what the new facing page did to you the moment it came down ('stone' | 'glue' | null), judged before the
+  // stamp, exactly as a close is. The caller decides what a crush means (back to the start).
+  function flip(s) {
+    s.face ^= 1;
+    const crush = crushCause(s, s.char, FOLD_MIN);
+    const events = stamp(s);
+    return { events, crush };
   }
 
   function isWin(s, mode) {
@@ -234,6 +265,7 @@
   }
 
   const api = { N, FOLD_MIN, POP_MIN, POP_MAX, SHADE_MIN, mirror, proj, isRight, modeOf, isFloor, isBlock,
-    isOpaque, shadowColumn, shadows, crushed, crushCause, cellBlock, stepBlock, pathBlock, ride, create, at, neighbours, findPath, stamp, isWin };
+    isOpaque, shadowColumn, shadows, crushed, crushCause, cellBlock, stepBlock, pathBlock, ride, create, at, colOf, neighbours, findPath, stamp,
+    flipBlock, flip, isWin };
   if (typeof module !== 'undefined') module.exports = api; else root.FoldLogic = api;
 })(this);
