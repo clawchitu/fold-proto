@@ -393,7 +393,10 @@ LEVELS.forEach((lv, i) => {
   const m = GEN.full(lv, false);
   const gate = lv.optional ? GATES.dark : GATES[lv.tier] || {}, tierName = lv.optional ? '暗信' : lv.tier;
   const idle = (m.voids + m.irrelevant) / (m.rows * m.cols);
-  console.log(`   v3 len=${m.len} (par ${m.par} + steps ${m.steps}) wrong=${m.wrong} first=${m.firstWrong} narrow=${m.narrow}/${m.par} dead=${Math.round(m.deadFrac * 100)}% basins=${m.deadEnds} noise=${m.noise} blockers=${m.blockers} irrelevant=${m.irrelevant} idle=${Math.round(idle * 100)}% reuse=${m.reuse}`);
+  console.log(`   v3 len=${m.len} (par ${m.par} + steps ${m.steps}) wrong=${m.wrong} first=${m.firstWrong} narrow=${m.narrow}/${m.par} dead=${Math.round(m.deadFrac * 100)}% basins=${m.deadEnds} noise=${m.noise} blockers=${m.blockers} irrelevant=${m.irrelevant} idle=${Math.round(idle * 100)}% reuse=${m.reuse} | phases=${m.phases} configs=${m.configs} backs=${m.backs}`);
+  // difficulty-v3.md batch 1: a reworked level declares the grid-changing presses (phases) and stone's-back closes (backs) it must keep
+  if (lv.phases != null && m.phases < lv.phases) fail(`PHASES: ${m.phases} grid-changing presses in the solution, declared ≥ ${lv.phases}`);
+  if (lv.backs != null && m.backs < lv.backs) fail(`BACKS: ${m.backs} closes from a stone's back, declared ≥ ${lv.backs}`);
   if (gate.lenMin && m.len < gate.lenMin) fail(`TOO SHORT: minimal solution is ${m.len} actions, ${tierName} needs ≥ ${gate.lenMin}`);
   if (gate.lenMax && m.len > gate.lenMax) fail(`TOO LONG for a teaching level: minimal solution is ${m.len} actions, max ${gate.lenMax}`);
   if (gate.wrongMin && m.wrong < gate.wrongMin) fail(`TOO READABLE: ${m.wrong} wrong turns over the solution, ${tierName} needs ≥ ${gate.wrongMin}`);

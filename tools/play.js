@@ -19,7 +19,8 @@ const I = window.I18N; I.setLang && I.setLang('en');
 const [, , id, ...actions] = process.argv;
 const lv = LEVELS.find((l) => l.id === id);
 if (!lv) { console.log('no level ' + id); process.exit(1); }
-const text = I.level(lv.id);
+let text; try { text = I.level(lv.id); } catch (e) { text = { name: lv.id, line: '', hint: '(this level has no hint text yet)', hint1: null }; }   // a candidate not yet in i18n.js
+if (lv.text) text = { ...text, ...lv.text };   // a candidate may carry its draft name / line / hint / hint1 on the level itself
 const s = L.create(lv);
 let angle = 180, rung = 0, hintsUsed = 0, log = [], undo = [], won = false, turns = 0, steps = 0;
 const fold = () => 180 - angle;                       // logic.js angle: 0 flat … 180 closed

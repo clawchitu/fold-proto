@@ -28,7 +28,7 @@ const I = window.I18N;
 const LEANS = C.SHADE.map((a) => 180 - a);   // 80 70 60 55 50 40 30
 const phys = (fold) => 180 - fold;
 
-const text = (id) => { const out = {}; for (const lang of ['zh', 'en']) { I.setLang(lang); out[lang] = I.level(id) || {}; } return out; };
+const text = (id) => { const out = {}; for (const lang of ['zh', 'en']) { I.setLang(lang); try { out[lang] = I.level(id) || {}; } catch (e) { out[lang] = {}; } } return out; };   // a candidate not yet in i18n.js has no text
 function levelNumber(i) {
   const starts = [0, 5, 13, 19, 25, 36];   // first index of chapters 1–6 (levels.js; 暗信 at 32–34 are skipped in the count)
   const lv = LEVELS[i];
@@ -139,8 +139,18 @@ function sheet(lv) {
     out.push('');
     out.push(...leans(w2, '== VIEW 6b · leaning while turned: the third page’s stones cast the shadows now =='));
     out.push('');
-    const g3 = B.press(g2, 0);
-    if (B.grids[g3].flat().join('') !== w2.grid.flat().join('')) { out.push('== turning back to the right page would do: ' + pressEvents({ ...w2, face: 0 }).join('; ') + ' =='); out.push(''); }
+    const g3 = B.press(g2, 0), w3 = worldOf(B, g3, 0);
+    if (g3 !== g2 && B.grids[g3].flat().join('') !== w2.grid.flat().join('')) {
+      out.push('== VIEW 7 · closed and TURNED BACK (the right page faces the left page again; this press changes the board) ==');
+      out.push(...closed({ ...w2, face: 0 }, w3, 'turning back'));
+      out.push('');
+      out.push(...flat(w3, '== VIEW 8 · turned back and opened: left page | right page, as they now are =='));
+      out.push('');
+      out.push(...leans(w3, '== VIEW 8b · leaning after turning back =='));
+      out.push('');
+      const g4 = B.press(g3, 1);
+      if (g4 !== g3 && B.grids[g4].flat().join('') !== w3.grid.flat().join('')) { out.push('== turning over a second time would do: ' + pressEvents({ ...w3, face: 1 }).join('; ') + ' =='); out.push(''); }
+    } else { out.push('== turning back to the right page changes nothing on the board =='); out.push(''); }
   }
   return out.join('\n');
 }
@@ -154,7 +164,7 @@ RULES (everything you know)
 - STANDING (60°–120°): pop-up tabs p on both sides of the hinge in the same row stand up and bridge the crease: you can step from one to the other.
 - LEANING (the right page tilted towards the lamp, physical 26°–89°): every stone on the facing page casts a shadow onto the left page in the same row. The shadow starts at the hinge-side and slides outward (towards column 1) as the book closes further; at 0° the stone itself lands on its mirror square (col c on the right lands on col 9−c on the left). A shadow over a GAP is walkable floor while it lasts; a shadow over paper is just paper. If you stand on a shadow-over-gap and the hinge moves, the shadow carries you with it (a RIDE) — if it slides onto a stone or off the page you fall; if it reaches 0° the stone lands on you. Opening the book (towards 180°) moves shadows back towards the hinge, so a ride can go either way.
 - CLOSED (0°): the facing page lies ON the left page. You walk the stacks (stack columns 1–4): a stack can be entered if either of its two squares is paper and neither is a stone or a locked door. Where both squares are paper you stay on the page you are on; where only one is paper you switch to that page. Opening the book again, you are on whichever page you ended on.
-- CLOSING CRUSHES: if you stand on the left page and a stone on the facing page is over your square (its mirror), closing crushes you: back to the start, board unchanged otherwise. Standing on the facing page above a left-page stone is safe (you stand on its back).
+- CLOSING CRUSHES: if you stand on the left page and a stone on the facing page is over your square (its mirror), closing crushes you: back to the start, board unchanged otherwise. Standing on the facing page above a left-page stone is safe (you stand on its back) — and when the book closes you are then INSIDE a stack that the stack map marks blocked: you can walk out of it into neighbouring stacks, but no one can walk into it. (Earlier levels used this.)
 - THE PRESS (the moment the book closes, wherever you stand, all at once): a key pressed against a door opens it; ink pressed against a gap prints onto it (that gap becomes paper); glue pressed against a stone pulls the stone onto the glue square (the stone changes page; its old square becomes paper; its shadow and its crushing go with it; the glue is used up). Standing on glue when it pulls a stone = crushed.
 - THREE-PAGE letters only: the third page is the back of the right leaf. With the book CLOSED and you standing on the LEFT page you may TURN the book over: the third page now faces the left page (columns 5–8 show the third page). Turning is a press too (keys/ink/glue between left and third page act; a third-page stone over your square crushes you — then the whole level restarts). Turn again to come back to the right page (another press). The letter may lie on the third page.
 - Undo exists in the game, but THIS test is one shot.

@@ -253,6 +253,20 @@ function measure(level) {
   out.needsInk = all.includes('i') && !solvableFrom(prep({ map: level.map.map((r) => r.split('i').join('.')) }), B.start);
   // which page switches: the solution lands on the other page after an open (land() chose the far page)
   out.pageSwitches = states.filter((s, i) => i > 0 && L.isRight(s.c) !== L.isRight(states[i - 1].c) && posture(states[i - 1].a) !== 'fold' && posture(s.a) !== 'fold').length;
+  // v3 (docs/difficulty-v3.md §3.2): what one glance at the board cannot settle.
+  //   phases  – presses (closes, turns) in the solution that CHANGE the grid: each is a board the player must imagine,
+  //             not read. Two-page letters can never exceed 1 (a press is idempotent after the first), three-page ones can.
+  //   configs – distinct closed-book configurations (grid, face) the solution closes or turns into: how many different
+  //             stack / crush maps must be held at once.
+  //   backs   – closes made standing on the facing page directly over a left-page stone (a stone's back): the stack is
+  //             marked blocked on every map, yet you are inside it. The rule consequence that stopped the owner (暗一, 暗三).
+  const presses = states.map((s, i) => i > 0 && ((posture(s.a) === 'fold' && posture(states[i - 1].a) !== 'fold') || s.face !== states[i - 1].face) ? i : -1).filter((i) => i > 0);
+  const gridSig = (g) => B.G[g].flat().join('');   // grid 1 may equal grid 0 in content (check.js keeps "has been closed" apart)
+  out.phases = presses.filter((i) => gridSig(states[i].g) !== gridSig(states[i - 1].g)).length;
+  // configurations are keyed on the board the player closes FROM (grid before the press + face): two closes on a
+  // two-page letter whose first press changed the board count as two
+  out.configs = new Set(presses.map((i) => gridSig(states[i - 1].g) + ',' + states[i].face)).size;
+  out.backs = presses.filter((i) => { const p = states[i - 1], s = states[i]; return s.face === p.face && L.isRight(p.c) && L.at(wof(B, p), L.mirror(p.c), p.r) === 'x'; }).length;
   return out;
 }
 
@@ -329,8 +343,11 @@ function fitness(level, opts, m) {
   // (3-3 comes before the ride is taught); --minlen reject short boards early
   const vol1 = (opts.nodead && m.dead > 0) || (opts.noride && m.ride) || (opts.matched && m.unmatched > 0)
     || (opts.goalT && m.goalFace !== 1) || (opts.minflips && (m.flips || 0) < opts.minflips);
-  if (m.par > opts.par || m.closes > opts.closes || !m.stepped15 || !need || m.par < opts.minpar || vol1) return -500 + m.par * 10 + Math.min(m.steps, 10);
+  // v3 floors (difficulty-v3.md): --phases N grid-changing presses, --backs N closes from a stone's back, --configs N closed configurations
+  const v3 = (opts.phases && m.phases < opts.phases) || (opts.backs && m.backs < opts.backs) || (opts.configs && m.configs < opts.configs);
+  if (m.par > opts.par || m.closes > opts.closes || !m.stepped15 || !need || m.par < opts.minpar || vol1 || v3) return -500 + m.par * 10 + Math.min(m.steps, 10) + 5 * (m.phases || 0) + 5 * (m.backs || 0);
   let f = 12 * m.par + 2 * Math.min(m.steps, 14) - 1.5 * Math.max(0, m.steps - 16);
+  f += 8 * Math.min(m.phases, 3) + 8 * Math.min(m.backs, 2) + 3 * Math.min(m.configs, 3);   // v3: imagined boards, stone's backs, held configurations
   f += 4 * Math.min(m.wrong, 10) + 3 * Math.min(m.firstWrong, 4);
   f += 6 * Math.min(m.deadEnds, 2) + 6 * (m.deadFrac >= 0.15 && m.deadFrac <= 0.7 ? 1 : 0);
   f += 8 * (m.before ? 1 : 0) + 6 * (m.made ? 1 : 0) + 3 * (m.ride ? 1 : 0) + 3 * Math.min(m.fatal, 2) + 3 * Math.min(m.pageSwitches, 2);
@@ -463,7 +480,7 @@ function fmt(level, m, r, F) {
   lines.push(`  { id: 'TODO', tier: 'TODO', map: [`);
   for (const row of level.map) lines.push(`      '${row}',`);
   lines.push('  ] },');
-  lines.push(`  // par ${m.par} steps ${m.steps} len ${m.len} closes ${m.closes}${m.flips ? ' flips ' + m.flips : ''} | wrong ${m.wrong} (first ${m.firstWrong}) narrow ${m.narrow}/${m.par} fatal ${m.fatal} | dead ${m.dead} (${m.deadFrac}) basins ${m.deadEnds} | before ${+m.before} made ${+m.made} ride ${+m.ride} pageSwitch ${m.pageSwitches} | elements ${m.elements} voids ${m.voids} needs ${['Fold','Pop','Shade','Key','Ink','Glue','Flip'].filter((k) => m['needs' + k]).join('+') || '-'}${m.ride ? '+ride' : ''}` +
+  lines.push(`  // par ${m.par} steps ${m.steps} len ${m.len} closes ${m.closes}${m.flips ? ' flips ' + m.flips : ''} | wrong ${m.wrong} (first ${m.firstWrong}) narrow ${m.narrow}/${m.par} fatal ${m.fatal} | dead ${m.dead} (${m.deadFrac}) basins ${m.deadEnds} | before ${+m.before} made ${+m.made} ride ${+m.ride} pageSwitch ${m.pageSwitches} | v3 phases ${m.phases} configs ${m.configs} backs ${m.backs} | elements ${m.elements} voids ${m.voids} needs ${['Fold','Pop','Shade','Key','Ink','Glue','Flip'].filter((k) => m['needs' + k]).join('+') || '-'}${m.ride ? '+ride' : ''}` +
     (r ? ` | noise ${r.noise} blockers ${r.blockers} load ${r.loadBearing} irrelevant ${r.irrelevant} reuse ${r.reuse}` : '') + (F != null ? ` | F ${F.toFixed(1)}` : ''));
   lines.push(`  // ${m.solution}`);
   if (r && r.decoys && r.decoys.length) lines.push(`  // decoys: ${r.decoys.join(' ')}`);
@@ -484,9 +501,10 @@ function stats() {
 }
 
 function args() {
-  const a = process.argv.slice(2), o = { cmd: a[0] || 'stats', rows: 5, iters: 4000, restarts: 12, seed: 1, par: 4, closes: 2, minpar: 2, tiles: '.-xg', need: 'glue', from: null, top: 8, elements: 9, nodead: false, noride: false, leftx: false, maxvoid: 0, minlen: 0, maxlen: 0, matched: false, pages: 2, goalT: false, minflips: 0 };
+  const a = process.argv.slice(2), o = { cmd: a[0] || 'stats', rows: 5, iters: 4000, restarts: 12, seed: 1, par: 4, closes: 2, minpar: 2, tiles: '.-xg', need: 'glue', from: null, top: 8, elements: 9, nodead: false, noride: false, leftx: false, maxvoid: 0, minlen: 0, maxlen: 0, matched: false, pages: 2, goalT: false, minflips: 0, phases: 0, backs: 0, configs: 0 };
   for (let i = 1; i < a.length; i++) {
-    if (a[i].startsWith('--') && !a[i].includes(',')) { const k = a[i].slice(2); const v = a[i + 1]; o[k] = v === undefined || v.startsWith('--') ? true : isNaN(+v) ? v : +v; if (!(v === undefined || v.startsWith('--'))) i++; }
+    if (a[i].startsWith('--') && !a[i].includes(',')) { const k = a[i].slice(2); const v = a[i + 1]; const isFlag = v === undefined || (v.startsWith('--') && !v.includes(','));   // a map row may begin with '--' (gaps): a comma marks it as a value
+      o[k] = isFlag ? true : isNaN(+v) ? v : +v; if (!isFlag) i++; }
     else o.arg = a[i];
   }
   return o;
