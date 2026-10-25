@@ -18,7 +18,7 @@ const TIERS = { teach: [0, 2], easy: [0, 6], mid: [0, 99], hard: [5, 99], final:
 // chapter, not every level. teach–mid ≤ 3 changes; hard / final ≤ 4; optional 「暗信」 challenge levels ≤ 6.
 // Full closes ≤ 2 on the main path, ≤ 3 in 「暗信」. A chapter's main path may not exceed 24 changes in total.
 const PAR_MAX = { teach: 3, easy: 3, mid: 3, hard: 4, final: 5, dark: 6 };   // final 4 → 5 (Chitu 10/25, difficulty-v3.md §6: the 暗信 at par 5–6 are the only levels that resisted the owner)
-const CLOSES_MAX = { main: 2, dark: 3 };
+const CLOSES_MAX = { main: 2, final: 3, dark: 3 };   // final 2 → 3 (Chitu 10/25, difficulty-v3.md §6: the third close after a closed walk is what held 暗三)
 const CHAPTER_PAR_MAX = 24;
 const CHAPTER_START = [0, 5, 13, 19, 25];   // first level index of chapters 1–5 (levels.js comments); later levels may carry `chapter`
 const chapterOf = (lv, i) => lv.chapter || CHAPTER_START.filter((s) => s <= i).length;
@@ -380,7 +380,7 @@ LEVELS.forEach((lv, i) => {
   // fatigue budget (plan.md §12.3, tiered by difficulty-postmortem.md §1.4): posture changes and full closes per tier
   const shut = (x) => x.startsWith('fold') || x.startsWith('flip');   // a page turn happens inside one close
   const closes = full.steps.filter((x, i, arr) => x.startsWith('fold') && (i === 0 || !shut(arr[i - 1]))).length;
-  const parMax = lv.optional ? PAR_MAX.dark : PAR_MAX[lv.tier] || 3, closesMax = lv.optional ? CLOSES_MAX.dark : CLOSES_MAX.main;
+  const parMax = lv.optional ? PAR_MAX.dark : PAR_MAX[lv.tier] || 3, closesMax = lv.optional ? CLOSES_MAX.dark : lv.tier === 'final' ? CLOSES_MAX.final : CLOSES_MAX.main;
   if (full.cost > parMax) fail(`OVER PAR: ${full.cost} posture changes (max ${parMax} for ${lv.optional ? '暗信' : lv.tier})`);
   if (closes > closesMax) fail(`OVER PAR: ${closes} full closes (max ${closesMax})`);
   if (!lv.optional) { const ch = chapterOf(lv, i); chapterPar[ch] = (chapterPar[ch] || 0) + full.cost; }

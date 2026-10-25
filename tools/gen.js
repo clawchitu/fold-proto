@@ -346,7 +346,7 @@ function fitness(level, opts, m) {
   const vol1 = (opts.nodead && m.dead > 0) || (opts.noride && m.ride) || (opts.matched && m.unmatched > 0)
     || (opts.goalT && m.goalFace !== 1) || (opts.minflips && (m.flips || 0) < opts.minflips);
   // v3 floors (difficulty-v3.md): --phases N grid-changing presses, --backs N closes from a stone's back, --configs N closed configurations
-  const v3 = (opts.phases && m.phases < opts.phases) || (opts.backs && m.backs < opts.backs) || (opts.configs && m.configs < opts.configs) || (opts.switches && m.stackSwitches < opts.switches);
+  const v3 = (opts.phases && m.phases < opts.phases) || (opts.backs && m.backs < opts.backs) || (opts.configs && m.configs < opts.configs) || (opts.switches && m.stackSwitches < opts.switches) || (opts.mincloses && m.closes < opts.mincloses);
   if (m.par > opts.par || m.closes > opts.closes || !m.stepped15 || !need || m.par < opts.minpar || vol1 || v3) return -500 + m.par * 10 + Math.min(m.steps, 10) + 5 * (m.phases || 0) + 5 * (m.backs || 0);
   let f = 12 * m.par + 2 * Math.min(m.steps, 14) - 1.5 * Math.max(0, m.steps - 16);
   f += 8 * Math.min(m.phases, 3) + 8 * Math.min(m.backs, 2) + 3 * Math.min(m.configs, 3) + 4 * Math.min(m.stackSwitches, 4);   // v3: imagined boards, stone's backs, held configurations
@@ -503,7 +503,7 @@ function stats() {
 }
 
 function args() {
-  const a = process.argv.slice(2), o = { cmd: a[0] || 'stats', rows: 5, iters: 4000, restarts: 12, seed: 1, par: 4, closes: 2, minpar: 2, tiles: '.-xg', need: 'glue', from: null, top: 8, elements: 9, nodead: false, noride: false, leftx: false, maxvoid: 0, minlen: 0, maxlen: 0, matched: false, pages: 2, goalT: false, minflips: 0, phases: 0, backs: 0, configs: 0, switches: 0 };
+  const a = process.argv.slice(2), o = { cmd: a[0] || 'stats', rows: 5, iters: 4000, restarts: 12, seed: 1, par: 4, closes: 2, minpar: 2, tiles: '.-xg', need: 'glue', from: null, top: 8, elements: 9, nodead: false, noride: false, leftx: false, maxvoid: 0, minlen: 0, maxlen: 0, matched: false, pages: 2, goalT: false, minflips: 0, phases: 0, backs: 0, configs: 0, switches: 0, mincloses: 0 };
   for (let i = 1; i < a.length; i++) {
     if (a[i].startsWith('--') && !a[i].includes(',')) { const k = a[i].slice(2); const v = a[i + 1]; const isFlag = v === undefined || (v.startsWith('--') && !v.includes(','));   // a map row may begin with '--' (gaps): a comma marks it as a value
       o[k] = isFlag ? true : isNaN(+v) ? v : +v; if (!isFlag) i++; }
