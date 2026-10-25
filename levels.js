@@ -436,14 +436,14 @@ const LEVELS = [
     ],
   },
   {
-    id: 'lastPage', tier: 'final', chapter: 6, len: 20, needs: ['needsFold', 'needsShade', 'needsGlue', 'needsFlip'],   // 6-7 · chapter end (re-searched 10/24, Chitu: real dead ends) · the first close must be made from the bottom of the right page: the glue ferries the left-page stone across, and only that stone's shadow (40°) reaches the narrow road to the one square you can close and turn from; the stack walk up column 1 ends on her page
+    id: 'lastPage', tier: 'final', chapter: 6, len: 18, phases: 2, backs: 1, needs: ['needsFold', 'needsShade', 'needsFlip'],   // (the glue fires at the turn, not at the first close, so glueFires is not asserted) 6-7 · chapter end · reworked 2026-10-25 under difficulty-v3.md §6 (batch 1, candidate lp2): the only way onto the left page is to close standing on the back of the left-page stone (top-right paper over (0,1)); then the stone travels three pages — the turn lets the left page's glue (1,2) pull the third page's stone across, turning back lets the right page's glue (6,2) take it on — and only then does a shadow fall on the gap beside her. Glance test: 0/2 one-shot, 1/2 two-shot; text samplers 11 / 12 calls, 0 hints
     map: [
-      '----.S.---.G',
-      '-.----..----',
-      '-..-...----.',
-      '------..---.',
-      '.x---.g..---',
-      'x-..----..-.',
+      '.--.-..-----',
+      'xGx-.-x.----',
+      '-g--.-gS--x-',
+      '--.i-.-.-.--',
+      '--..---..x--',
+      '...----x....',
     ],
   },
 ];
