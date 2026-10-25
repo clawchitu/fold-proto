@@ -250,13 +250,13 @@ const LEVELS = [
     ],
   },
   {
-    id: 'twoFigures', tier: 'final', len: 19, needs: ['needsFold', 'needsShade', 'needsRide', 'needsKey'],   // 4-6 · vol. 1 finale · close over the stone's back to reach the left page, two shadows at two angles, and the last close is from the doorway the first close opened: the stack walk ends in her square
+    id: 'twoFigures', tier: 'final', len: 18, backs: 1, needs: ['needsFold', 'needsShade', 'needsRide', 'needsKey'],   // 4-6 · vol. 1 finale · reworked 2026-10-25 under difficulty-v3.md §6 (batch 1, candidate B): the right page you start on reaches the left page only through the stack over the left-page stone (2,2) — stand on its back and close (that close also opens the door with the key in the corner); the open left page reaches the doorway only along two shadows at two angles (80°, then 55°), and the doorway is the one square the last close carries into her stack. Glance test: one-shot 2/3 over fresh readers (not at the vol. 1 bar of ≤ 1/2; adopted as the best candidate, par-5 variant tf5 also fell 2/2)
     map: [
-      '.--..--x',
-      'D--..-Gk',
-      '-.-..Sx-',
-      '-.-x.---',
-      '-.-.-.--',
+      '-...----',
+      '..-----x',
+      '-.x.S.--',
+      '---..--G',
+      'D.-...xk',
     ],
   },
   // ---- Vol. 2 「翻页」 · Chapter 5 「胶」 (docs/design-v2c1.md): letter paper with glue on it. One new tile, one sentence:

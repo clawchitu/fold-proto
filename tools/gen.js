@@ -267,6 +267,8 @@ function measure(level) {
   // two-page letter whose first press changed the board count as two
   out.configs = new Set(presses.map((i) => gridSig(states[i - 1].g) + ',' + states[i].face)).size;
   out.backs = presses.filter((i) => { const p = states[i - 1], s = states[i]; return s.face === p.face && L.isRight(p.c) && L.at(wof(B, p), L.mirror(p.c), p.r) === 'x'; }).length;
+  //   stackSwitches – page changes while walking the closed book (land()): which page you are on is history, not on any map
+  out.stackSwitches = states.filter((s, i) => i > 0 && s.a === states[i - 1].a && s.face === states[i - 1].face && posture(s.a) === 'fold' && L.isRight(s.c) !== L.isRight(states[i - 1].c)).length;
   return out;
 }
 
@@ -344,10 +346,10 @@ function fitness(level, opts, m) {
   const vol1 = (opts.nodead && m.dead > 0) || (opts.noride && m.ride) || (opts.matched && m.unmatched > 0)
     || (opts.goalT && m.goalFace !== 1) || (opts.minflips && (m.flips || 0) < opts.minflips);
   // v3 floors (difficulty-v3.md): --phases N grid-changing presses, --backs N closes from a stone's back, --configs N closed configurations
-  const v3 = (opts.phases && m.phases < opts.phases) || (opts.backs && m.backs < opts.backs) || (opts.configs && m.configs < opts.configs);
+  const v3 = (opts.phases && m.phases < opts.phases) || (opts.backs && m.backs < opts.backs) || (opts.configs && m.configs < opts.configs) || (opts.switches && m.stackSwitches < opts.switches);
   if (m.par > opts.par || m.closes > opts.closes || !m.stepped15 || !need || m.par < opts.minpar || vol1 || v3) return -500 + m.par * 10 + Math.min(m.steps, 10) + 5 * (m.phases || 0) + 5 * (m.backs || 0);
   let f = 12 * m.par + 2 * Math.min(m.steps, 14) - 1.5 * Math.max(0, m.steps - 16);
-  f += 8 * Math.min(m.phases, 3) + 8 * Math.min(m.backs, 2) + 3 * Math.min(m.configs, 3);   // v3: imagined boards, stone's backs, held configurations
+  f += 8 * Math.min(m.phases, 3) + 8 * Math.min(m.backs, 2) + 3 * Math.min(m.configs, 3) + 4 * Math.min(m.stackSwitches, 4);   // v3: imagined boards, stone's backs, held configurations
   f += 4 * Math.min(m.wrong, 10) + 3 * Math.min(m.firstWrong, 4);
   f += 6 * Math.min(m.deadEnds, 2) + 6 * (m.deadFrac >= 0.15 && m.deadFrac <= 0.7 ? 1 : 0);
   f += 8 * (m.before ? 1 : 0) + 6 * (m.made ? 1 : 0) + 3 * (m.ride ? 1 : 0) + 3 * Math.min(m.fatal, 2) + 3 * Math.min(m.pageSwitches, 2);
@@ -480,7 +482,7 @@ function fmt(level, m, r, F) {
   lines.push(`  { id: 'TODO', tier: 'TODO', map: [`);
   for (const row of level.map) lines.push(`      '${row}',`);
   lines.push('  ] },');
-  lines.push(`  // par ${m.par} steps ${m.steps} len ${m.len} closes ${m.closes}${m.flips ? ' flips ' + m.flips : ''} | wrong ${m.wrong} (first ${m.firstWrong}) narrow ${m.narrow}/${m.par} fatal ${m.fatal} | dead ${m.dead} (${m.deadFrac}) basins ${m.deadEnds} | before ${+m.before} made ${+m.made} ride ${+m.ride} pageSwitch ${m.pageSwitches} | v3 phases ${m.phases} configs ${m.configs} backs ${m.backs} | elements ${m.elements} voids ${m.voids} needs ${['Fold','Pop','Shade','Key','Ink','Glue','Flip'].filter((k) => m['needs' + k]).join('+') || '-'}${m.ride ? '+ride' : ''}` +
+  lines.push(`  // par ${m.par} steps ${m.steps} len ${m.len} closes ${m.closes}${m.flips ? ' flips ' + m.flips : ''} | wrong ${m.wrong} (first ${m.firstWrong}) narrow ${m.narrow}/${m.par} fatal ${m.fatal} | dead ${m.dead} (${m.deadFrac}) basins ${m.deadEnds} | before ${+m.before} made ${+m.made} ride ${+m.ride} pageSwitch ${m.pageSwitches} | v3 phases ${m.phases} configs ${m.configs} backs ${m.backs} switches ${m.stackSwitches} | elements ${m.elements} voids ${m.voids} needs ${['Fold','Pop','Shade','Key','Ink','Glue','Flip'].filter((k) => m['needs' + k]).join('+') || '-'}${m.ride ? '+ride' : ''}` +
     (r ? ` | noise ${r.noise} blockers ${r.blockers} load ${r.loadBearing} irrelevant ${r.irrelevant} reuse ${r.reuse}` : '') + (F != null ? ` | F ${F.toFixed(1)}` : ''));
   lines.push(`  // ${m.solution}`);
   if (r && r.decoys && r.decoys.length) lines.push(`  // decoys: ${r.decoys.join(' ')}`);
@@ -501,7 +503,7 @@ function stats() {
 }
 
 function args() {
-  const a = process.argv.slice(2), o = { cmd: a[0] || 'stats', rows: 5, iters: 4000, restarts: 12, seed: 1, par: 4, closes: 2, minpar: 2, tiles: '.-xg', need: 'glue', from: null, top: 8, elements: 9, nodead: false, noride: false, leftx: false, maxvoid: 0, minlen: 0, maxlen: 0, matched: false, pages: 2, goalT: false, minflips: 0, phases: 0, backs: 0, configs: 0 };
+  const a = process.argv.slice(2), o = { cmd: a[0] || 'stats', rows: 5, iters: 4000, restarts: 12, seed: 1, par: 4, closes: 2, minpar: 2, tiles: '.-xg', need: 'glue', from: null, top: 8, elements: 9, nodead: false, noride: false, leftx: false, maxvoid: 0, minlen: 0, maxlen: 0, matched: false, pages: 2, goalT: false, minflips: 0, phases: 0, backs: 0, configs: 0, switches: 0 };
   for (let i = 1; i < a.length; i++) {
     if (a[i].startsWith('--') && !a[i].includes(',')) { const k = a[i].slice(2); const v = a[i + 1]; const isFlag = v === undefined || (v.startsWith('--') && !v.includes(','));   // a map row may begin with '--' (gaps): a comma marks it as a value
       o[k] = isFlag ? true : isNaN(+v) ? v : +v; if (!isFlag) i++; }

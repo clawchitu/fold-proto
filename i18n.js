@@ -334,7 +334,7 @@
       inkShore: ['墨岸', '两道影子之间，一格墨。', '沿右页绕到右上，合上：墨印到左页，这一叠下面是石头。合着往左到左页，打开到 40°：踩上第 2 列的影子。再开到 55°，影子带你到第 3 列；穿过印着的墨，踩上下面那道影子，走到左下的纸上，合上——信在对面。', '先印岸，再走影子。'],
       stoneRain: ['石雨', '三块石头悬在叠合的路上。', '合上以后哪里都走不通——除了站在左页那块石头背上合。沿右页走到第 4 行右侧，合上，合着往左到左下角。合到 55°，踩上影子，再打开到 80°：影子带你到第 4 列。沿左页绕到左上，在第 3 列顶上合上——信在对面。', '叠合的路被堵死了。哪一叠下面是石头？'],
       shadeDoor: ['门下影', '影子停在门前。', '走到右下角合上：钥匙开门，这一叠下面是石头。合着往上到左页第 3 行，合到 40° 踩上第 3 列的影子，再打开到 70°：影子带你到第 4 列。穿过开着的门往上走，到第 3 列顶上合上——别在石头正对面。', '哪一步必须在门开以后？'],
-      twoFigures: ['两人', '两岸相触。信，到了。', '对岸的人在等。往左、往下走到第 4 行，合上：这一叠下面是石头。合着往左到左页，打开到 55°：沿第 4 列往上，踩上第 3 列顶上的影子。合到 50°，影子带你到第 2 列；走到左上角，门开着——站在门里合上，两岸相触，你就走到了那个人的格子里。', '最后一合，站在哪里？'],
+      twoFigures: ['两人', '两岸相触。信，到了。', '往右走一格——你正站在左页那块石头的上面——在这里合上：这一叠进不来，但出得去。合着往左，走到左页。打开到 80°，沿第 4 列走到底；再合到 55°，最下面一行的影子把你接到左下角，门在第一次合上时已经开了。站在门里合上，往上一叠，就是那个人。', '石头的背上，也能合。'],
       // vol. 2 chapter 5 「胶」 (docs/design-v2c1.md): the first close rearranges the board; what do you do before it?
       glue: ['胶', '路上有石头，对岸有胶。', '合上一次：对面的胶会把石头粘过去。打开，路就空了。'],
       lend: ['借石', '对岸没有石头，就没有影子。', '先合上一次，胶把这边的石头粘到对岸去。打开，再斜起到 30°–50°：它的影子落在缺口上。'],
@@ -385,7 +385,7 @@
       inkShore: ['Ink Shore', 'Between two shadows, one square of ink.', 'Walk round the right page to its upper right and close: the ink prints onto the left page, and this stack sits on a stone. Closed, go left onto the left page and open to 40°: step onto the shadow in column 2. Open to 55°: it carries you to column 3. Cross the printed ink onto the lower shadow, walk to the paper at the bottom-left, and close — the letter is opposite.', 'Print the shore first, then walk the shadows.'],
       stoneRain: ['Stone Rain', 'Three stones hang over the stacked road.', 'Closed, nothing connects — unless you close standing on the back of the left page’s stone. Walk the right page to the right of row 4 and close; closed, go left to the bottom-left corner. Close to 55°, step onto the shadow, then open to 80°: it carries you to column 4. Walk round the left page to the top of column 3 and close there — the letter is opposite.', 'The stacked road is blocked. Which stack sits on a stone?'],
       shadeDoor: ['Shade at the Door', 'The shadow stops at the door.', 'Walk to the bottom-right corner and close: the key opens the door, and this stack sits on a stone. Closed, go up onto row 3 of the left page, close to 40° and step onto the shadow in column 3, then open to 70°: it carries you to column 4. Walk up through the open door to the top of column 3 and close — not opposite the stone.', 'Which step has to come after the door opens?'],
-      twoFigures: ['Two Figures', 'The two banks touch. The letter has arrived.', 'The other one waits across the river. Step left and down to row 4 and close: this stack sits on a stone. Closed, go left onto the left page and open to 55°: walk up column 4 and step onto the shadow at the top of column 3. Close to 50°: it carries you to column 2. Walk to the top-left corner — the door is open. Close standing in the doorway: the two banks touch, and you walk into their square.', 'The last close — where do you stand?'],
+      twoFigures: ['Two Figures', 'The two banks touch. The letter has arrived.', 'Step one square right — you are standing over the left page’s stone — and close there: that stack cannot be entered, but it can be left. Closed, walk left onto the left page. Open to 80° and walk down column 4; then close to 55°: the bottom row’s shadow takes you to the bottom-left corner, where the first close opened the door. Close standing in the doorway and step up one stack: the other one is there.', 'A stone’s back is somewhere to close from.'],
       glue: ['Glue', 'A stone on your road; glue on the far bank.', 'Close once: the glue opposite pulls the stone across. Open, and the road is clear.'],
       lend: ['Borrowed Stone', 'No stone on the far page, so no shadow.', 'Close once, and the glue carries this stone to the far page. Open, then lean to 30°–50°: its shadow falls on the gap.'],
       bridgeGlue: ['Bridge and Glue', 'The gap at the foot of the bridge needs a shadow.', 'Close once to glue the stone across. Then open to about 75°: the tabs stand, and the new stone’s shadow lands at the foot of the bridge.'],
@@ -435,7 +435,7 @@
       inkShore: ['墨の岸', '二つの影の間に、墨が一枡。', '（TODO ja）右ページを回って右上で閉じる。墨が左に写り、石の背の上。閉じたまま左ページへ、40°まで開いて2列目の影に乗る。55°まで開くと3列目へ。写った墨を越えて下の影へ、左下の紙で閉じる。', 'まず岸を写し、それから影を歩く。'],
       stoneRain: ['石の雨', '三つの石が重なりの道の上に。', '（TODO ja）閉じてもどこもつながらない。左ページの石の背の上で閉じる以外は。右ページの4行目右で閉じ、閉じたまま左下へ。55°まで閉じて影に乗り、80°まで開く。左ページを回って3列目の上で閉じる。', '重なりの道はふさがれている。どの重なりが石の上？'],
       shadeDoor: ['扉の下の影', '影は扉の前で止まる。', '（TODO ja）右下の角で閉じる。鍵が扉を開け、石の背の上。閉じたまま左ページの3行目へ。40°まで閉じて3列目の影に乗り、70°まで開く。開いた扉を抜けて3列目の上で閉じる。石の真向かいではなく。', '扉が開いたあとでなければできないのは？'],
-      twoFigures: ['二人', '両岸がふれる。手紙は、届いた。', '（TODO ja）右ページを右下へ歩いて閉じる。石の背の上。閉じたまま左ページへ、55°まで開いて4列目を上がり、3列目の上の影に乗る。50°まで閉じると2列目へ。左上の角、扉は開いている。扉の中で閉じる。両岸がふれ、その人の枡へ。', '最後に閉じるとき、どこに立つ？'],
+      twoFigures: ['二人', '両岸がふれる。手紙は、届いた。', '（TODO ja）右へ一枡。左ページの石の真上に立って閉じる。その重なりには入れないが、出られる。閉じたまま左へ、左ページへ。80°まで開いて4列目を下まで。55°まで閉じると、いちばん下の行の影が左下の角へ運ぶ。扉は最初に閉じたとき開いている。扉の中で閉じ、一つ上の重なりへ。その人がいる。', '石の背の上でも、閉じられる。'],
       // TODO(ja): draft, pending native review (design-v2c1.md §3)
       glue: ['糊', '道に石、向こう岸に糊。', '一度閉じる。向かいの糊が石を引き寄せる。開けば、道は空いている。'],
       lend: ['借りた石', '向こうの頁に石がなければ、影もない。', 'まず一度閉じて、糊でこちらの石を向こう岸へ送る。開いて、30°〜50°まで傾ける。その影がすき間に落ちる。'],
@@ -480,7 +480,7 @@
       inkShore: ['먹 강가', '두 그림자 사이, 먹 한 칸.', '(TODO ko) 오른쪽 페이지를 돌아 오른쪽 위에서 닫아요. 먹이 왼쪽에 찍히고, 돌의 등 위. 닫은 채 왼쪽 페이지로, 40°까지 펼쳐 2열 그림자에 올라요. 55°까지 펼치면 3열로. 찍힌 먹을 지나 아래 그림자로, 왼쪽 아래 종이에서 닫아요.', '먼저 강가를 찍고, 그다음 그림자를 걸어요.'],
       stoneRain: ['돌비', '돌 셋이 겹친 길 위에 걸려 있다.', '(TODO ko) 닫아도 어디도 이어지지 않아요. 왼쪽 페이지 돌의 등 위에서 닫는 것 말고는. 오른쪽 페이지 4행 오른쪽에서 닫고, 닫은 채 왼쪽 아래로. 55°까지 닫아 그림자에 올라 80°까지 펼쳐요. 왼쪽 페이지를 돌아 3열 꼭대기에서 닫아요.', '겹친 길이 막혔어요. 어느 겹이 돌 위일까?'],
       shadeDoor: ['문 아래 그림자', '그림자는 문 앞에서 멈춘다.', '(TODO ko) 오른쪽 아래 모서리에서 닫아요. 열쇠가 문을 열고, 돌의 등 위. 닫은 채 왼쪽 페이지 3행으로. 40°까지 닫아 3열 그림자에 올라, 70°까지 펼쳐요. 열린 문을 지나 3열 꼭대기에서 닫아요. 돌 맞은편은 안 돼요.', '문이 열린 뒤에만 되는 건 어느 걸음?'],
-      twoFigures: ['두 사람', '두 강가가 맞닿는다. 편지는, 도착했다.', '(TODO ko) 오른쪽 페이지를 오른쪽 아래로 걸어 닫아요. 돌의 등 위. 닫은 채 왼쪽 페이지로, 55°까지 펼쳐 4열을 올라가 3열 꼭대기 그림자에 올라요. 50°까지 닫으면 2열로. 왼쪽 위 모서리, 문은 열려 있어요. 문 안에서 닫아요. 두 강가가 맞닿고, 그 사람의 칸으로.', '마지막에 닫을 때, 어디에 서 있지?'],
+      twoFigures: ['두 사람', '두 강가가 맞닿는다. 편지는, 도착했다.', '(TODO ko) 오른쪽으로 한 칸. 왼쪽 페이지 돌의 바로 위에 서서 닫아요. 그 겹에는 들어갈 수 없지만 나갈 수는 있어요. 닫은 채 왼쪽으로, 왼쪽 페이지로. 80°까지 펼쳐 4열을 끝까지 내려가요. 55°까지 닫으면 맨 아래 줄의 그림자가 왼쪽 아래 모서리로 데려가요. 문은 처음 닫을 때 열렸어요. 문 안에서 닫고 한 겹 위로. 그 사람이 있어요.', '돌의 등 위에서도 닫을 수 있다.'],
       // TODO(ko): draft, pending native review (design-v2c1.md §3)
       glue: ['풀', '길에 돌, 건너편에 풀.', '한 번 닫아요. 맞은편 풀이 돌을 붙여 가요. 펼치면 길이 비어 있어요.'],
       lend: ['빌린 돌', '건너편 페이지에 돌이 없으면 그림자도 없다.', '먼저 한 번 닫아요. 풀이 이쪽 돌을 건너편으로 보내요. 펼치고 30°~50°로 기울여요. 그 그림자가 틈 위에 떨어져요.'],

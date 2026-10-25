@@ -17,7 +17,7 @@ const TIERS = { teach: [0, 2], easy: [0, 6], mid: [0, 99], hard: [5, 99], final:
 // Posture budget per tier (plan.md §12.3, revised in docs/difficulty-postmortem.md §1.4): the fatigue rule caps the
 // chapter, not every level. teach–mid ≤ 3 changes; hard / final ≤ 4; optional 「暗信」 challenge levels ≤ 6.
 // Full closes ≤ 2 on the main path, ≤ 3 in 「暗信」. A chapter's main path may not exceed 24 changes in total.
-const PAR_MAX = { teach: 3, easy: 3, mid: 3, hard: 4, final: 4, dark: 6 };
+const PAR_MAX = { teach: 3, easy: 3, mid: 3, hard: 4, final: 5, dark: 6 };   // final 4 → 5 (Chitu 10/25, difficulty-v3.md §6: the 暗信 at par 5–6 are the only levels that resisted the owner)
 const CLOSES_MAX = { main: 2, dark: 3 };
 const CHAPTER_PAR_MAX = 24;
 const CHAPTER_START = [0, 5, 13, 19, 25];   // first level index of chapters 1–5 (levels.js comments); later levels may carry `chapter`
