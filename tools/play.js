@@ -82,7 +82,7 @@ function setAngle(target) {
   const before = reach().size;
   if (mode() === 'fold' && prevMode !== 'fold') {
     const ev = L.stamp(s);
-    say('book closed' + (ev.length ? ': ' + ev.map((e) => ({ door: 'the key opened the door', ink: 'the ink printed onto the facing page', glue: 'the glue pulled a stone across' })[e.type]).join(', ') : ''));
+    say('book closed' + (ev.length ? ': ' + ev.map((e) => ({ door: 'the key opened the door', ink: 'the ink printed onto the facing page', glue: 'the glue pulled a stone across', bleed: 'the wet ink bled one ring outward (' + e.cells.length + ' squares)' })[e.type]).join(', ') : ''));
   } else say(`book at ${angle}°`);
   if (L.isWin(s, mode())) won = true;
 }
@@ -97,7 +97,7 @@ for (const act of actions) {
       push(); turns++;
       const { events, crush } = L.flip(s);
       say((s.face ? 'Turned over: the left page now faces the third page' : 'Turned back: the left page faces the right page again') +
-        (events.length ? '; ' + events.map((e) => ({ door: 'the key opened the door', ink: 'the ink printed', glue: 'the glue pulled a stone across' })[e.type]).join(', ') : ''));
+        (events.length ? '; ' + events.map((e) => ({ door: 'the key opened the door', ink: 'the ink printed', glue: 'the glue pulled a stone across', bleed: 'the wet ink bled one ring outward (' + e.cells.length + ' squares)' })[e.type]).join(', ') : ''));
       if (crush) { L.restart(s); say('The page you turned to has a stone over your square. Back to the start, the book turned back as the level began.'); }
       else if (L.isWin(s, mode())) won = true;
     }

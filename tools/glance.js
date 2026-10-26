@@ -71,8 +71,8 @@ function pressEvents(w) {
   const s = { ...w, grid: w.grid.map((r) => r.slice()) };
   const ev = L.stamp(s);
   const at = (p) => `col ${p.c + 1},row ${p.r + 1}`;
-  return ev.map((e) => e.type === 'door' ? `the key at ${at(e.cells[0])} opens the door at ${at(e.cells[1])} (both squares become paper / open door)`
-    : e.type === 'ink' ? `the ink at ${at(e.cells[0])} prints onto the gap at ${at(e.cells[1])}: that gap becomes paper (ink)`
+  return ev.map((e) => e.type === 'bleed' ? `the wet ink bleeds one ring: ${e.cells.map(at).join(', ')} become wet ink (walkable; glue under it is spoiled)` : e.type === 'door' ? `the key at ${at(e.cells[0])} opens the door at ${at(e.cells[1])} (both squares become paper / open door)`
+    : e.type === 'ink' ? `the ${e.wet ? 'WET ' : ''}ink at ${at(e.cells[0])} prints onto the gap at ${at(e.cells[1])}: that gap becomes ${e.wet ? 'wet ink (walkable, and it will bleed at the next press)' : 'paper (ink)'}`
     : `the glue at ${at(e.cells[1])} pulls the stone from ${at(e.cells[0])} onto itself: the stone now stands on the glue square, and ${at(e.cells[0])} is paper`);
 }
 
@@ -107,7 +107,7 @@ function sheet(lv) {
   out.push(`LEVEL ${levelNumber(i)} · ${lv.id} · 「${t.zh.name || ''}」 / ${t.en.name || ''} · tier ${lv.optional ? '暗信 (optional challenge)' : lv.tier}`);
   out.push(`line shown under the title: 「${t.zh.line || ''}」 / “${t.en.line || ''}”`);
   out.push(`board ${B.base.h} rows × 8 visible columns${three ? '. This letter has THREE pages: the third page is the back of the right leaf; it is not visible until you close the book and turn it over (view 5–6 below)' : ' (two pages)'}.`);
-  out.push('legend: @ you (start, paper)  . paper  - gap  x stone  k key  D locked door  o open door  i ink  p pop-up tab (stands as a bridge across the crease at 60°–120°)  g glue  G the letter (goal)');
+  out.push('legend: @ you (start, paper)  . paper  - gap  x stone  k key  D locked door  o open door  i ink  I WET ink (bleeds a ring at every press)  p pop-up tab (stands as a bridge across the crease at 60°–120°)  g glue  G the letter (goal)');
   out.push('');
   const w0 = worldOf(B, 0, 0);
   out.push(...flat(w0, '== VIEW 1 · as the level opens: book flat (180°) =='));
@@ -124,7 +124,20 @@ function sheet(lv) {
     out.push(...leans(w1, '== VIEW 4b · leaning after the close (the stones that moved cast new shadows) =='));
     out.push('');
     const g1b = B.press(g1, 0);
-    if (B.grids[g1b].flat().join('') !== w1.grid.flat().join('')) { out.push('== a second close from here would do: ' + pressEvents(w1).join('; ') + ' =='); out.push(''); }
+    // wet ink (ch. 7): every press grows the ink, so print the board after a second and a third close too (the player
+    // can close / undo as often as they like); the route between the closes is what the sheet cannot show
+    let gk = g1, wk = w1;
+    for (let k = 2; k <= 3; k++) {
+      const gn = B.press(gk, 0);
+      if (B.grids[gn].flat().join('') === B.grids[gk].flat().join('')) break;
+      const wn = worldOf(B, gn, 0);
+      out.push(`== close no. ${k} from this spread would do: ` + pressEvents(wk).join('; ') + ' ==');
+      out.push(...closed(wk, wn, `close no. ${k}`).slice(2));
+      out.push(...flat(wn, `== VIEW 4·${k} · opened after ${k} closes (no turn between) ==`));
+      out.push(...leans(wn, `== VIEW 4b·${k} · leaning after ${k} closes ==`));
+      out.push('');
+      gk = gn; wk = wn;
+    }
   } else {
     out.push('== VIEW 4 · opened again after that close: the board is unchanged ==');
     out.push('');
@@ -158,7 +171,7 @@ function sheet(lv) {
 const RULES = `You are a player of Letterfold (折信), a paper-folding puzzle. You have finished volume 1 and the earlier levels of this chapter, so you know every rule below. Read the board sheet, then write the solution route IN ONE SHOT: you get no feedback, no second try, no tools. Do not hedge or give alternatives.
 
 RULES (everything you know)
-- The board is an open book: left page (columns 1–4) and the page facing it (columns 5–8), hinge between columns 4 and 5. Rows are numbered from the top. Tiles: . paper (walkable), - gap (not walkable), x stone (blocks; blocks light), k key, D locked door (blocks), o open door, i ink, p pop-up tab, g glue (walkable paper), G the letter = goal, @ where you start.
+- The board is an open book: left page (columns 1–4) and the page facing it (columns 5–8), hinge between columns 4 and 5. Rows are numbered from the top. Tiles: . paper (walkable), - gap (not walkable), x stone (blocks; blocks light), k key, D locked door (blocks), o open door, i ink, I wet ink (walkable), p pop-up tab, g glue (walkable paper), G the letter = goal, @ where you start.
 - You can only walk on paper / keys / ink / glue / open doors / shadows-over-gaps, orthogonally, on your own page. You cannot cross the hinge while the book is open (except on a standing pop-up bridge).
 - Hinge angle: 180° flat, 90° standing, 0° closed. It moves in 5° steps from the current angle. Three postures matter: OPEN (> 120° or < 60°… see below), STANDING 60°–120°, CLOSED 0°–25°.
 - STANDING (60°–120°): pop-up tabs p on both sides of the hinge in the same row stand up and bridge the crease: you can step from one to the other.
@@ -166,6 +179,7 @@ RULES (everything you know)
 - CLOSED (0°): the facing page lies ON the left page. You walk the stacks (stack columns 1–4): a stack can be entered if either of its two squares is paper and neither is a stone or a locked door. Where both squares are paper you stay on the page you are on; where only one is paper you switch to that page. Opening the book again, you are on whichever page you ended on.
 - CLOSING CRUSHES: if you stand on the left page and a stone on the facing page is over your square (its mirror), closing crushes you: back to the start, board unchanged otherwise. Standing on the facing page above a left-page stone is safe (you stand on its back) — and when the book closes you are then INSIDE a stack that the stack map marks blocked: you can walk out of it into neighbouring stacks, but no one can walk into it. (Earlier levels used this.)
 - THE PRESS (the moment the book closes, wherever you stand, all at once): a key pressed against a door opens it; ink pressed against a gap prints onto it (that gap becomes paper); glue pressed against a stone pulls the stone onto the glue square (the stone changes page; its old square becomes paper; its shadow and its crushing go with it; the glue is used up). Standing on glue when it pulls a stone = crushed.
+- WET INK (I): walkable like ink, but it has not dried. At EVERY press (a close, a turn of the closed book), before anything else, every wet square spreads one ring into the GAP and GLUE squares beside it on its own page (paper, stones, doors, the hinge and the page edge stop it; glue it covers is spoiled and pulls nothing). Then it prints, like ink, onto the gap facing it — and what it prints is wet too. So each close grows the ink one ring on both pages; a gap you were going to cross on a shadow may be paper by then (a shadow over paper carries no one), and the ink never dries or shrinks.
 - THREE-PAGE letters only: the third page is the back of the right leaf. With the book CLOSED and you standing on the LEFT page you may TURN the book over: the third page now faces the left page (columns 5–8 show the third page). Turning is a press too (keys/ink/glue between left and third page act; a third-page stone over your square crushes you — then the whole level restarts). Turn again to come back to the right page (another press). The letter may lie on the third page.
 - Undo exists in the game, but THIS test is one shot.
 

@@ -97,3 +97,35 @@ const mk = (map) => L.create({ map });
   assert.deepStrictEqual(s.grid.map((r) => r.join('')), lv.map);
 }
 console.log('logic tests passed');
+// Wet ink (vol. 2 ch. 7 「墨晕」): a press first bleeds every wet square one ring into gaps and glue on its own page,
+// then prints the (grown) blot onto the gaps facing it. Dry ink does not bleed. Each press grows it again.
+{
+  const s = mk(['-S-----.',
+                '-I--g---',    // wet at (1,1): the ring reaches (0,1) and (2,1); (1,0) is the start, (1,2) a stone
+                '-x--.---',
+                'i-------']);  // dry ink at (0,3): prints, never bleeds
+  const ev = L.stamp(s);
+  assert.deepStrictEqual(s.grid.map((r) => r.join('')), ['-S-----.', 'III-gIII', '-x--.---', 'i------i'],
+    'ring 1 on the left (0,1) (2,1); the grown blot prints onto the facing gaps (7,1) (6,1) (5,1); the start is floor and prints nothing; the glue (4,1) faces a gap and stays');
+  assert.ok(ev.some((e) => e.type === 'bleed' && e.cells.length === 2), 'bleed event with the two new squares');
+  assert.ok(ev.some((e) => e.type === 'ink' && e.wet), 'wet prints are ink events flagged wet');
+  assert.ok(ev.some((e) => e.type === 'ink' && !e.wet), 'the dry ink printed too');
+  assert.ok(L.isFloor('I'));
+}
+{
+  // the printed copy is wet: at the second press both pages grow; glue beside wet ink is spoiled BEFORE it can pull
+  const s = mk(['--I-...x',
+                '---g-x..']);
+  L.stamp(s);
+  assert.deepStrictEqual(s.grid.map((r) => r.join('')), ['-III...x', '--Ig-x..'], 'press 1: ring (1,0) (3,0) (2,1); the facing squares are paper or stone: nothing prints');
+  const ev = L.stamp(s);
+  assert.deepStrictEqual(s.grid.map((r) => r.join('')), ['IIII...x', '-IIIIx..'], 'press 2: the ring covers the glue (3,1) before the pair loop, so the stone (5,1)... no: the glue faced (4,1), a gap; now (3,1) is wet ink and prints onto (4,1)');
+  assert.ok(!ev.some((e) => e.type === 'glue'), 'spoiled glue pulls nothing');
+  assert.ok(ev.some((e) => e.type === 'bleed' && e.cells.some((c) => c.was === 'g')), 'the bleed records the glue it covered');
+  L.stamp(s);
+  assert.deepStrictEqual(s.grid.map((r) => r.join('')), ['IIII...x', 'IIIIIx..'], 'press 3: the last gap (0,1) fills; the wet print at (4,1) has only paper and stone around it');
+  const before = s.grid.map((r) => r.join(''));
+  L.stamp(s);
+  assert.deepStrictEqual(s.grid.map((r) => r.join('')), before, 'saturated ink is idempotent');
+}
+console.log('wet ink tests passed');

@@ -18,11 +18,12 @@ const TIERS = { teach: [0, 2], easy: [0, 6], mid: [0, 99], hard: [5, 99], final:
 // chapter, not every level. teach–mid ≤ 3 changes; hard / final ≤ 4; optional 「暗信」 challenge levels ≤ 6.
 // Full closes ≤ 2 on the main path, ≤ 3 in 「暗信」. A chapter's main path may not exceed 24 changes in total.
 const PAR_MAX = { teach: 3, easy: 3, mid: 3, hard: 4, final: 5, dark: 6 };   // final 4 → 5 (Chitu 10/25, difficulty-v3.md §6: the 暗信 at par 5–6 are the only levels that resisted the owner)
-const CLOSES_MAX = { main: 2, final: 3, dark: 3 };   // final 2 → 3 (Chitu 10/25, difficulty-v3.md §6: the third close after a closed walk is what held 暗三)
+const CLOSES_MAX = { main: 2, final: 3, dark: 3, wet: 3 };   // wet: chapter 7 「墨晕」 main path — closes are the chapter's resource (difficulty-v3.md §4.2, roadmap §4 #4)
+const WET_CHAPTER = 7;   // final 2 → 3 (Chitu 10/25, difficulty-v3.md §6: the third close after a closed walk is what held 暗三)
 const CHAPTER_PAR_MAX = 24;
 const CHAPTER_START = [0, 5, 13, 19, 25];   // first level index of chapters 1–5 (levels.js comments); later levels may carry `chapter`
 const chapterOf = (lv, i) => lv.chapter || CHAPTER_START.filter((s) => s <= i).length;
-const MECHANICS = ['needsFold', 'needsPop', 'needsShade', 'needsRide', 'needsKey', 'needsInk', 'needsGlue', 'needsFlip'];
+const MECHANICS = ['needsFold', 'needsPop', 'needsShade', 'needsRide', 'needsKey', 'needsInk', 'needsGlue', 'needsFlip', 'needsWet'];
 
 function turn(world, from, a0, a1) {
   // returns the character cell after turning the hinge from a0 to a1, or null if it falls
@@ -320,6 +321,8 @@ function report(lv, withDifficulty = true) {
   if (lv.map.some((row) => row.slice(L.N).includes('x')) || (all.includes('g') && all.includes('x'))) { out.needsShade = !noShade; out.needsRide = !oneShade; }
   if (all.includes('k')) out.needsKey = !without('k');
   if (all.includes('i')) out.needsInk = !without('i');
+  if (all.includes('I')) out.needsWet = !without('I');                 // unsolvable with the wet ink dried into plain paper
+  if (all.includes('I')) { const st = L.create(lv); L.stamp(st); st.face = 0; out.wetCloses = full ? full.steps.filter((x) => x.startsWith('fold')).length : null; }
   if (all.includes('g')) {
     out.needsGlue = !without('g');                                   // unsolvable with the glue wiped off
     const st = L.create(lv); out.glueFires = L.stamp(st).some((e) => e.type === 'glue');   // a stone really changes page
@@ -368,6 +371,7 @@ LEVELS.forEach((lv, i) => {
     ('needsKey' in r ? `  needsKey=${r.needsKey}` : '') +
     ('needsInk' in r ? `  needsInk=${r.needsInk}` : '') +
     ('needsGlue' in r ? `  needsGlue=${r.needsGlue} glueFires=${r.glueFires}` : '') +
+    ('needsWet' in r ? `  needsWet=${r.needsWet}` : '') +
     ('needsFlip' in r ? `  needsFlip=${r.needsFlip}` : ''));
   if (!full) { fail('UNSOLVABLE'); return; }
   console.log('   ' + full.steps.join(' → '));
@@ -380,7 +384,7 @@ LEVELS.forEach((lv, i) => {
   // fatigue budget (plan.md §12.3, tiered by difficulty-postmortem.md §1.4): posture changes and full closes per tier
   const shut = (x) => x.startsWith('fold') || x.startsWith('flip');   // a page turn happens inside one close
   const closes = full.steps.filter((x, i, arr) => x.startsWith('fold') && (i === 0 || !shut(arr[i - 1]))).length;
-  const parMax = lv.optional ? PAR_MAX.dark : PAR_MAX[lv.tier] || 3, closesMax = lv.optional ? CLOSES_MAX.dark : lv.tier === 'final' ? CLOSES_MAX.final : CLOSES_MAX.main;
+  const parMax = lv.optional ? PAR_MAX.dark : PAR_MAX[lv.tier] || 3, closesMax = lv.optional ? CLOSES_MAX.dark : lv.tier === 'final' ? CLOSES_MAX.final : chapterOf(lv, i) === WET_CHAPTER ? CLOSES_MAX.wet : CLOSES_MAX.main;
   if (full.cost > parMax) fail(`OVER PAR: ${full.cost} posture changes (max ${parMax} for ${lv.optional ? '暗信' : lv.tier})`);
   if (closes > closesMax) fail(`OVER PAR: ${closes} full closes (max ${closesMax})`);
   if (!lv.optional) { const ch = chapterOf(lv, i); chapterPar[ch] = (chapterPar[ch] || 0) + full.cost; }

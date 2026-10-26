@@ -123,6 +123,7 @@ nav button:hover, .presets button:hover { background: rgba(0, 0, 0, .05); color:
 .cell[data-kind="open"] .tile { outline: 1.5px dashed var(--accent); outline-offset: -5px; }
 .cell[data-kind="pop"] .tile { background: linear-gradient(90deg, var(--card) 70%, #fbe6dd); }
 .cell[data-kind="ink"] .tile svg { width: 80%; height: 80%; }
+.cell[data-kind="wet"] .tile svg { width: 96%; height: 96%; filter: blur(.7px); opacity: .88; }   /* wet ink (ch. 7): the blot has not dried — softer edge, a size up */
 /* glue (vol. 2): an amber smear on the paper, glossy while wet; it is paper, so it stays clickable */
 .cell[data-kind="glue"] .tile {
   background: radial-gradient(ellipse 58% 48% at 50% 56%, rgba(232, 184, 72, .62) 0 60%, rgba(232, 184, 72, .22) 78%, var(--card) 92%);

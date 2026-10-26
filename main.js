@@ -142,10 +142,10 @@
   function paintTiles() {
     cells.forEach((row, r) => row.forEach((el, c) => {
       const t = F.at(state, c, r);
-      const kind = { '-': 'empty', '.': 'floor', S: 'floor', G: 'goal', x: 'stone', k: 'key', D: 'door', o: 'open', i: 'ink', p: 'pop', g: 'glue' }[t];
+      const kind = { '-': 'empty', '.': 'floor', S: 'floor', G: 'goal', x: 'stone', k: 'key', D: 'door', o: 'open', i: 'ink', I: 'wet', p: 'pop', g: 'glue' }[t];
       if (el.dataset.kind === kind) return;
       el.dataset.kind = kind;
-      el.innerHTML = kind === 'empty' ? '' : `<div class="tile">${SVG[t === 'S' ? '' : t] || ''}</div>`;
+      el.innerHTML = kind === 'empty' ? '' : `<div class="tile">${SVG[t === 'S' ? '' : t === 'I' ? 'i' : t] || ''}</div>`;
     }));
   }
   function buildTabs() {
@@ -535,7 +535,7 @@
 
   // chapter headings in the Levels sheet: first level index of each chapter (tools/check.js CHAPTER_START), its volume
   const CHAPTERS = [{ at: 0, vol: 1, ch: 1 }, { at: 5, ch: 2 }, { at: 13, ch: 3 }, { at: 19, ch: 4 }, { at: 25, vol: 2, ch: 5 },
-    { at: LEVELS.findIndex((l) => l.chapter === 6), ch: 6 }];
+    { at: LEVELS.findIndex((l) => l.chapter === 6), ch: 6 }, { at: LEVELS.findIndex((l) => l.chapter === 7), ch: 7 }];
   function openLevels() {
     ui.levelGrid.innerHTML = '';
     const head = (cls, text) => { const h = document.createElement('h3'); h.className = cls; h.textContent = text; ui.levelGrid.appendChild(h); };

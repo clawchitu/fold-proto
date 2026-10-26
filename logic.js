@@ -30,7 +30,7 @@
     return 'open';
   }
 
-  const isFloor = (t) => '.SGkiopg'.includes(t);
+  const isFloor = (t) => '.SGkiopgI'.includes(t);
   const isBlock = (t) => t === 'x' || t === 'D';
   const isOpaque = (t) => t === 'x';   // stones block the light; paper and ink let it through
 
@@ -218,10 +218,31 @@
     return null;
   }
 
-  // Pressing the pages together: keys open the door they touch, ink prints onto bare paper,
-  // glue pulls the stone it touches onto itself (the stone changes page; the glue is used up).
+  // Wet ink (vol. 2 ch. 7 「墨晕」, docs/design-ch7.md): 'I' is ink that has not dried. It is floor like dry ink, but every
+  // press (a close, a turn of the closed book) it first BLEEDS one ring — each wet square on the two pressed pages spreads
+  // into the gap and glue squares beside it on its own page (paper, stones, doors, the hinge and the page edge stop it;
+  // glue it covers is spoiled and will not pull) — and only then prints, like dry ink, onto the gap facing it. What it
+  // prints is wet too, so both pages keep growing a ring per press: the number of closes is a resource, and a gap you
+  // meant to cross on a shadow may be paper by the time you get there (a shadow over paper carries no one).
+  function bleed(s) {
+    const wet = [];
+    for (let r = 0; r < s.h; r++) for (let c = 0; c < s.w; c++) if (at(s, c, r) === 'I') wet.push([c, r]);
+    const cells = [], seen = new Set();
+    for (const [c, r] of wet) for (const [dc, dr] of DIRS) {
+      const nc = c + dc, nr = r + dr, k = nc + ',' + nr;
+      if (nc < 0 || nc >= s.w || nr < 0 || nr >= s.h || isRight(nc) !== isRight(c) || seen.has(k)) continue;
+      const t = at(s, nc, nr);
+      if (t === '-' || t === 'g') { seen.add(k); put(s, nc, nr, 'I'); cells.push({ c: nc, r: nr, was: t }); }
+    }
+    return cells;
+  }
+
+  // Pressing the pages together: wet ink bleeds a ring, then keys open the door they touch, ink (dry or wet) prints
+  // onto the gap it touches, glue pulls the stone it touches onto itself (the stone changes page; the glue is used up).
   function stamp(s) {
     const events = [];
+    const bled = bleed(s);
+    if (bled.length) events.push({ type: 'bleed', cells: bled });
     for (let r = 0; r < s.h; r++) {
       for (let q = 0; q < N; q++) {
         const m = mirror(q);
@@ -231,9 +252,9 @@
           if (A === 'k' && B === 'D') {
             put(s, a, r, '.'); put(s, b, r, 'o');
             events.push({ type: 'door', cells: [{ c: a, r }, { c: b, r }] });
-          } else if (A === 'i' && B === '-') {
-            put(s, b, r, 'i');
-            events.push({ type: 'ink', cells: [{ c: a, r }, { c: b, r }] });
+          } else if ((A === 'i' || A === 'I') && B === '-') {
+            put(s, b, r, A);
+            events.push({ type: 'ink', wet: A === 'I', cells: [{ c: a, r }, { c: b, r }] });
           } else if (A === 'g' && B === 'x') {
             put(s, a, r, 'x'); put(s, b, r, '.');
             events.push({ type: 'glue', cells: [{ c: b, r }, { c: a, r }] });
@@ -274,6 +295,6 @@
 
   const api = { N, FOLD_MIN, POP_MIN, POP_MAX, SHADE_MIN, mirror, proj, isRight, modeOf, isFloor, isBlock,
     isOpaque, shadowColumn, shadows, crushed, crushCause, cellBlock, stepBlock, pathBlock, ride, create, restart, at, colOf, neighbours, findPath, stamp,
-    flipBlock, flip, isWin };
+    bleed, flipBlock, flip, isWin };
   if (typeof module !== 'undefined') module.exports = api; else root.FoldLogic = api;
 })(this);

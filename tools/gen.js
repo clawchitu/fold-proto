@@ -17,6 +17,7 @@
 //       --matched (every door has a key facing it, every key a door, every ink a gap); --need also takes fold | ride | made
 //       vol. 2 ch. 6 (docs/design-ch6.md): --pages 3 (12-column boards with a third page), --need flip (the turn is essential),
 //       --goalT (the letter lies on the third page), --minflips 2 (the solution turns the book at least twice)
+//       vol. 2 ch. 7 (docs/design-ch7.md): tile I = wet ink (--tiles '.-xgI'), --need wet (drying the ink into paper breaks the level)
 //
 // What the search optimises (fitness(), §3 of the postmortem):
 //   long minimal solutions (par, steps), many plausible-but-wrong hinge moves at each decision point (wrong),
@@ -29,7 +30,7 @@ const LEVELS = require('../levels.js');
 
 const ANGLES = C.ANGLES, STEPPED = C.STEPPED;
 const posture = C.posture;
-const ELEMENTS = 'xkDipg';
+const ELEMENTS = 'xkDipgI';   // I = wet ink (ch. 7)
 
 // ---------- one level, prepared: both grids, memoised shadows ----------
 // A state is { c, r, a, face, g }: g indexes the grid chain (check.js grids: the board after each press), face says
@@ -170,7 +171,7 @@ function measure(level) {
   for (const row of level.map) for (let q = 0; q < L.N; q++) for (let f = 0; f < pages - 1; f++) {
     const a = row[q], b = row[L.mirror(q) + f * L.N];
     // a left-page key / door / ink is matched if it meets its partner on either facing page
-    const partner = (x) => (x === 'D' ? 'k' : x === 'k' ? 'D' : x === 'i' ? '-' : null);
+    const partner = (x) => (x === 'D' ? 'k' : x === 'k' ? 'D' : x === 'i' || x === 'I' ? '-' : null);
     if (partner(b) && row[q] !== partner(b)) out.unmatched++;
     if (partner(a) && f === 0 && ![...Array(pages - 1).keys()].some((ff) => row[L.mirror(q) + ff * L.N] === partner(a))) out.unmatched++;
   }
@@ -251,6 +252,7 @@ function measure(level) {
   out.needsShade = !solvableFrom(B, B.start, ANGLES.filter((a) => a < L.SHADE_MIN || a >= L.FOLD_MIN));
   out.needsKey = all.includes('k') && !solvableFrom(prep({ map: level.map.map((r) => r.split('k').join('.')) }), B.start);
   out.needsInk = all.includes('i') && !solvableFrom(prep({ map: level.map.map((r) => r.split('i').join('.')) }), B.start);
+  out.needsWet = all.includes('I') && !solvableFrom(prep({ map: level.map.map((r) => r.split('I').join('.')) }), B.start);   // ch. 7: the wet ink dried into paper
   // which page switches: the solution lands on the other page after an open (land() chose the far page)
   out.pageSwitches = states.filter((s, i) => i > 0 && L.isRight(s.c) !== L.isRight(states[i - 1].c) && posture(states[i - 1].a) !== 'fold' && posture(s.a) !== 'fold').length;
   // v3 (docs/difficulty-v3.md §3.2): what one glance at the board cannot settle.
@@ -339,7 +341,7 @@ function fitness(level, opts, m) {
   m = m || measure(level);
   if (!m.solvable) return -1000 + (m.states || 0) * 0.05;
   const needOne = (n) => n === 'glue' ? m.glueFires || m.needsGlue : n === 'shade' ? m.needsShade : n === 'ride' ? m.ride : n === 'made' ? m.made
-    : n === 'pop' ? m.needsPop : n === 'key' ? m.needsKey : n === 'ink' ? m.needsInk : n === 'fold' ? m.needsFold : n === 'flip' ? m.needsFlip : true;
+    : n === 'pop' ? m.needsPop : n === 'key' ? m.needsKey : n === 'ink' ? m.needsInk : n === 'wet' ? m.needsWet : n === 'fold' ? m.needsFold : n === 'flip' ? m.needsFlip : true;
   const need = String(opts.need).split('+').every(needOne);
   // vol. 1 constraints (postmortem §6): --nodead no dead state anywhere; --noride the minimal solution never rides a shadow
   // (3-3 comes before the ride is taught); --minlen reject short boards early
@@ -482,7 +484,7 @@ function fmt(level, m, r, F) {
   lines.push(`  { id: 'TODO', tier: 'TODO', map: [`);
   for (const row of level.map) lines.push(`      '${row}',`);
   lines.push('  ] },');
-  lines.push(`  // par ${m.par} steps ${m.steps} len ${m.len} closes ${m.closes}${m.flips ? ' flips ' + m.flips : ''} | wrong ${m.wrong} (first ${m.firstWrong}) narrow ${m.narrow}/${m.par} fatal ${m.fatal} | dead ${m.dead} (${m.deadFrac}) basins ${m.deadEnds} | before ${+m.before} made ${+m.made} ride ${+m.ride} pageSwitch ${m.pageSwitches} | v3 phases ${m.phases} configs ${m.configs} backs ${m.backs} switches ${m.stackSwitches} | elements ${m.elements} voids ${m.voids} needs ${['Fold','Pop','Shade','Key','Ink','Glue','Flip'].filter((k) => m['needs' + k]).join('+') || '-'}${m.ride ? '+ride' : ''}` +
+  lines.push(`  // par ${m.par} steps ${m.steps} len ${m.len} closes ${m.closes}${m.flips ? ' flips ' + m.flips : ''} | wrong ${m.wrong} (first ${m.firstWrong}) narrow ${m.narrow}/${m.par} fatal ${m.fatal} | dead ${m.dead} (${m.deadFrac}) basins ${m.deadEnds} | before ${+m.before} made ${+m.made} ride ${+m.ride} pageSwitch ${m.pageSwitches} | v3 phases ${m.phases} configs ${m.configs} backs ${m.backs} switches ${m.stackSwitches} | elements ${m.elements} voids ${m.voids} needs ${['Fold','Pop','Shade','Key','Ink','Glue','Flip','Wet'].filter((k) => m['needs' + k]).join('+') || '-'}${m.ride ? '+ride' : ''}` +
     (r ? ` | noise ${r.noise} blockers ${r.blockers} load ${r.loadBearing} irrelevant ${r.irrelevant} reuse ${r.reuse}` : '') + (F != null ? ` | F ${F.toFixed(1)}` : ''));
   lines.push(`  // ${m.solution}`);
   if (r && r.decoys && r.decoys.length) lines.push(`  // decoys: ${r.decoys.join(' ')}`);
