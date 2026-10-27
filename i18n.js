@@ -418,6 +418,9 @@
       // ---- vol. 3 chapter 10 「鹤」 (docs/design-ch10.md) ----
       crane: ['鹤', '站上去。', '走到纸鹤上合书：合上那一拍，鹤飞到对页同一行的镜像格，你跟着它。打开，你在右页了，往下一格是她。', '站在鹤上合书，你就在对页。'],
       land: ['落', '鹤会过来。', '你站在左页，鹤在右页——合上书：它飞到你这页的镜像格，正好落在缺口里。打开，缺口是纸了，走过去。', '鹤落在哪，哪就是纸。'],
+      cross: ['渡', '影子在左页。', '站上鹤合书，你到了左页 (2,3)。斜到 50°：右页石头 (7,2) 的影子落在 (3,2) 的缺口上，走上去；开到 80°，影子把你带到 (4,2)，往上一格是她。', '鹤把你送到影子那边：先飞，再乘。'],
+      soak: ['染', '墨比鹤快。', '站上右页的鹤合书，你到了左页 (1,2)。左页那只鹤 (3,4) 对着缺口——可是缺口旁边是湿墨：合的那一拍墨先洇进落点，鹤染了墨，飞不动了，它自己成了一滴墨。斜到 30° 踩 (2,1) 的影子到 (3,1)，再合一次：那滴墨往四周洇，(4,4) 成了纸。斜到 70° 踩 (4,1) 的影子，沿第 4 列下到她。', '飞不动的鹤是一滴墨，第二次合它会洇。'],
+      over: ['翻飞', '翻也是一次压。', '站在左页石头的背上 (5,4) 合书：鹤飞到右页 (6,1)。叠合走到那一叠，你正站在鹤上。开一点再合：它带你回左页 (3,1)——翻书只能站在左页。翻：翻也是一次压，鹤飞到第三页的 (6,1)，你跟着它。打开，走到她。', '翻那一拍鹤也飞——飞到第三页，带着你。'],
       roll: ['滚', '石头没粘住。', '斜起到 80°：页经过立起那一下，松石往折痕滚一格，掉进你旁边的缺口——缺口成了纸。走过去。', '书立起来，石头就往折痕滚；不用合上。'],
       twice: ['两次', '差两格。', '斜起（它滚一格），再放平（再滚一格）：石头掉进缺口，桥就有了。合上再打开，也是这两次。', '来回一次是两次过立；放平那一下也算。'],
       jump: ['跳', '影子跟着石头。', '斜到 50°：去的路上页立过一次，远处那颗已经滚到第 7 列——它的影子落在 (3,4) 的缺口上，不在你照着图算的那格。走近处那颗的影子 (4,3)，下到 (3,4)，再到 (2,4)；放平、合上，叠合走法通到她。', '影子落在石头滚之后的位置，不是画出来的位置。'],
@@ -490,6 +493,9 @@
       // ---- vol. 3 chapter 9 「滚」 (docs/design-ch9.md) ----
       crane: ['Crane', 'Stand on it.', 'Walk onto the paper crane and close the book: at the press the crane flies to the mirror square on the facing page, and you with it. Open: you are on the right page, one step above her.', 'Close the book standing on the crane and you are on the other page.'],
       land: ['Land', 'The crane comes to you.', 'You are on the left page, the crane on the right — close the book: it flies to the mirror square on your page, right into the gap. Open: the gap is paper now. Walk across.', 'Where the crane lands is paper.'],
+      cross: ['Cross', 'The shadows are on the left page.', 'Close standing on the crane: you are on the left page at (2,3). Lean to 50°: the right stone at (7,2) shades the gap at (3,2) — step on; open to 80° and the shadow carries you to (4,2), one step below her.', 'The crane takes you to where the shadows fall: fly first, then ride.'],
+      soak: ['Soak', 'Ink is faster than the crane.', 'Close standing on the right page’s crane: you are on the left page at (1,2). The left crane at (3,4) faces a gap — but wet ink lies beside that gap: at the press the ink bleeds into the landing first, the crane is soaked and will not fly; it is a blot now. Lean to 30°, cross on the shadow at (2,1) to (3,1), and close again: the blot spreads, and (4,4) is paper. Lean to 70°, take the shadow at (4,1) and walk down column 4 to her.', 'A crane that cannot fly is a blot: the next close spreads it.'],
+      over: ['Over', 'The turn is a press too.', 'Close on the back of the left stone at (5,4): the crane flies to (6,1) on the right page. Walk the stacks there — you are standing on it. Open a little and close again: it carries you back to the left page, (3,1) — the book can only be turned from the left page. Turn: the turn is a press, the crane flies to (6,1) on the THIRD page, and you with it. Open and walk to her.', 'At the turn the crane flies too — to the third page, with you.'],
       roll: ['Roll', 'The stone is not glued down.', 'Lean to 80°: as the page passes upright the loose stone rolls one square towards the crease and drops into the gap beside you — the gap is paper now. Walk across.', 'Stand the book up and the stone rolls to the crease; no close needed.'],
       twice: ['Twice', 'Two squares short.', 'Lean (it rolls one), flatten (it rolls one more): the stone drops into the gap and the bridge is there. Close and open again would have been the same two passes.', 'A lean that comes back is two passes; flattening counts too.'],
       jump: ['Jump', 'The shadow follows the stone.', 'Lean to 50°: on the way the page passed upright and the far stone has rolled to column 7 — its shadow falls on the gap at (3,4), not where you worked it out from the drawing. Walk the near stone’s shadow at (4,3), down to (3,4), across to (2,4); flatten, close, and the stacks lead to her.', 'The shadow falls where the stone is after its roll, not where it was drawn.'],
@@ -516,6 +522,9 @@
       // ---- vol. 3 chapter 9 (drafts, TODO ja review) ----
       crane: ['鶴', '上に立つ。', '紙の鶴に乗って本を閉じる：閉じた拍子に鶴は向かいの頁の鏡の枡へ飛び、きみも一緒に。開けば右頁、彼女はひとつ下。', '鶴の上で閉じれば、向こうの頁にいる。'],
       land: ['降りる', '鶴はこちらへ来る。', 'きみは左頁、鶴は右頁——本を閉じる：鶴はこちらの頁の鏡の枡、ちょうど隙間へ降りる。開けば隙間は紙。渡る。', '鶴が降りたところは紙。'],
+      cross: ['渡る', '影は左頁にある。', '鶴の上で閉じる：左頁の (2,3) に着く。50° に傾ける：右頁の石 (7,2) の影が (3,2) の隙間に落ちる——乗る。80° まで開けば影が (4,2) へ運び、ひとつ上が彼女。', '鶴は影のある頁へ運ぶ：先に飛び、それから乗る。'],
+      soak: ['染みる', '墨は鶴より速い。', '右頁の鶴の上で閉じる：左頁の (1,2) に着く。左頁の鶴 (3,4) は隙間に向いている——が、隙間の隣は湿った墨：閉じた拍子に墨が先に降り場へ滲み、鶴は染みて飛べない。鶴は一滴の墨になる。30° に傾け (2,1) の影で (3,1) へ、もう一度閉じる：その墨が広がり (4,4) が紙になる。70° に傾け (4,1) の影から 4 列目を下って彼女へ。', '飛べない鶴は墨。次に閉じれば滲む。'],
+      over: ['翻る', '翻すのも一度の圧。', '左頁の石の背 (5,4) で閉じる：鶴は右頁の (6,1) へ飛ぶ。束でそこへ歩けば、きみは鶴の上。少し開いてまた閉じる：鶴はきみを左頁の (3,1) へ連れ戻す——本は左頁からしか翻せない。翻す：翻すのも圧、鶴は第三頁の (6,1) へ飛び、きみも一緒。開いて彼女のところへ。', '翻す拍子にも鶴は飛ぶ——第三頁へ、きみを乗せて。'],
       roll: ['転', '石は貼られていない。', '80° まで傾ける：頁が立った拍子に石が折り目へ一枡転がり、隣の隙間に落ちる——隙間は紙になった。渡る。', '本を立てれば石は折り目へ転がる。閉じなくていい。'],
       twice: ['二度', '二枡足りない。', '傾けて（一枡）、平らに戻す（もう一枡）：石が隙間に落ちて橋になる。閉じて開いても同じ二度。', '往復は二度の「立ち」。戻すほうも数える。'],
       jump: ['跳', '影は石についていく。', '50° まで傾ける：途中で頁が立ち、遠い石は 7 列目へ転がっている——影は (3,4) の隙間に落ちる。近い石の影 (4,3) を渡り、(3,4) へ、(2,4) へ。平らにして閉じれば束が彼女へ続く。', '影は転がったあとの石の位置に落ちる。'],
@@ -585,6 +594,9 @@
       // ---- vol. 3 chapter 9 (drafts, TODO ko review) ----
       crane: ['학', '위에 올라서요.', '종이학 위에 올라가 책을 닫아요: 닫히는 순간 학은 맞은편 면의 거울 칸으로 날아가고, 너도 함께요. 열면 오른쪽 면, 그녀는 한 칸 아래.', '학 위에서 닫으면 맞은편 면에 있어요.'],
       land: ['내려앉다', '학이 이쪽으로 와요.', '너는 왼쪽 면, 학은 오른쪽 면——책을 닫아요: 학이 이쪽 면의 거울 칸, 바로 그 틈에 내려앉아요. 열면 틈은 종이예요. 건너가요.', '학이 내려앉은 곳은 종이예요.'],
+      cross: ['건너다', '그림자는 왼쪽 면에 있어요.', '학 위에서 닫아요: 왼쪽 면 (2,3)에 도착해요. 50°로 기울이면 오른쪽 돌 (7,2)의 그림자가 (3,2) 틈에 떨어져요. 올라서요. 80°까지 열면 그림자가 (4,2)로 데려가고, 한 칸 위가 그녀예요.', '학은 그림자가 있는 면으로 데려가요: 먼저 날고, 그다음 타요.'],
+      soak: ['물들다', '먹이 학보다 빨라요.', '오른쪽 면 학 위에서 닫아요: 왼쪽 면 (1,2)에 도착해요. 왼쪽 학 (3,4)은 틈을 보고 있지만 틈 옆엔 젖은 먹: 닫히는 순간 먹이 먼저 내려앉을 자리로 번지고, 학은 물들어 못 날아요. 학은 먹 한 방울이 돼요. 30°로 기울여 (2,1) 그림자로 (3,1)에 가서 다시 닫아요: 그 먹이 번져 (4,4)가 종이가 돼요. 70°로 기울여 (4,1) 그림자를 밟고 4열을 따라 내려가 그녀에게.', '못 나는 학은 먹 한 방울. 다음에 닫으면 번져요.'],
+      over: ['넘기다', '넘기는 것도 한 번 누르는 거예요.', '왼쪽 면 돌의 등 (5,4)에서 닫아요: 학이 오른쪽 면 (6,1)로 날아가요. 묶음으로 거기까지 걸어가면 너는 학 위에 서 있어요. 조금 열었다 다시 닫아요: 학이 너를 왼쪽 면 (3,1)로 데려가요. 책은 왼쪽 면에서만 넘길 수 있으니까요. 넘겨요: 넘기는 것도 누르는 것, 학은 세 번째 면 (6,1)로 날아가고 너도 함께. 열고 그녀에게 걸어가요.', '넘기는 순간에도 학은 날아요. 세 번째 면으로, 너를 태우고.'],
       roll: ['구르기', '돌이 붙어 있지 않아요.', '80°까지 기울여요: 페이지가 서는 순간 돌이 접힌 금 쪽으로 한 칸 굴러 옆 틈에 떨어져요. 틈은 종이가 됐어요. 건너가요.', '책을 세우면 돌이 접힌 금으로 굴러요. 닫지 않아도 돼요.'],
       twice: ['두 번', '두 칸 모자라요.', '기울이고(한 칸), 다시 펴요(한 칸 더): 돌이 틈에 떨어져 다리가 돼요. 닫았다 열어도 같은 두 번이에요.', '한 번 오가는 건 두 번 세우는 것. 펴는 쪽도 세요.'],
       jump: ['뛰기', '그림자는 돌을 따라가요.', '50°까지 기울여요: 가는 길에 페이지가 한 번 섰고, 먼 돌은 7열로 굴러갔어요. 그림자는 (3,4) 틈에 떨어져요. 가까운 돌의 그림자 (4,3)을 지나 (3,4)로, (2,4)로. 펴고 닫으면 묶음이 그녀에게 이어져요.', '그림자는 구른 뒤의 돌 자리에 떨어져요.'],

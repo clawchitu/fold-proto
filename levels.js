@@ -638,6 +638,34 @@ const LEVELS = [
       '-x.S....',
     ],
   },
+  {
+    id: 'cross', tier: 'mid', chapter: 10, needs: ['needsFold', 'needsShade', 'needsRide', 'needsCrane'],   // 10-3 · fly first, then ride: the crane puts you on the LEFT page, where the right page's stones throw their shadows. Close on the crane (6,2) → (1,2); lean to 50°: the (6,1) stone shades the gap (2,1), step on; open to 80° and the shadow carries you to (3,1), one step below her (her stack is blocked by the (4,0) stone). gen.js search (seed 7) #1, the (0,2) decoy stone stripped: len 16, wrong 13, ride, noise 0
+    map: [
+      '---Gx...',
+      '-.--..x.',
+      '----.-h.',
+      '.---.S--',
+    ],
+  },
+  {
+    id: 'soak', tier: 'hard', chapter: 10, phases: 2, needs: ['needsFold', 'needsWet', 'needsCrane'],   // 10-5 · hard · ink is faster than the crane (7-4's order, with a new victim): the left crane (2,3) faces the gap (5,3), and 10-2 says it will land there — but the wet ink (5,4) bleeds into that gap at the same press, before the crane flies: the crane is soaked and stays, as wet ink. Ride the right crane (7,1) to (0,1), cross the (7,0) stone's 30° shadow at (1,0) to (2,0) and close again: the soaked crane bleeds a ring — (3,3) is paper now — and the 70° shadow at (3,0) leads down column 3 to her. hunt.js soak (seed 3) #1: len 19, wrong 12, phases 2, carries 1, noise 0
+    map: [
+      '.-.-...x',
+      '---..-.h',
+      '---..S--',
+      'x-h-.---',
+      '.x-GxI.-',
+    ],
+  },
+  {
+    id: 'over', tier: 'final', chapter: 10, phases: 3, backs: 1, needs: ['needsFold', 'needsFlip', 'needsCrane'],   // 10-6 · final · the turn is a press too. Close on the back of the left stone (3,3) from (4,3): the crane (2,0) flies to (5,0) on the right page; walk the stacks to that stack and you stand on it. Open a little and close again: it carries you BACK to the left page (2,0) — the book can only be turned from the left page (ch. 6), and the crane is the only way there. Turn: the turn is a press, the crane flies to the third page's (5,0)·T — a gap, so it is floor — with you; open and walk to her. hunt.js over (seed 3) #1, the (0,1) and (8,2) decoy stones stripped: len 19, wrong 11, carries 2, phases 3, backs 1, noise 0
+    map: [
+      '.xh-.--S--.-',
+      '.---..-.--..',
+      '..-.--...--G',
+      '.--x....-..-',
+    ],
+  },
 ];
 
 if (typeof module !== 'undefined') module.exports = LEVELS;
