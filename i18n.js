@@ -415,6 +415,9 @@
       turned: ['翻墨', '翻过去也算一次。', '斜到 70°：右页的石头把影子投在左页第 4 列顶上的缺口。踩上去合书——合的过程中影子滑动，把你放在胶那一格。合着走到左页最外一列，翻书：翻也是一次压，胶把第三页的石头粘过来，湿墨印过去，叠合图通到她。', '翻书的那一拍，也压。'],
       through: ['透', '信在这一面，却要翻过去。', '合一次：站在左页石头正对面的纸上合，这一叠堵死，走出去——第 4 行的叠对面还是缺口，把你放到左页。翻书：第三页对着左页时再走叠，第 3 行那一叠换页到左页远角；从第三页上再合一次，走到左上角，翻回来，合着走到她。', '翻过去不是为了到第三页；是为了换一张叠合图。'],
       // ---- vol. 3 chapter 9 「滚」 (docs/design-ch9.md): names are objects and motions; the order of moves lives in the hint; the last line is the aha ----
+      // ---- vol. 3 chapter 10 「鹤」 (docs/design-ch10.md) ----
+      crane: ['鹤', '站上去。', '走到纸鹤上合书：合上那一拍，鹤飞到对页同一行的镜像格，你跟着它。打开，你在右页了，往下一格是她。', '站在鹤上合书，你就在对页。'],
+      land: ['落', '鹤会过来。', '你站在左页，鹤在右页——合上书：它飞到你这页的镜像格，正好落在缺口里。打开，缺口是纸了，走过去。', '鹤落在哪，哪就是纸。'],
       roll: ['滚', '石头没粘住。', '斜起到 80°：页经过立起那一下，松石往折痕滚一格，掉进你旁边的缺口——缺口成了纸。走过去。', '书立起来，石头就往折痕滚；不用合上。'],
       twice: ['两次', '差两格。', '斜起（它滚一格），再放平（再滚一格）：石头掉进缺口，桥就有了。合上再打开，也是这两次。', '来回一次是两次过立；放平那一下也算。'],
       jump: ['跳', '影子跟着石头。', '斜到 50°：去的路上页立过一次，远处那颗已经滚到第 7 列——它的影子落在 (3,4) 的缺口上，不在你照着图算的那格。走近处那颗的影子 (4,3)，下到 (3,4)，再到 (2,4)；放平、合上，叠合走法通到她。', '影子落在石头滚之后的位置，不是画出来的位置。'],
@@ -485,6 +488,8 @@
       turned: ['Turned Ink', 'Turning the book counts too.', 'Lean to 70°: the right page’s stone shades the gap at the top of column 4. Step onto it and close — the shadow slides as the book closes and sets you down on the glue square. Walk the stacks to the left page’s far column and turn the book: the turn is a press, the glue pulls the third page’s stone across, the wet ink prints, and the stacks open to her.', 'The moment the book turns, it presses.'],
       through: ['Through', 'The letter is on this side, and still you turn.', 'Close on the paper facing the left stone: a blocked stack, walk out of it — row 4 faces a gap and sets you on the left page. Turn the book: with the third page facing, the row-3 stack changes page to the left corner; close once more from the third page, walk to the top-left, turn back, and the closed walk ends on her.', 'The turn is not the way to the third page; it is the way to a different set of stacks.'],
       // ---- vol. 3 chapter 9 「滚」 (docs/design-ch9.md) ----
+      crane: ['Crane', 'Stand on it.', 'Walk onto the paper crane and close the book: at the press the crane flies to the mirror square on the facing page, and you with it. Open: you are on the right page, one step above her.', 'Close the book standing on the crane and you are on the other page.'],
+      land: ['Land', 'The crane comes to you.', 'You are on the left page, the crane on the right — close the book: it flies to the mirror square on your page, right into the gap. Open: the gap is paper now. Walk across.', 'Where the crane lands is paper.'],
       roll: ['Roll', 'The stone is not glued down.', 'Lean to 80°: as the page passes upright the loose stone rolls one square towards the crease and drops into the gap beside you — the gap is paper now. Walk across.', 'Stand the book up and the stone rolls to the crease; no close needed.'],
       twice: ['Twice', 'Two squares short.', 'Lean (it rolls one), flatten (it rolls one more): the stone drops into the gap and the bridge is there. Close and open again would have been the same two passes.', 'A lean that comes back is two passes; flattening counts too.'],
       jump: ['Jump', 'The shadow follows the stone.', 'Lean to 50°: on the way the page passed upright and the far stone has rolled to column 7 — its shadow falls on the gap at (3,4), not where you worked it out from the drawing. Walk the near stone’s shadow at (4,3), down to (3,4), across to (2,4); flatten, close, and the stacks lead to her.', 'The shadow falls where the stone is after its roll, not where it was drawn.'],
@@ -509,6 +514,8 @@
       turned: ['返墨', '裏返すのも一度のうち。', '70° に傾ける：右頁の石が 4 列目いちばん上の隙間に影を落とす。乗って閉じる——閉じるあいだに影が滑り、糊の枡に降ろされる。重ねたまま左頁の外側の列へ歩き、本を返す：返すのも押すこと、糊が第三頁の石を引き寄せ、濡れた墨が写り、束が彼女へつながる。', '返す瞬間も、押している。'],   // TODO ja review
       through: ['透', '手紙はこちら側、それでもめくる。', '（TODO ja）左頁の石の向かいの紙で閉じ、塞がった束から出る。4 行目の束は向かいが隙間で、左頁に降ろされる。本を返す：第三頁が向いているときに束を歩くと 3 行目で左頁の隅へ移れる。第三頁からもう一度閉じ、左上へ歩き、返して、閉じたまま彼女へ。', '返すのは第三頁へ行くためではなく、別の束の地図のため。'],
       // ---- vol. 3 chapter 9 (drafts, TODO ja review) ----
+      crane: ['鶴', '上に立つ。', '紙の鶴に乗って本を閉じる：閉じた拍子に鶴は向かいの頁の鏡の枡へ飛び、きみも一緒に。開けば右頁、彼女はひとつ下。', '鶴の上で閉じれば、向こうの頁にいる。'],
+      land: ['降りる', '鶴はこちらへ来る。', 'きみは左頁、鶴は右頁——本を閉じる：鶴はこちらの頁の鏡の枡、ちょうど隙間へ降りる。開けば隙間は紙。渡る。', '鶴が降りたところは紙。'],
       roll: ['転', '石は貼られていない。', '80° まで傾ける：頁が立った拍子に石が折り目へ一枡転がり、隣の隙間に落ちる——隙間は紙になった。渡る。', '本を立てれば石は折り目へ転がる。閉じなくていい。'],
       twice: ['二度', '二枡足りない。', '傾けて（一枡）、平らに戻す（もう一枡）：石が隙間に落ちて橋になる。閉じて開いても同じ二度。', '往復は二度の「立ち」。戻すほうも数える。'],
       jump: ['跳', '影は石についていく。', '50° まで傾ける：途中で頁が立ち、遠い石は 7 列目へ転がっている——影は (3,4) の隙間に落ちる。近い石の影 (4,3) を渡り、(3,4) へ、(2,4) へ。平らにして閉じれば束が彼女へ続く。', '影は転がったあとの石の位置に落ちる。'],
@@ -576,6 +583,8 @@
       turned: ['뒤집은 먹', '뒤집는 것도 한 번이에요.', '70°로 기울여요: 오른쪽 면 돌이 4열 맨 위 빈칸에 그림자를 드리워요. 올라서서 닫아요 — 닫히는 동안 그림자가 미끄러져 풀 칸에 내려놓아요. 겹친 채 왼쪽 면 바깥 열로 걸어가 책을 뒤집어요: 뒤집는 것도 누르는 것, 풀이 셋째 면의 돌을 끌어오고 젖은 먹이 찍히고 묶음이 그녀에게 이어져요.', '뒤집는 순간에도 눌러요.'],   // TODO ko review
       through: ['비침', '편지는 이쪽에 있는데, 그래도 넘겨요.', '(TODO ko) 왼쪽 면 돌 맞은편 종이에서 닫고, 막힌 묶음에서 걸어 나와요. 4행 묶음은 맞은편이 틈이라 왼쪽 면에 내려줘요. 책을 뒤집어요: 셋째 면이 마주할 때 묶음을 걸으면 3행에서 왼쪽 면 모서리로 건너가요. 셋째 면에서 한 번 더 닫고 왼쪽 위로 걸어가 다시 뒤집으면, 닫은 채로 그녀에게 닿아요.', '뒤집는 건 셋째 면에 가려는 게 아니라, 다른 묶음 지도를 쓰려는 거예요.'],
       // ---- vol. 3 chapter 9 (drafts, TODO ko review) ----
+      crane: ['학', '위에 올라서요.', '종이학 위에 올라가 책을 닫아요: 닫히는 순간 학은 맞은편 면의 거울 칸으로 날아가고, 너도 함께요. 열면 오른쪽 면, 그녀는 한 칸 아래.', '학 위에서 닫으면 맞은편 면에 있어요.'],
+      land: ['내려앉다', '학이 이쪽으로 와요.', '너는 왼쪽 면, 학은 오른쪽 면——책을 닫아요: 학이 이쪽 면의 거울 칸, 바로 그 틈에 내려앉아요. 열면 틈은 종이예요. 건너가요.', '학이 내려앉은 곳은 종이예요.'],
       roll: ['구르기', '돌이 붙어 있지 않아요.', '80°까지 기울여요: 페이지가 서는 순간 돌이 접힌 금 쪽으로 한 칸 굴러 옆 틈에 떨어져요. 틈은 종이가 됐어요. 건너가요.', '책을 세우면 돌이 접힌 금으로 굴러요. 닫지 않아도 돼요.'],
       twice: ['두 번', '두 칸 모자라요.', '기울이고(한 칸), 다시 펴요(한 칸 더): 돌이 틈에 떨어져 다리가 돼요. 닫았다 열어도 같은 두 번이에요.', '한 번 오가는 건 두 번 세우는 것. 펴는 쪽도 세요.'],
       jump: ['뛰기', '그림자는 돌을 따라가요.', '50°까지 기울여요: 가는 길에 페이지가 한 번 섰고, 먼 돌은 7열로 굴러갔어요. 그림자는 (3,4) 틈에 떨어져요. 가까운 돌의 그림자 (4,3)을 지나 (3,4)로, (2,4)로. 펴고 닫으면 묶음이 그녀에게 이어져요.', '그림자는 구른 뒤의 돌 자리에 떨어져요.'],

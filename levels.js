@@ -622,6 +622,22 @@ const LEVELS = [
       '.--.-.--',
     ],
   },
+  // ---- vol. 3 「倾」 · Chapter 10 「鹤」 (docs/design-vol3.md §1.2, docs/design-ch10.md): the paper crane `h` is floor; at EVERY press it flies to its
+  // mirror cell (after the roll of the sweep, the bleed, the keys, the ink and the glue) and carries whoever stands on it. Levels 10-1…10-6.
+  {
+    id: 'crane', tier: 'teach', chapter: 10, needs: ['needsFold', 'needsCrane'],   // 10-1 · teaching · stand on the crane and close: at the press it flies to the mirror square on the facing page and you with it; open, and she is one step below you. Every stack is two-sided, so the stack walk never changes page: only the crane does
+    map: [
+      'S.h.....',
+      '--x--G--',
+    ],
+  },
+  {
+    id: 'land', tier: 'easy', chapter: 10, needs: ['needsFold', 'needsCrane'],   // 10-2 · the crane comes to you: you are on the left page, it is on the right. Close (standing anywhere but (2,0): the (5,0) stone comes down there): it flies to its mirror square on YOUR page — the gap between you and her — and where it lands is floor. Open and walk across. The (5,0) stone blocks the (2,0) stack and the (1,1) stone the (1,1) stack, so the closed walk never reaches her corner; the (5,0) stone's shadow only ever falls on paper
+    map: [
+      'G-...xh.',
+      '-x.S....',
+    ],
+  },
 ];
 
 if (typeof module !== 'undefined') module.exports = LEVELS;

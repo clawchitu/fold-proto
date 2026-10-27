@@ -68,6 +68,41 @@ const T = {
         const j = hinge[k + 1]; if (j == null) continue; const q = st[j - 1], t = st[j];
         if (L.passes(p.a, s.a) && L.passes(q.a, t.a) && G_posture(s.a) !== 'fold' && G_posture(p.a) !== 'fold' && G_posture(t.a) !== 'fold') fro = true; }
       return [fro || openRoll, m.needsRoll, (m.rolls || 0) >= 2, (m.fills || 0) >= 1, m.before, m.closes >= 1]; } },
+  // ---- vol. 3 ch. 10 「鹤」 (docs/design-ch10.md): the crane flies at every press, whether you want it to or not ----
+  shuttle: { rows: 5, pages: 2, lamp: null, tiles: '.-xgh', par: 4, closes: 2, minpar: 3, need: 'crane', elements: 8, minlen: 15, phases: 0, backs: 0, carries: 1,
+    seed: ['S.h.-...', '..--..x.', '-.x..g.-', '...-..-.', '--.-...G'],
+    pred: (m, X) => { // the solution is carried once, and later presses again from a square that is NOT the crane's while a crane on its page flies (standing on it again would carry you back)
+      const st = X.states; let off = false;
+      for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (s.face !== p.face || G_posture(s.a) !== 'fold' || G_posture(p.a) === 'fold') continue;
+        const wb = X.B.world(p.g, p.face), wa = X.B.world(s.g, s.face); if (L.at(wb, p.c, p.r) === 'h' || L.isRight(s.c) !== L.isRight(p.c)) continue;
+        const c0 = L.isRight(p.c) ? 4 : 0; for (let r = 0; r < X.B.h; r++) for (let c = c0; c < c0 + 4; c++) if (L.at(wb, c, r) === 'h' && L.at(wa, c, r) !== 'h') off = true; }
+      return [(m.carries || 0) >= 1, off, m.needsCrane, m.closes >= 2]; } },
+  ground: { rows: 5, pages: 2, lamp: null, tiles: '.-xrh', par: 4, closes: 2, minpar: 3, need: 'roll+crane', elements: 8, minlen: 15, phases: 0, backs: 0, carries: 1,
+    seed: ['..h.-.r.', 'S.-.-...', '.x-..-.G', '--.-x...', '.-..r-..'],
+    pred: (m, X) => { // the drawn board shows a left-page crane's landing free with a loose stone one square outward of it: a close from flat rolls the stone onto the landing FIRST and the crane stays (with you on it, the stone comes down on you). The solution's FIRST close rides THAT crane (after passes that rolled the stone past the landing)
+      const b = X.B.base.grid, st = X.states; let set = false, grounded = false, n = 0; const g1 = X.B.G[X.B.press(X.B.roll(0, 0, null), 0)];
+      for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (s.face !== p.face || G_posture(s.a) !== 'fold' || G_posture(p.a) === 'fold') continue; n++;
+        if (n === 1 && !L.isRight(p.c) && L.isRight(s.c) && b[p.r][p.c] === 'h' && b[p.r][7 - p.c] === '.' && b[p.r][8 - p.c] === 'r') { set = true; if (g1[p.r][p.c] === 'h') grounded = true; } }
+      return [set, grounded, m.needsRoll, m.needsCrane, (m.rolls || 0) >= 1, m.closes >= 1]; } },
+  soak: { rows: 5, pages: 2, lamp: null, tiles: '.-xIh', par: 4, closes: 2, minpar: 3, need: 'wet+crane', elements: 8, minlen: 15, phases: 2, backs: 0,
+    seed: ['S.h.-...', '-.--.I..', '..--..-G', '-.x..-..', '.--.-...'],
+    pred: (m, X) => { // the crane's landing is a gap beside wet ink: the bleed of the same press soaks the crane before it flies; it is wet ink on YOUR page now and the next press spreads a ring from it — a square of that ring is on the solution
+      const b = X.B.base.grid, g1 = X.B.G[X.B.press(0, 0)], g2 = X.B.G[X.B.press(X.B.press(0, 0), 0)]; let soaked = false, road = false;
+      for (let r = 0; r < b.length; r++) for (let c = 0; c < 8; c++) if (b[r][c] === 'h' && g1[r][c] === 'I') { soaked = true;
+        for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nc = c + dc, nr = r + dr; if (nc < 0 || nc >= 8 || nr < 0 || nr >= b.length || L.isRight(nc) !== L.isRight(c)) continue;
+          if (b[nr][nc] === '-' && g2[nr][nc] === 'I' && X.states.some((s) => s.c === nc && s.r === nr && X.B.G[s.g][nr][nc] === 'I')) road = true; } }
+      return [soaked, road, m.needsWet, m.needsCrane, m.closes >= 2, m.phases >= 2]; } },
+  ferry: { rows: 5, pages: 2, lamp: null, tiles: '.-xrh', par: 4, closes: 2, minpar: 3, need: 'roll+crane', elements: 8, minlen: 15, phases: 0, backs: 0, carries: 2,
+    seed: ['S.h.....', '-.--.r-.', '.G-..r..', 'x---.-..', '..-..-r.'],
+    pred: (m, X) => { // the crane flies back and forth at every close: the solution rides it OVER and BACK (carried twice), and between the two it stands on the right page holding a loose stone through a pass (9-4) — you crossed only to hold the stone
+      let held = false; const st = X.states; for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (p.face !== s.face || p.a === s.a || !L.passes(p.a, s.a) || !L.isRight(p.c)) continue;
+        if (X.B.roll(p.g, p.face, { c: p.c, r: p.r }) !== X.B.roll(p.g, p.face, null)) held = true; }
+      return [(m.carries || 0) >= 2, held, m.needsRoll, m.needsCrane, m.closes >= 2]; } },
+  over: { rows: 4, pages: 3, lamp: null, tiles: '.-xh', par: 5, closes: 3, minpar: 4, need: 'flip+crane', elements: 8, minlen: 18, phases: 0, backs: 0,
+    seed: ['S.h.....-..-', '.-.-.x..-.-.', '--.......-G.', '.x-.-...-.-.'],
+    pred: (m, X) => { // the turn is a press too: a flip in the solution carries the figure, standing on a left-page crane, to the THIRD page
+      const st = X.states; let flipCarry = false; for (let i = 1; i < st.length; i++) if (st[i].face !== st[i - 1].face && L.isRight(st[i].c) !== L.isRight(st[i - 1].c)) flipCarry = true;
+      return [flipCarry, m.needsFlip, m.needsCrane, m.closes >= 1]; } },
 };
 const G_posture = C.posture;
 const t = T[name]; if (!t) throw new Error('name');
