@@ -503,6 +503,61 @@ const LEVELS = [
       'x.-I--..----',
     ],
   },
+  // ---- Chapter 8 「灯位」 (docs/design-ch8.md): the lamp is on the LEFT bank — level.lamp 'L' (the flat left page's stones shade the
+  // lifted page; shadows slide outward towards column 8 as the book closes) or 'LR' (two lamps, both sets). Tile A = angle gate: floor
+  // only while the page leans. Vol. 2 finale: pays off the turn (6), glue (5) and wet ink (7) together. Main path: `chapter: 8`.
+  {
+    id: 'lamp', tier: 'teach', chapter: 8, lamp: 'L', needs: ['needsShade', 'needsRide', 'needsLamp'],   // 8-1 · teaching · lean to 60°: the left page's stone shades the gap beside you on the lifted page; step on, close to 45° and the shadow slides OUTWARD (towards column 8), carrying you to the square before her
+    map: [
+      'x---S--G',
+      '--------',
+    ],
+  },
+  {
+    id: 'lift', tier: 'easy', chapter: 8, lamp: 'L', needs: ['needsFold', 'needsShade', 'needsRide', 'needsLamp'],   // 8-2 · the reverse ride: step onto the left stone's shadow at 50°, then OPEN to 70° — the shadow slides back towards the hinge and sets you on the hinge-side paper; close from there and the stack walk ends on her. gen.js S2 #1 (seed 2): len 8, wrong 11, backs 1
+    map: [
+      '..-.--..',
+      '...x.-.S',
+      '.x-G--.-',
+    ],
+  },
+  {
+    id: 'banks', tier: 'mid', chapter: 8, lamp: 'LR', needs: ['needsFold', 'needsShade', 'needsRide', 'needsLamp'],   // 8-3 · two lamps: the right page's stones shade the left page as always, the left page's stones shade the lifted page. The right-lamp shadows are the trap; the road is the left stone's shadow at 30°, ridden back to the hinge by opening to 60°, then one close and three stack switches to her. gen.js S3 #1 (seed 3): len 12, wrong 10, switches 3
+    map: [
+      '.-G----S',
+      '.--.-.-.',
+      '...x.x-.',
+      '..x.--..',
+    ],
+  },
+  {
+    id: 'gate', tier: 'mid', chapter: 8, lamp: 'L', backs: 1, needs: ['needsFold', 'needsShade', 'needsLamp', 'needsGate'],   // 8-4 · the angle gate (A) stands only while the page leans: at 40° walk over the left stone's shadow and through the gate onto the paper above — in ONE lean, since the gate drops you if the lean ends — and close from there: that square is the back of the left page's stone, so you are inside a blocked stack and walk out of it. gen.js S4 #2 (seed 4): len 11, wrong 11, backs 1
+    map: [
+      'G.x.-.Ax',
+      'x--.---.',
+      '-..---.-',
+      '....S...',
+    ],
+  },
+  {
+    id: 'taken', tier: 'hard', chapter: 8, lamp: 'LR', phases: 1, needs: ['needsFold', 'needsShade', 'needsRide', 'needsLamp'],   // the glue is the trap, not the tool (check.js: glueFires, not needsGlue): it fires at the first close whatever you do, and takes the left-page road away   // 8-6 · two lamps + glue: cross the left page at 50° on the right stones' shadows to the glue's corner, close — the glue pulls the (7,1) stone across, which TAKES AWAY the shadow you came on (before) — and the stack walk puts you on the right page; there the left stone's shadow at 40° and a reverse ride to 60° reach her. gen.js S6 #2 (seed 6): len 15, wrong 17, dead 30% / 2, before, phases 1. glance: 1/1 one-shot 2026-10-26 (kept for its aha, design-ch8.md §3.2)
+    map: [
+      '-.-..-x-',
+      'g-x.-..x',
+      '.-S.-x.-',
+      'x--.g--.',
+      '.----G--',
+    ],
+  },
+  {
+    id: 'twolamps', tier: 'final', chapter: 8, lamp: 'LR', phases: 3, backs: 1, needs: ['needsFold', 'needsShade', 'needsGlue', 'needsFlip', 'needsWet', 'needsLamp', 'needsGate'],   // 8-7 · final · 卷二 finale. First close (from the right page's top corner): both glues fire at once — the right page's stone comes to the left page (and becomes a stone's back + a left-lamp shadow), the left page's stone goes to the right page (its left-page shadow is gone). Lean to 30° and walk the lifted page over the left stone's shadow to the square the glue just emptied: it is now the back of the glued-in stone. Close there — inside a blocked stack — step out to the left page and turn the book: the turn is the third press, the third page's wet ink bleeds, and the stack walk lands on a square that is wet only after the turn. Lean to 50°: the left page's stones shade the third page and bridge the last gap to her. The gate stands only in the lean and seals the flat shortcut. gen.js S7 #1 (seed 7, from a hand seed) polished, the left-page glue decoy removed by hand (the left-page wet ink stays: it is what makes the second close change the board — without it wrong drops from 11 to 1): len 19, wrong 11, dead 18% / 4, phases 3, backs 1, switches 2, noise 1. glance: 1/1 one-shot 2026-10-26 (the reader wrote the intended route; kept for its aha, see design-ch8.md §3.2)
+    map: [
+      '.x.gx.-.G---',
+      '.x-.--g.--.-',
+      '.-A--...-I--',
+      '--I..S...---',
+    ],
+  },
 ];
 
 if (typeof module !== 'undefined') module.exports = LEVELS;
