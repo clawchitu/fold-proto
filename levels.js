@@ -648,6 +648,16 @@ const LEVELS = [
     ],
   },
   {
+    id: 'ground', tier: 'hard', chapter: 10, phases: 1, needs: ['needsFold', 'needsRoll', 'needsCrane'],   // 10-4 · hard · the landing is free before the close; at the press the stone gets there first. The crane (2,0) faces (5,0), paper, with the loose stone (6,0) one square outward: close on the crane from flat and the pass of that close rolls the stone onto the landing — the crane stays and the stone comes down on you. Lean to 55° (pass 1: every loose stone rolls one; the rolled (4,4) stone's shadow at (3,4) and the (5,2) stone's at (3,2) lead round to the top-left corner), stand on the crane, FLATTEN (pass 2: the (5,0) stone drops into the (4,0) gap, the one behind rolls to (5,0)), then close (pass 3: it rolls on to (4,0), the landing is free, the crane carries you to (5,0)); walk the stacks to (6,2), open, one step down to her. The second crane (3,0) is the decoy whose landing (4,0) the stones fill and then occupy. hunt.js ground (seed 11) #2, the left-page loose stone fixed as x: len 18, wrong 22, before, made, rolls 3, noise 1
+    map: [
+      '..hh-.rr',
+      '..--.--r',
+      '...-.x.-',
+      '-x-..-G-',
+      'S..-.r--',
+    ],
+  },
+  {
     id: 'soak', tier: 'hard', chapter: 10, phases: 2, needs: ['needsFold', 'needsWet', 'needsCrane'],   // 10-5 · hard · ink is faster than the crane (7-4's order, with a new victim): the left crane (2,3) faces the gap (5,3), and 10-2 says it will land there — but the wet ink (5,4) bleeds into that gap at the same press, before the crane flies: the crane is soaked and stays, as wet ink. Ride the right crane (7,1) to (0,1), cross the (7,0) stone's 30° shadow at (1,0) to (2,0) and close again: the soaked crane bleeds a ring — (3,3) is paper now — and the 70° shadow at (3,0) leads down column 3 to her. hunt.js soak (seed 3) #1: len 19, wrong 12, phases 2, carries 1, noise 0
     map: [
       '.-.-...x',

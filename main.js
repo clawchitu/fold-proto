@@ -95,6 +95,7 @@
     D: '<svg viewBox="0 0 40 40"><circle cx="20" cy="17" r="3.6" fill="var(--accent)"/><path d="M20 19v8" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/></svg>',
     i: '<svg viewBox="0 0 40 40"><path d="M20 7c6 1 12 5 12 12 1 7-5 13-12 13-8 0-13-5-13-12 0-6 4-9 6-10 2-2 4-3 7-3z" fill="#2b2a28"/><circle cx="33" cy="9" r="2" fill="#2b2a28"/></svg>',
     // glue (vol. 2): a wet drop with a highlight; the amber smear itself is the tile background (style.css)
+    h: '<svg viewBox="0 0 40 40"><path d="M6 25l10-4 4-13 4 13 10 4-12 2-2 7-2-7z" fill="none" stroke="#8a5a14" stroke-width="2" stroke-linejoin="round"/><path d="M16 21l4 2 4-2" fill="none" stroke="#8a5a14" stroke-width="1.4" stroke-linecap="round"/></svg>',   // vol. 3 ch. 10: the paper crane (an outline + one fold line; design-vol3.md §1.2)
     g: '<svg viewBox="0 0 40 40"><path d="M20 9c4 6 8 10 8 15a8 8 0 0 1-16 0c0-5 4-9 8-15z" fill="none" stroke="#8a5a14" stroke-width="2.2" stroke-linejoin="round"/><path d="M16 24a4 4 0 0 0 3 4" fill="none" stroke="#8a5a14" stroke-width="1.6" stroke-linecap="round"/></svg>',
   };
 
@@ -142,7 +143,7 @@
   function paintTiles() {
     cells.forEach((row, r) => row.forEach((el, c) => {
       const t = F.at(state, c, r);
-      const kind = { '-': 'empty', '.': 'floor', S: 'floor', G: 'goal', x: 'stone', r: 'loose', k: 'key', D: 'door', o: 'open', i: 'ink', I: 'wet', p: 'pop', g: 'glue', A: 'gate' }[t];
+      const kind = { '-': 'empty', '.': 'floor', S: 'floor', G: 'goal', x: 'stone', r: 'loose', k: 'key', D: 'door', o: 'open', i: 'ink', I: 'wet', p: 'pop', g: 'glue', A: 'gate', h: 'crane' }[t];
       if (el.dataset.kind === kind) return;
       el.dataset.kind = kind;
       el.innerHTML = kind === 'empty' ? '' : `<div class="tile">${SVG[t === 'S' ? '' : t === 'I' ? 'i' : t === 'A' ? 'o' : t === 'r' ? 'x' : t] || ''}</div>`;
@@ -173,7 +174,7 @@
     ui.right.classList.remove('turned'); void ui.right.offsetWidth; ui.right.classList.add('turned');
     sound.crease();
     lastStamp = events;
-    paintTiles(); buildTabs(); applyAngle();
+    paintTiles(); buildTabs(); applyAngle(); placeChar(true);   // vol. 3 ch. 10: the turn is a press — a crane under your feet flew to the third page with you (logic.flip moved state.char)
     if (events.length) { setTimeout(() => sound.stamp(), 120); events.forEach((e) => e.cells.forEach(({ c, r }) => flash(cells[r][c]))); }
     pulseLinks();
     bus.emit('flip', { face: state.face, events, crush });
@@ -309,7 +310,8 @@
       sound.crease();
       if (state.pages > 2 && !localStorage.getItem('fold.layerRule')) { localStorage.setItem('fold.layerRule', '1'); toast(t('layerRule')); }
       const events = F.stamp(state);
-      state.char = F.carried(events, state.char);   // vol. 3 ch. 10: the crane under your feet flew to its mirror cell, with you (same stack while closed; TODO figure repaint + toast when ch. 10 ships)
+      const was = state.char; state.char = F.carried(events, state.char);   // vol. 3 ch. 10: the crane under your feet flew to its mirror cell, with you (the same stack while closed)
+      if (state.char !== was) { placeChar(true); toast(t('carried', { col: t('col', { c: state.char.c + 1 }) })); }
       lastStamp = events;
       if (events.length) {
         paintTiles();
@@ -550,7 +552,7 @@
   // chapter headings in the Levels sheet: first level index of each chapter (tools/check.js CHAPTER_START), its volume
   const CHAPTERS = [{ at: 0, vol: 1, ch: 1 }, { at: 5, ch: 2 }, { at: 13, ch: 3 }, { at: 19, ch: 4 }, { at: 25, vol: 2, ch: 5 },
     { at: LEVELS.findIndex((l) => l.chapter === 6), ch: 6 }, { at: LEVELS.findIndex((l) => l.chapter === 7), ch: 7 }, { at: LEVELS.findIndex((l) => l.chapter === 8), ch: 8 },
-    { at: LEVELS.findIndex((l) => l.chapter === 9), vol: 3, ch: 9 }];
+    { at: LEVELS.findIndex((l) => l.chapter === 9), vol: 3, ch: 9 }, { at: LEVELS.findIndex((l) => l.chapter === 10), ch: 10 }];
   function openLevels() {
     ui.levelGrid.innerHTML = '';
     const head = (cls, text) => { const h = document.createElement('h3'); h.className = cls; h.textContent = text; ui.levelGrid.appendChild(h); };
