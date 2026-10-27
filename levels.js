@@ -446,6 +446,44 @@ const LEVELS = [
       '...----x....',
     ],
   },
+  // ---- Chapter 7 「墨晕」 (vol. 2, docs/design-ch7.md): wet ink I. Every press (close or turn) first bleeds each wet square one ring
+  // into the gaps and glue beside it on its own page, then prints the grown blot onto the facing gaps — and the print is wet too.
+  // Closes are the chapter's resource (check.js CLOSES_MAX.wet = 3). Main path: `chapter: 7`.
+  {
+    id: 'wet', tier: 'teach', chapter: 7, needs: ['needsFold', 'needsWet'],   // 7-1 · teaching · one close: the blot bleeds one ring and the gap beside the start is ink; the right-page stone keeps the closed stack walk from reaching her
+    map: [
+      'S-I-----',
+      '-G----x-',
+    ],
+  },
+  {
+    id: 'print', tier: 'easy', chapter: 7, needs: ['needsFold', 'needsWet'],   // 7-2 · you start on the right page; the blot prints across wet, and the print grows a ring at the second close — two closes to reach the corner
+    map: [
+      '-----S--',
+      '-I---.--',
+      '--------',
+      '-------G',
+    ],
+  },
+  {
+    id: 'ring', tier: 'mid', chapter: 7, backs: 1, needs: ['needsFold', 'needsShade', 'needsRide', 'needsWet'],   // 7-3 · one ring is enough: close once from the stone's back to cross to the left page, lean 40° onto the shadow and ride out to 80°; a second close would fill the gap the ride needs (before)
+    map: [
+      '.-----.-',
+      '-.-Gx..-',
+      '-.--.-xI',
+      '-x--S..-',
+    ],
+  },
+  {
+    id: 'spoiled', tier: 'hard', chapter: 7, phases: 2, needs: ['needsFold', 'needsShade', 'needsGlue', 'needsWet'],   // 7-4 · the glue beside the blot never pulls: the ring covers it at the first press (bleed comes before glue) — and that is the point: ink bleeds THROUGH glue where paper would stop it, and the second ring runs along the bottom row to her. gen.js B2 #2 (seed 23): len 18, wrong 14, dead 38% / 2 basins, before, phases 2, backs 1
+    map: [
+      '-------.',
+      '-I-..---',
+      'g.x--.-x',
+      '-x-S.I.-',
+      '--x.-g-G',
+    ],
+  },
 ];
 
 if (typeof module !== 'undefined') module.exports = LEVELS;

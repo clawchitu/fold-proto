@@ -80,6 +80,17 @@ const SLIPS = [
       { walkStack: [2, 0] },                      // the stack with a gap on the left and her on the third page
       { win: true },
     ] },
+  { id: 'wet', level: '7-1', tile: 'I',
+    map: ['S--I----', '-G------'],
+    beats: [
+      { step: [1, 0], blocked: 'gap' },           // the gap beside the start
+      { angle: 180, stamp: 'bleed' },             // close: the blot bleeds one ring — (2,0) and (3,1) — and prints onto the right page
+      { angle: 0 },
+      { step: [1, 0], blocked: 'gap' },           // one square short: still a gap
+      { angle: 180, stamp: 'bleed' },             // close again: ring two reaches (1,0) and (2,1)
+      { angle: 0 },
+      { walk: [1, 1] }, { win: true },            // the road joins: down to the letter
+    ] },
 ];
 
 function run(slip) {

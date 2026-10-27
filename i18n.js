@@ -83,6 +83,9 @@
       turned: '翻过来了：左页对着第三页', turnedBack: '翻回来了：左页又对着右页',
       crushedFlip: '翻过来的那页上有石头，正压在你这格。书翻回原样，回到起点',
       'ch.6.line': '合上，翻过来，再打开。', 'paper.ch6': '信笺，两面都写了字。', 'paper.turned': '这一面是信笺的背面',
+      'ch.7.line': '墨还没干，每合一次洇一圈。', 'paper.ch7': '信笺，墨迹未干。', 'chHead.7': '七 · 墨晕', 'pre.wet': '湿墨',
+      'letter.7.title': '左岸来信', 'letter.7.body': '墨还没干。\n我每合一次书，字就往你那边洇一圈——\n洇到页边，洇到背面。\n别等它干。合上来。', 'letter.7.sign': '——左岸', 'letter.7.end': '卷二《翻页》第三章完。\n下一章，灯换了岸。',
+      'slip.wet.title': '墨晕', 'slip.wet.body': '这滴墨还没干。每合一次书，它往四周洇一格，也印到对面——印过去的也是湿的。合几次，墨就长几圈。', 'slip.wet.pic': '图：合一次，墨洇一圈，还差一格；再合一次，路接上了。',
       'letter.6.title': '右岸来信', 'letter.6.body': '你翻过来了。\n我在这一页等了很久，久到字都写到了背面。\n不要紧——合上的时候，\n哪一面对着你，由你定。', 'letter.6.sign': '——右岸', 'letter.6.end': '卷二《翻页》第二章完。\n背面还有字。',
     },
 
@@ -156,6 +159,9 @@
       turned: 'Turned over: the left page now faces the third page', turnedBack: 'Turned back: the left page faces the right page again',
       crushedFlip: 'The page you turned to has a stone over your square. The book turns back; back to the start.',
       'ch.6.line': 'Close, turn it over, open.', 'paper.ch6': 'Letter paper, written on both sides.', 'paper.turned': 'This face is the back of the letter paper',
+      'ch.7.line': 'The ink is wet: every close bleeds one ring.', 'paper.ch7': 'Letter paper, the ink still wet.', 'chHead.7': '7 · Bleed', 'pre.wet': 'wet ink',
+      'letter.7.title': 'A Letter from the Left Bank', 'letter.7.body': 'The ink is not dry.\nEach time I close the book the words bleed a ring towards you —\nto the margin, through to the back.\nDon’t wait for it to dry. Close the book.', 'letter.7.sign': '— the Left Bank', 'letter.7.end': 'End of Book Two, chapter three.\nNext, the lamp changes banks.',
+      'slip.wet.title': 'Wet Ink', 'slip.wet.body': 'This blot has not dried. Every time the book closes it bleeds one square outward and prints onto the facing page — and the print is wet too. Close twice, it grows two rings.', 'slip.wet.pic': 'Picture: one close, one ring, one square short; a second close, and the road joins.',
       'letter.6.title': 'A Letter from the Right Bank', 'letter.6.body': 'You turned the page.\nI waited on this one so long the writing ran onto the back.\nNever mind — when the book is shut,\nwhich face is towards you is yours to choose.', 'letter.6.sign': '— the Right Bank', 'letter.6.end': 'End of Book Two, chapter two.\nThere is more on the back.',
     },
 
@@ -229,6 +235,9 @@
       turned: 'めくった。左頁の向かいは三枚目の頁', turnedBack: 'めくり戻した。左頁の向かいはまた右頁',
       crushedFlip: 'めくった頁の石が、このマスに落ちてきた。本を元に戻して、はじめから',
       'ch.6.line': '閉じて、裏返して、開く。', 'paper.ch6': '便箋。両面に字がある。', 'paper.turned': 'この面は便箋の裏',
+      'ch.7.line': '墨はまだ乾いていない。閉じるたび、ひとまわり滲む。', 'paper.ch7': '便箋。墨が乾いていない。', 'chHead.7': '七 · 滲み', 'pre.wet': '濡れた墨',   // TODO ja review
+      'letter.7.title': '左岸からの手紙', 'letter.7.body': '墨はまだ乾いていない。\n本を閉じるたび、字はきみのほうへひとまわり滲む——\n頁の端まで、裏まで。\n乾くのを待たないで。閉じて。', 'letter.7.sign': '——左岸より', 'letter.7.end': '第二巻『頁をめくる』第三章 了。\n次の章で、灯が岸を変える。',   // TODO ja review
+      'slip.wet.title': '滲み', 'slip.wet.body': 'この墨はまだ乾いていない。本を閉じるたびに四方へ一枡滲み、向かいにも写る——写ったほうも濡れている。閉じた回数だけ、墨は広がる。', 'slip.wet.pic': '図：一度閉じるとひとまわり滲み、あと一枡届かない。もう一度閉じると道がつながる。',   // TODO ja review
       'letter.6.title': '右岸からの手紙', 'letter.6.body': 'めくってくれたね。\nこの頁で長く待ちすぎて、字が裏まで続いた。\nかまわない——閉じたとき、\nどちらの面がきみに向くかは、きみが決める。', 'letter.6.sign': '——右岸より', 'letter.6.end': '第二巻『頁をめくる』第二章 了。\n裏にも、まだ字がある。',
     },
 
@@ -302,6 +311,9 @@
       turned: '넘겼어요. 왼쪽 페이지가 세 번째 페이지와 마주 봐요', turnedBack: '되돌렸어요. 왼쪽 페이지가 다시 오른쪽 페이지와 마주 봐요',
       crushedFlip: '넘긴 페이지의 돌이 이 칸에 떨어졌어요. 책을 되돌리고 처음으로 돌아가요',
       'ch.6.line': '닫고, 뒤집고, 펼친다.', 'paper.ch6': '편지지, 양면에 글이 있다.', 'paper.turned': '이 면은 편지지의 뒷면',
+      'ch.7.line': '먹이 아직 마르지 않았다. 닫을 때마다 한 겹 번진다.', 'paper.ch7': '편지지, 먹이 아직 마르지 않았다.', 'chHead.7': '7장 · 번짐', 'pre.wet': '젖은 먹',   // TODO ko review
+      'letter.7.title': '왼쪽 강가에서 온 편지', 'letter.7.body': '먹이 아직 마르지 않았다.\n책을 닫을 때마다 글이 네 쪽으로 한 겹 번진다.\n여백까지, 뒷면까지.\n마르기를 기다리지 마. 닫아 줘.', 'letter.7.sign': '— 왼쪽 강가에서', 'letter.7.end': '제2권 《페이지를 넘기다》 제3장 끝.\n다음 장에서 등불이 강가를 바꾼다.',   // TODO ko review
+      'slip.wet.title': '번짐', 'slip.wet.body': '이 먹은 아직 마르지 않았어요. 책을 닫을 때마다 사방으로 한 칸 번지고, 맞은편에도 찍혀요. 찍힌 쪽도 젖어 있어요. 닫은 횟수만큼 먹이 자라요.', 'slip.wet.pic': '그림: 한 번 닫으면 한 겹 번지고 한 칸이 모자라요. 한 번 더 닫으면 길이 이어져요.',   // TODO ko review
       'letter.6.title': '오른쪽 강가에서 온 편지', 'letter.6.body': '네가 페이지를 넘겼구나.\n이 페이지에서 너무 오래 기다려 글이 뒷면까지 이어졌다.\n괜찮아. 책을 닫았을 때\n어느 면이 너를 향할지는 네가 정하니까.', 'letter.6.sign': '— 오른쪽 강가에서', 'letter.6.end': '제2권 《페이지를 넘기다》 제2장 끝.\n뒷면에 글이 더 있다.',
     },
   };
@@ -359,6 +371,10 @@
       bleed: ['透字', '背面的字透过来了。', '先别合上：角上的胶会把左上那块石头粘走，影子就没了。沿左页走到顶行第 2 列（胶上），斜起到 55°：影子落在第 3 列第 2 行。踩上去，再把书打开到 70°：影子带你到第 4 列。往下一格，在第 3 行合上、翻过来，合着走到第 3 叠的顶上。', '先别合上。'],
       pressedFlower: ['压花', '页角有胶。别急。', '先合上的话，胶把石头粘过来，路就断了。从起点走到左下角，斜起到 40° 踩上影子，再打开到 60°：影子带你到第 2 列。走到第 4 列第 2 行，合上、翻过来，合着往下走到底。', '合上之前，先把影子走完。'],
       lastPage: ['末页', '翻到最后一页。', '走到右上角那格纸——它正对着左页的石头——在那里合上，合着走出这一叠到左页。翻过去：左页的胶把第三页的石头粘过来；再翻回来：右页的胶把它接走。它现在在右页了，斜起到 55°，影子正落在信旁边的缺口上。', '石头的背上，也是纸。'],
+      wet: ['湿', '这滴墨还没干。', '合上书：墨往四周洇一格，起点旁边的缺口变成了墨。打开，走过去。', '合一次，看它长。'],
+      print: ['印', '印过去的，也是湿的。', '墨印到右页之后，右页的那片墨也会洇。合一次不够，合两次：第二圈洇到右下角。', '对面那片墨，也会长。'],
+      ring: ['圈', '一圈够。', '站在右页左下角那格纸上合书——它正对着左页的石头，你在石头背上；合着走到左页第 3 行。斜起到 40° 踩上第 3 列的影子，再开到 80°：影子把你带到第 4 列，往上一格就是她。', '合第二次，影子底下的缺口就没了。'],
+      spoiled: ['胶', '墨旁边有胶。', '湿墨挨着胶：合上那一拍，墨先洇到胶上，胶就粘不动石头了——而且墨能洇过胶，洇不过纸。第一合站在第 4 列第 2 行（先斜到 70° 踩影子上去），合着走到右页；斜到 50° 走到第 7 列第 4 行，再合一次：第二圈沿底行洇到她那格旁边。', '墨比胶快。'],
     },
     en: {
       bridge: ['Bridge', 'Across the gap, a scrap of card.', 'Close the phone: the card on the right lands exactly over the gap.'],
@@ -407,6 +423,10 @@
       bleed: ['Bleed-through', 'The writing on the back shows through.', 'Do not close first: the glue in the corner would take the top-left stone, and its shadow with it. Walk the left page to row 1, column 2 (the glue), lean to 55°: the shadow falls at column 3, row 2. Step on, then OPEN to 70°: it carries you to column 4. Step down once, close in row 3, turn, and walk the stack to the top of stack 3.', 'Do not close yet.'],
       pressedFlower: ['Pressed Flower', 'Glue in the corner. No hurry.', 'Close first and the glue pulls a stone across: the road breaks. From the start walk to the bottom-left, lean to 40° onto the shadow, then open to 60°: it carries you to column 2. Walk to column 4, row 2, close, turn, and walk the stack to the bottom.', 'Finish the shadow before you close.'],
       lastPage: ['Last Page', 'Turn to the last page.', 'Walk to the top-right paper, the square facing the left page’s stone, and close there; walk out of that stack onto the left page. Turn the book over: the left page’s glue pulls the third page’s stone across. Turn it back: the right page’s glue takes it on. Now it is on the right page: lean to 55° and its shadow falls on the gap beside the letter.', 'A stone’s back is paper too.'],
+      wet: ['Wet', 'This blot has not dried.', 'Close the book: the ink bleeds one square outward, and the gap beside the start becomes ink. Open and walk across.', 'Close once and watch it grow.'],
+      print: ['Print', 'What it prints is wet too.', 'Once the ink has printed onto the right page, that print bleeds as well. One close is not enough; close twice and the second ring reaches the bottom-right corner.', 'The blot on the far page grows too.'],
+      ring: ['Ring', 'One ring is enough.', 'Close standing on the bottom-left paper of the right page — it faces the left page’s stone, you are on its back — and walk the stacks to row 3 of the left page. Lean to 40° onto the shadow in column 3, then open to 80°: it carries you to column 4, one step below her.', 'Close a second time and the gap under the shadow is gone.'],
+      spoiled: ['Glue', 'There is glue beside the ink.', 'Wet ink next to glue: the moment the book closes the ink bleeds onto the glue first, and the glue pulls no stone — and ink bleeds through glue where paper would stop it. First close at column 4, row 2 (lean to 70° to reach it on the shadow), walk the stacks to the right page; lean to 50°, walk to column 7, row 4, close again: the second ring runs along the bottom row to the square beside her.', 'Ink is quicker than glue.'],
     },
     ja: {
       bridge: ['橋', 'すき間の向こうに、厚紙が一枚。', 'スマホを閉じると、右の厚紙がすき間にぴたりと重なる。'],
