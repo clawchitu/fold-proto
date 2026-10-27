@@ -23,21 +23,27 @@ const WET_CHAPTER = 7;   // final 2 → 3 (Chitu 10/25, difficulty-v3.md §6: th
 const CHAPTER_PAR_MAX = 24;
 const CHAPTER_START = [0, 5, 13, 19, 25];   // first level index of chapters 1–5 (levels.js comments); later levels may carry `chapter`
 const chapterOf = (lv, i) => lv.chapter || CHAPTER_START.filter((s) => s <= i).length;
-const MECHANICS = ['needsFold', 'needsPop', 'needsShade', 'needsRide', 'needsKey', 'needsInk', 'needsGlue', 'needsFlip', 'needsWet', 'needsLamp', 'needsGate'];
+const MECHANICS = ['needsFold', 'needsPop', 'needsShade', 'needsRide', 'needsKey', 'needsInk', 'needsGlue', 'needsFlip', 'needsWet', 'needsLamp', 'needsGate', 'needsRoll'];
 
-function turn(world, from, a0, a1) {
-  // returns the character cell after turning the hinge from a0 to a1, or null if it falls
-  let cur = { ...from }, src = null;
-  const step = a1 > a0 ? 5 : -5;
-  for (let a = a0 + step; step > 0 ? a <= a1 : a >= a1; a += step) {
-    const w = { ...world, char: cur };
+// One hinge move: the state after turning the hinge from s.a to a, or null if the figure falls or is crushed on the way.
+// The angle walks in 5° steps; a figure on a shadow rides it. Each time the lifted page passes upright (vol. 3: the
+// hinge crosses 90°) the loose stones roll — the grid changes mid-sweep, and the rest of the sweep (shadows, the crush
+// when the book closes) is judged on the rolled board. Reaching a close presses the pages (stamp) after the sweep.
+function move(B, s, a) {
+  let cur = { c: s.c, r: s.r }, src = null, g = s.g;
+  let w = worldOf(B, s);
+  const step = a > s.a ? 5 : -5;
+  for (let x = s.a + step; step > 0 ? x <= a : x >= a; x += step) {
+    if (L.passes(x - step, x)) { g = B.roll(g, s.face, cur); w = worldOf(B, { ...s, g }); src = null; }
+    w.char = cur;
     const onShadow = !L.isFloor(L.at(w, cur.c, cur.r));   // a shadow on either page (ch. 8 lamp), or an open angle gate
-    if (onShadow) { if (src == null) src = L.shadows(w, a - step).get(cur.c + ',' + cur.r) ?? null; } else src = null;
-    const to = L.ride(w, cur, src, a);   // rides, falls, or is crushed when the book closes on a stone
+    if (onShadow) { if (src == null) src = L.shadows(w, x - step).get(cur.c + ',' + cur.r) ?? null; } else src = null;
+    const to = L.ride(w, cur, src, x);   // rides, falls, or is crushed when the book closes on a stone
     if (!to) return null;
     cur = to;
   }
-  return cur;
+  if (a >= L.FOLD_MIN) g = B.press(g, s.face);
+  return { c: cur.c, r: cur.r, a, face: s.face, g };
 }
 
 // The board's grids, as a chain of presses. A state carries `g`, an index into `grids`; press(g, face) is the grid after
@@ -48,22 +54,35 @@ function turn(world, from, a0, a1) {
 function grids(level) {
   const base = L.create(level);
   const table = [base.grid], sig = new Map(), memo = new Map();
+  const store = (k, grid) => {
+    const key = grid.flat().join('');
+    let idx = sig.get(key);
+    if (idx == null) { idx = table.length; table.push(grid); sig.set(key, idx); }
+    memo.set(k, idx);
+    return idx;
+  };
   const press = (g, face) => {
     const k = g + ',' + face;
     if (memo.has(k)) return memo.get(k);
     const s = { grid: table[g].map((row) => row.slice()), h: base.h, w: base.w, pages: base.pages, face, lamp: base.lamp };
     L.stamp(s);
-    const key = s.grid.flat().join('');
-    let idx = sig.get(key);
-    if (idx == null) { idx = table.length; table.push(s.grid); sig.set(key, idx); }
-    memo.set(k, idx);
-    return idx;
+    return store(k, s.grid);
   };
-  return { base, grids: table, press, pages: base.pages };
+  // the lifted page passed upright (vol. 3 ch. 9): the loose stones on the facing page roll, unless the figure (fig) holds
+  // one. Keyed on the figure's cell only when it stands on the facing page — on the left page it is in nobody's way.
+  const roll = (g, face, fig) => {
+    const held = fig && L.isRight(fig.c) ? fig.c + ',' + fig.r : '-';
+    const k = 'r' + g + ',' + face + ',' + held;
+    if (memo.has(k)) return memo.get(k);
+    const s = { grid: table[g].map((row) => row.slice()), h: base.h, w: base.w, pages: base.pages, face, lamp: base.lamp };
+    const ev = L.roll(s, held === '-' ? null : fig);
+    if (!ev.length) { memo.set(k, g); return g; }
+    return store(k, s.grid);
+  };
+  return { base, grids: table, press, roll, pages: base.pages };
 }
 const keyOf = (s) => [s.c, s.r, s.a, s.face, s.g].join();
 const worldOf = (B, s) => ({ grid: B.grids[s.g], h: B.base.h, w: B.base.w, pages: B.pages, face: s.face, char: { c: s.c, r: s.r }, start: B.base.start, lamp: B.base.lamp });
-const after = (B, s, a) => (a >= L.FOLD_MIN ? B.press(s.g, s.face) : s.g);
 const startOf = (B) => ({ c: B.base.char.c, r: B.base.char.r, a: 0, face: 0, g: 0 });
 // the goal in visible columns, with the face it lives on (null = left page)
 function goalOf(base) {
@@ -107,8 +126,8 @@ function solve(level, angles = ANGLES, from = null, opts = {}) {
     const next = [];
     for (const a of angles) {
       if (a === s.a) continue;
-      const to = turn(world, world.char, s.a, a);
-      if (to) next.push([{ c: to.c, r: to.r, a, face: s.face, g: after(B, s, a) }, 1]);
+      const n = move(B, s, a);
+      if (n) next.push([n, 1]);
     }
     if (!opts.noFlip) { const f = flipOf(B, s); if (f) next.push([f, 1]); }
     const sh = L.shadows(world, s.a);
@@ -151,7 +170,7 @@ function greedy(level) {
     if (L.isWin(w, mode)) return visited.size;
     const push = (n, cost) => { const k = keyOf(n); if (!seen.has(k)) { seen.add(k); open.push([hOf(n, g), cost, n]); } };
     for (const n of L.neighbours(w, w.char, mode, L.shadows(w, s.a))) push({ ...s, c: n.c, r: n.r }, hc);
-    for (const a of ANGLES) { if (a === s.a) continue; const to = turn(w, w.char, s.a, a); if (to) push({ c: to.c, r: to.r, a, face: s.face, g: after(B, s, a) }, hc + 1); }
+    for (const a of ANGLES) { if (a === s.a) continue; const n = move(B, s, a); if (n) push(n, hc + 1); }
     const f = flipOf(B, s); if (f) push(f, hc + 1);
   }
   return visited.size;
@@ -203,9 +222,9 @@ function analyse(level) {
     const out = [];
     for (const a of ANGLES) {
       if (a === s.a) continue;
-      const to = turn(w, w.char, s.a, a);
-      if (!to) { kills++; if (L.isFloor(L.at(w, s.c, s.r))) traps.add(k); continue; }   // a kill from solid paper = a crush
-      out.push({ c: to.c, r: to.r, a, face: s.face, g: after(B, s, a) });
+      const n = move(B, s, a);
+      if (!n) { kills++; if (L.isFloor(L.at(w, s.c, s.r))) traps.add(k); continue; }   // a kill from solid paper = a crush
+      out.push(n);
     }
     const f = flipOf(B, s);
     if (f === null) { kills++; traps.add(k); } else if (f) out.push(f);   // turning the book onto a stone is a crush from paper
@@ -250,8 +269,8 @@ function analyse(level) {
       if (a === s.a || posture(a) === posture(s.a) && posture(a) !== 'lean') continue;
       const nexts = new Map();
       for (const x of cl) {
-        const to = turn(world(x), { c: x.c, r: x.r }, x.a, a);
-        if (to) { const n = { c: to.c, r: to.r, a, face: x.face, g: after(B, x, a) }; nexts.set(keyOf(n), n); }
+        const n = move(B, x, a);
+        if (n) nexts.set(keyOf(n), n);
       }
       for (const n of nexts.values()) rec(n, depth - 1, [...labels, label(s.a, a)]);
     }
@@ -274,14 +293,14 @@ function analyse(level) {
   let direct = null;
   for (const x of closure(B, start)) for (const a of ANGLES) {
     if (a === 0) continue;
-    const imagined = { c: x.c, r: x.r, a, face: 0, g: after(B, x, a) }, h = hOf(imagined, g);
+    const imagined = { c: x.c, r: x.r, a, face: 0, g: 0 }, h = hOf(imagined, g);
     if (!direct || h < direct.h || (h === direct.h && a > direct.a)) direct = { h, a, from: x };
   }
   let misdirect = false;
   if (direct) {
-    const to = turn(world(direct.from), { c: direct.from.c, r: direct.from.r }, 0, direct.a);
-    if (!to) misdirect = true;                                            // crushed or dropped
-    else { const rest = solve(level, ANGLES, { c: to.c, r: to.r, a: direct.a, face: 0, g: after(B, direct.from, direct.a) }, { B }); misdirect = !rest || rest.cost > best.cost; }
+    const n = move(B, direct.from, direct.a);
+    if (!n) misdirect = true;                                             // crushed or dropped
+    else { const rest = solve(level, ANGLES, n, { B }); misdirect = !rest || rest.cost > best.cost; }
   }
   // insight moves along the optimal path: hinge moves with no step between, and steps away from the goal
   let undo = 0, away = 0;
@@ -297,7 +316,7 @@ function analyse(level) {
   const made = best.path.some((s) => {
     if (s.g === 0 || posture(s.a) !== 'lean' || L.isFloor(L.at(world(s), s.c, s.r))) return false;   // either page (ch. 8: a glued stone's shadow on the lifted page)
     const src = L.shadows(world(s), s.a).get(s.c + ',' + s.r);
-    return src != null && B.base.grid[s.r][L.colOf(s, src)] !== 'x';
+    return src != null && !L.isOpaque(B.base.grid[s.r][L.colOf(s, src)]);   // a loose stone that rolled casts a made shadow too
   });
   const structure = best.cost + (forks === 1 ? 1 : 0) + (best.walk >= 8 ? 1 : 0) + (trap ? 1 : 0) + (window <= 2 ? 1 : 0) + (combo >= 3 ? 1 : 0);
   const insight = 2 * (misdirect ? 1 : 0) + 2 * (deadEnds >= 1 ? 1 : 0) + (dead >= 12 ? 1 : 0) + 2 * (before ? 1 : 0) + 2 * (made ? 1 : 0)
@@ -315,10 +334,11 @@ function report(lv, withDifficulty = true) {
   const noPop = solve(lv, ANGLES.filter((a) => a < L.POP_MIN || a > L.POP_MAX));
   const noShade = solve(lv, ANGLES.filter((a) => !SHADE.includes(a)));
   const oneShade = SHADE.some((keep) => solve(lv, ANGLES.filter((a) => !SHADE.includes(a) || a === keep)));
-  const without = (ch) => solve({ ...lv, map: lv.map.map((row) => row.split(ch).join('.')) });
+  const without = (ch, as = '.') => solve({ ...lv, map: lv.map.map((row) => row.split(ch).join(as)) });
   const all = lv.map.join('');
   const out = { solvable: !!full, changes: full ? full.cost : null, needsFold: !noFold, needsPop: !noPop };
-  if (all.includes('x') && (lv.map.some((row) => row.slice(L.N).includes('x')) || all.includes('g') || (lv.lamp || '').includes('L'))) { out.needsShade = !noShade; out.needsRide = !oneShade; }
+  if (/[xr]/.test(all) && (lv.map.some((row) => /[xr]/.test(row.slice(L.N))) || all.includes('g') || (lv.lamp || '').includes('L'))) { out.needsShade = !noShade; out.needsRide = !oneShade; }
+  if (all.includes('r')) out.needsRoll = !without('r', 'x');            // vol. 3 ch. 9: unsolvable with the loose stones glued down
   if (lv.lamp && lv.lamp !== 'R') out.needsLamp = !solve({ ...lv, lamp: 'R' });   // ch. 8: unsolvable with the lamp back on the right bank
   if (all.includes('A')) out.needsGate = !without('A');                          // ch. 8: unsolvable with the angle gate laid down as paper
   if (all.includes('k')) out.needsKey = !without('k');
@@ -339,7 +359,7 @@ function report(lv, withDifficulty = true) {
   return out;
 }
 
-module.exports = { solve, analyse, report, greedy, turn, grids, goalOf, hOf, posture, flipOf, startOf, worldOf, ANGLES, STEPPED, SHADE, TIERS };
+module.exports = { solve, analyse, report, greedy, move, grids, goalOf, hOf, posture, flipOf, startOf, worldOf, ANGLES, STEPPED, SHADE, TIERS };
 if (require.main !== module) return;
 require('./test.js');   // logic.js unit tests (crush causes, block reasons); throws on failure
 const GEN = require('./gen.js');   // metric v3 (difficulty-postmortem.md §3): solution length, decoys, wrong turns. Loaded here to avoid a require cycle.
@@ -376,6 +396,7 @@ LEVELS.forEach((lv, i) => {
     ('needsWet' in r ? `  needsWet=${r.needsWet}` : '') +
     ('needsLamp' in r ? `  needsLamp=${r.needsLamp}` : '') +
     ('needsGate' in r ? `  needsGate=${r.needsGate}` : '') +
+    ('needsRoll' in r ? `  needsRoll=${r.needsRoll}` : '') +
     ('needsFlip' in r ? `  needsFlip=${r.needsFlip}` : ''));
   if (!full) { fail('UNSOLVABLE'); return; }
   console.log('   ' + full.steps.join(' → '));

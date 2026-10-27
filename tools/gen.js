@@ -20,6 +20,8 @@
 //       vol. 2 ch. 7 (docs/design-ch7.md): tile I = wet ink (--tiles '.-xgI'), --need wet (drying the ink into paper breaks the level)
 //       vol. 2 ch. 8 (docs/design-ch8.md): --lamp L | LR (lamp on the left bank / two lamps), tile A = angle gate (--tiles '.-xA'),
 //       --need lamp (the lamp back on the right bank breaks the level), --need gate (the gate laid down as paper breaks it)
+//       vol. 3 ch. 9 (docs/design-ch9.md): tile r = loose stone (--tiles '.-xr'), --need roll (gluing the loose stones down as
+//       stones breaks the level), --rolls N (the solution's hinge moves roll a stone at least N times), --fills N (… drop one into a gap N times)
 //
 // What the search optimises (fitness(), §3 of the postmortem):
 //   long minimal solutions (par, steps), many plausible-but-wrong hinge moves at each decision point (wrong),
@@ -32,7 +34,7 @@ const LEVELS = require('../levels.js');
 
 const ANGLES = C.ANGLES, STEPPED = C.STEPPED;
 const posture = C.posture;
-const ELEMENTS = 'xkDipgIA';   // I = wet ink (ch. 7), A = angle gate (ch. 8)
+const ELEMENTS = 'xkDipgIAr';   // I = wet ink (ch. 7), A = angle gate (ch. 8), r = loose stone (ch. 9)
 const GEN_DEFAULTS = {};          // level fields every candidate carries (ch. 8: --lamp L | LR)
 
 // ---------- one level, prepared: both grids, memoised shadows ----------
@@ -40,7 +42,7 @@ const GEN_DEFAULTS = {};          // level fields every candidate carries (ch. 8
 // which page of the right leaf faces the left page (vol. 2 ch. 6). Two-page boards only ever see face 0.
 function prep(level) {
   level = { ...GEN_DEFAULTS, ...level };
-  const { base, grids: G, press, pages } = C.grids(level);
+  const { base, grids: G, press, roll, pages } = C.grids(level);
   const memo = [];
   const world = (g, face) => ({ grid: G[g], h: base.h, w: base.w, pages, face, start: base.start, lamp: base.lamp });
   const shadowsAt = (g, face, a) => {
@@ -51,25 +53,28 @@ function prep(level) {
   };
   const goal = C.goalOf(base);
   // events of the first close, plus anything a turn adds: used by roles() for the 'moved' stone role
-  return { level, base, G, press, pages, h: base.h, w: base.w, world, shadowsAt, goal,
+  return { level, base, G, press, roll, pages, h: base.h, w: base.w, world, shadowsAt, goal,
     start: base.start ? C.startOf({ base }) : null };
 }
 const wof = (B, s) => B.world(s.g, s.face);
 const act = (c, face) => (face && c >= L.N ? c + L.N : c);   // grid column behind a visible column
 
-// Turn the hinge from s.a to a1 in 5° steps, riding shadows; the landing cell or null (fell / crushed).
-function turn(B, s, a1) {
-  let cur = { c: s.c, r: s.r }, src = null;
-  const w = wof(B, s);
+// One hinge move from s.a to a1 in 5° steps, riding shadows; loose stones roll each time the lifted page passes upright
+// (the grid changes mid-sweep); a close presses after the sweep. The next state, or null (fell / crushed).
+function move(B, s, a1) {
+  let cur = { c: s.c, r: s.r }, src = null, g = s.g;
+  let w = wof(B, s);
   const step = a1 > s.a ? 5 : -5;
   for (let a = s.a + step; step > 0 ? a <= a1 : a >= a1; a += step) {
+    if (L.passes(a - step, a)) { g = B.roll(g, s.face, cur); w = B.world(g, s.face); src = null; }
     const onShadow = !L.isFloor(L.at(w, cur.c, cur.r));
-    if (onShadow) { if (src == null) src = B.shadowsAt(s.g, s.face, a - step).get(cur.c + ',' + cur.r) ?? null; } else src = null;
-    const to = L.ride(w, cur, src, a);
+    if (onShadow) { if (src == null) src = B.shadowsAt(g, s.face, a - step).get(cur.c + ',' + cur.r) ?? null; } else src = null;
+    const to = L.ride({ ...w, char: cur }, cur, src, a);
     if (!to) return null;
     cur = to;
   }
-  return cur;
+  if (a1 >= L.FOLD_MIN) g = B.press(g, s.face);
+  return { c: cur.c, r: cur.r, a: a1, face: s.face, g };
 }
 // Turning the closed book over: next state, null when it crushes, undefined when not allowed here.
 function flipOf(B, s) {
@@ -93,9 +98,9 @@ function explore(B, angles = ANGLES, from = B.start, opts = {}) {
     const kill = () => { const kk = kills.get(k) || { n: 0, paper: 0 }; kk.n++; if (L.isFloor(L.at(w, s.c, s.r))) kk.paper++; kills.set(k, kk); };
     for (const a of angles) {
       if (a === s.a) continue;
-      const to = turn(B, s, a);
-      if (!to) { kill(); continue; }
-      const n = { c: to.c, r: to.r, a, face: s.face, g: a >= L.FOLD_MIN ? B.press(s.g, s.face) : s.g }, nk = key(n);
+      const n = move(B, s, a);
+      if (!n) { kill(); continue; }
+      const nk = key(n);
       out.push([nk, 1]);
       if (!nodes.has(nk)) { nodes.set(nk, n); queue.push(n); }
     }
@@ -244,7 +249,7 @@ function measure(level) {
   out.made = states.some((s) => {
     if (s.g === 0 || posture(s.a) !== 'lean' || L.isFloor(L.at(wof(B, s), s.c, s.r))) return false;   // either page: under the left-bank lamp a glued stone makes a shadow on the lifted page (ch. 8)
     const src = B.shadowsAt(s.g, s.face, s.a).get(s.c + ',' + s.r);
-    return src != null && B.base.grid[s.r][act(src, s.face)] !== 'x';
+    return src != null && !L.isOpaque(B.base.grid[s.r][act(src, s.face)]);   // a rolled loose stone's shadow is made too
   });
   out.ride = states.some((s, i) => i > 0 && s.a !== states[i - 1].a && !L.isFloor(L.at(wof(B, s), s.c, s.r)) && L.at(wof(B, s), s.c, s.r) !== 'A');
   out.glueFires = B.G.length > 1 && B.G.slice(1).some((grid) => grid.some((row, r) => row.some((t, c) => t === 'x' && B.base.grid[r][c] !== 'x')));
@@ -260,6 +265,18 @@ function measure(level) {
   const lamp = (level.lamp || GEN_DEFAULTS.lamp || 'R');
   out.needsLamp = lamp !== 'R' && !solvableFrom(prep({ ...level, lamp: 'R' }), B.start);   // ch. 8: the lamp back on the right bank
   out.needsGate = all.includes('A') && !solvableFrom(prep({ ...level, map: level.map.map((r) => r.split('A').join('.')) }), B.start);   // ch. 8: the gate laid down as paper
+  out.needsRoll = all.includes('r') && !solvableFrom(prep({ ...level, map: level.map.map((r) => r.split('r').join('x')) }), B.start);   // ch. 9: the loose stones glued down
+  // ch. 9: hinge moves in the solution that rolled a stone (the grid changed before any press), and those that dropped one into a gap
+  const gridSigOf = (g) => B.G[g].flat().join('');
+  out.rolls = 0; out.fills = 0;
+  for (let i = 1; i < states.length; i++) {
+    const p = states[i - 1], s = states[i];
+    if (p.face !== s.face || p.a === s.a || !L.passes(p.a, s.a)) continue;
+    const g1 = B.roll(p.g, p.face, { c: p.c, r: p.r });
+    if (gridSigOf(g1) === gridSigOf(p.g)) continue;
+    out.rolls++;
+    if ([...gridSigOf(p.g)].some((t, k) => t === '-' && gridSigOf(g1)[k] === '.')) out.fills++;
+  }
   // which page switches: the solution lands on the other page after an open (land() chose the far page)
   out.pageSwitches = states.filter((s, i) => i > 0 && L.isRight(s.c) !== L.isRight(states[i - 1].c) && posture(states[i - 1].a) !== 'fold' && posture(s.a) !== 'fold').length;
   // v3 (docs/difficulty-v3.md §3.2): what one glance at the board cannot settle.
@@ -271,7 +288,9 @@ function measure(level) {
   //             marked blocked on every map, yet you are inside it. The rule consequence that stopped the owner (暗一, 暗三).
   const presses = states.map((s, i) => i > 0 && ((posture(s.a) === 'fold' && posture(states[i - 1].a) !== 'fold') || s.face !== states[i - 1].face) ? i : -1).filter((i) => i > 0);
   const gridSig = (g) => B.G[g].flat().join('');   // grid 1 may equal grid 0 in content (check.js keeps "has been closed" apart)
-  out.phases = presses.filter((i) => gridSig(states[i].g) !== gridSig(states[i - 1].g)).length;
+  // a press changed the grid: judged against the board after the roll of the same sweep (ch. 9), so a roll alone is not a phase
+  const rolledBefore = (i) => { const p = states[i - 1], s = states[i]; return s.face === p.face && p.a !== s.a && L.passes(p.a, s.a) ? B.roll(p.g, p.face, { c: p.c, r: p.r }) : p.g; };
+  out.phases = presses.filter((i) => gridSig(states[i].g) !== gridSig(rolledBefore(i))).length;
   // configurations are keyed on the board the player closes FROM (grid before the press + face): two closes on a
   // two-page letter whose first press changed the board count as two
   out.configs = new Set(presses.map((i) => gridSig(states[i - 1].g) + ',' + states[i].face)).size;
@@ -315,7 +334,7 @@ function roles(level, m) {
   // a stone that is not where it started in some pressed grid was moved by glue (roles are keyed by original grid cells)
   for (const grid of B.G.slice(1)) grid.forEach((row, r) => row.forEach((t, c) => { if (B.base.grid[r][c] === 'x' && t !== 'x') add(c, r, 'moved'); }));
   // where a stone seen at visible column c (face f) originally stood: there, or on the page it was glued from
-  const origin = (c, r, f) => { const a = act(c, f); if (B.base.grid[r][a] === 'x') return a; const m = L.mirror(c); return B.base.grid[r][m] === 'x' ? m : act(m, f); };
+  const origin = (c, r, f) => { const a = act(c, f); if (L.isOpaque(B.base.grid[r][a])) return a; for (let k = a + 1; k < a + L.N && B.base.grid[r][k] != null; k++) if (B.base.grid[r][k] === 'r') return k; const m = L.mirror(c); return L.isOpaque(B.base.grid[r][m]) ? m : act(m, f); };
   for (let i = 0; i < states.length; i++) {
     const s = states[i], w = wof(B, s);
     if (posture(s.a) === 'lean' && !L.isRight(s.c) && !L.isFloor(L.at(w, s.c, s.r))) {
@@ -347,7 +366,7 @@ function full(level, withV2 = true) {
 function fitness(level, opts, m) {
   m = m || measure(level);
   if (!m.solvable) return -1000 + (m.states || 0) * 0.05;
-  const needOne = (n) => n === 'glue' ? m.glueFires || m.needsGlue : n === 'shade' ? m.needsShade : n === 'ride' ? m.ride : n === 'made' ? m.made
+  const needOne = (n) => n === 'glue' ? m.glueFires || m.needsGlue : n === 'shade' ? m.needsShade : n === 'ride' ? m.ride : n === 'made' ? m.made : n === 'roll' ? m.needsRoll
     : n === 'pop' ? m.needsPop : n === 'key' ? m.needsKey : n === 'ink' ? m.needsInk : n === 'wet' ? m.needsWet : n === 'lamp' ? m.needsLamp : n === 'gate' ? m.needsGate : n === 'fold' ? m.needsFold : n === 'flip' ? m.needsFlip : true;
   const need = String(opts.need).split('+').every(needOne);
   // vol. 1 constraints (postmortem §6): --nodead no dead state anywhere; --noride the minimal solution never rides a shadow
@@ -355,13 +374,15 @@ function fitness(level, opts, m) {
   const vol1 = (opts.nodead && m.dead > 0) || (opts.noride && m.ride) || (opts.matched && m.unmatched > 0)
     || (opts.goalT && m.goalFace !== 1) || (opts.minflips && (m.flips || 0) < opts.minflips);
   // v3 floors (difficulty-v3.md): --phases N grid-changing presses, --backs N closes from a stone's back, --configs N closed configurations
-  const v3 = (opts.phases && m.phases < opts.phases) || (opts.backs && m.backs < opts.backs) || (opts.configs && m.configs < opts.configs) || (opts.switches && m.stackSwitches < opts.switches) || (opts.mincloses && m.closes < opts.mincloses);
+  const v3 = (opts.phases && m.phases < opts.phases) || (opts.backs && m.backs < opts.backs) || (opts.configs && m.configs < opts.configs) || (opts.switches && m.stackSwitches < opts.switches) || (opts.mincloses && m.closes < opts.mincloses)
+    || (opts.rolls && (m.rolls || 0) < opts.rolls) || (opts.fills && (m.fills || 0) < opts.fills);
   if (m.par > opts.par || m.closes > opts.closes || !m.stepped15 || !need || m.par < opts.minpar || vol1 || v3) return -500 + m.par * 10 + Math.min(m.steps, 10) + 5 * (m.phases || 0) + 5 * (m.backs || 0);
   let f = 12 * m.par + 2 * Math.min(m.steps, 14) - 1.5 * Math.max(0, m.steps - 16);
   f += 8 * Math.min(m.phases, 3) + 8 * Math.min(m.backs, 2) + 3 * Math.min(m.configs, 3) + 4 * Math.min(m.stackSwitches, 4);   // v3: imagined boards, stone's backs, held configurations
   f += 4 * Math.min(m.wrong, 10) + 3 * Math.min(m.firstWrong, 4);
   f += 6 * Math.min(m.deadEnds, 2) + 6 * (m.deadFrac >= 0.15 && m.deadFrac <= 0.7 ? 1 : 0);
   f += 8 * (m.before ? 1 : 0) + 6 * (m.made ? 1 : 0) + 3 * (m.ride ? 1 : 0) + 3 * Math.min(m.fatal, 2) + 3 * Math.min(m.pageSwitches, 2);
+  f += 4 * Math.min(m.rolls || 0, 3) + 3 * Math.min(m.fills || 0, 2);   // ch. 9: rolls the player must count, stones that became bridges
   f += 4 * m.narrow;
   f -= 3 * Math.max(0, m.elements - opts.elements) + 0.6 * m.elements + 0.3 * Math.max(0, m.paper - 12);
   if (opts.maxvoid) f -= 60 * Math.max(0, m.voids / (m.rows * m.cols) - opts.maxvoid);   // a board that is mostly gap reads in a glance (§1.1)
@@ -491,7 +512,7 @@ function fmt(level, m, r, F) {
   lines.push(`  { id: 'TODO', tier: 'TODO', ${level.lamp || GEN_DEFAULTS.lamp ? `lamp: '${level.lamp || GEN_DEFAULTS.lamp}', ` : ''}map: [`);
   for (const row of level.map) lines.push(`      '${row}',`);
   lines.push('  ] },');
-  lines.push(`  // par ${m.par} steps ${m.steps} len ${m.len} closes ${m.closes}${m.flips ? ' flips ' + m.flips : ''} | wrong ${m.wrong} (first ${m.firstWrong}) narrow ${m.narrow}/${m.par} fatal ${m.fatal} | dead ${m.dead} (${m.deadFrac}) basins ${m.deadEnds} | before ${+m.before} made ${+m.made} ride ${+m.ride} pageSwitch ${m.pageSwitches} | v3 phases ${m.phases} configs ${m.configs} backs ${m.backs} switches ${m.stackSwitches} | elements ${m.elements} voids ${m.voids} needs ${['Fold','Pop','Shade','Key','Ink','Glue','Flip','Wet','Lamp','Gate'].filter((k) => m['needs' + k]).join('+') || '-'}${m.ride ? '+ride' : ''}` +
+  lines.push(`  // par ${m.par} steps ${m.steps} len ${m.len} closes ${m.closes}${m.flips ? ' flips ' + m.flips : ''} | wrong ${m.wrong} (first ${m.firstWrong}) narrow ${m.narrow}/${m.par} fatal ${m.fatal} | dead ${m.dead} (${m.deadFrac}) basins ${m.deadEnds} | before ${+m.before} made ${+m.made} ride ${+m.ride} pageSwitch ${m.pageSwitches} | v3 phases ${m.phases} configs ${m.configs} backs ${m.backs} switches ${m.stackSwitches} | elements ${m.elements} voids ${m.voids} needs ${['Fold','Pop','Shade','Key','Ink','Glue','Flip','Wet','Lamp','Gate','Roll'].filter((k) => m['needs' + k]).join('+') || '-'}${m.ride ? '+ride' : ''}${m.rolls ? ' | rolls ' + m.rolls + ' fills ' + m.fills : ''}` +
     (r ? ` | noise ${r.noise} blockers ${r.blockers} load ${r.loadBearing} irrelevant ${r.irrelevant} reuse ${r.reuse}` : '') + (F != null ? ` | F ${F.toFixed(1)}` : ''));
   lines.push(`  // ${m.solution}`);
   if (r && r.decoys && r.decoys.length) lines.push(`  // decoys: ${r.decoys.join(' ')}`);
@@ -512,7 +533,7 @@ function stats() {
 }
 
 function args() {
-  const a = process.argv.slice(2), o = { cmd: a[0] || 'stats', rows: 5, iters: 4000, restarts: 12, seed: 1, par: 4, closes: 2, minpar: 2, tiles: '.-xg', need: 'glue', from: null, top: 8, elements: 9, nodead: false, noride: false, leftx: false, maxvoid: 0, minlen: 0, maxlen: 0, matched: false, pages: 2, goalT: false, minflips: 0, phases: 0, backs: 0, configs: 0, switches: 0, mincloses: 0, lamp: null };
+  const a = process.argv.slice(2), o = { cmd: a[0] || 'stats', rows: 5, iters: 4000, restarts: 12, seed: 1, par: 4, closes: 2, minpar: 2, tiles: '.-xg', need: 'glue', from: null, top: 8, elements: 9, nodead: false, noride: false, leftx: false, maxvoid: 0, minlen: 0, maxlen: 0, matched: false, pages: 2, goalT: false, minflips: 0, phases: 0, backs: 0, configs: 0, switches: 0, mincloses: 0, lamp: null, rolls: 0, fills: 0 };
   for (let i = 1; i < a.length; i++) {
     if (a[i].startsWith('--') && !a[i].includes(',')) { const k = a[i].slice(2); const v = a[i + 1]; const isFlag = v === undefined || (v.startsWith('--') && !v.includes(','));   // a map row may begin with '--' (gaps): a comma marks it as a value
       o[k] = isFlag ? true : isNaN(+v) ? v : +v; if (!isFlag) i++; }

@@ -11,6 +11,9 @@
 //         I  wet ink (vol. 2 ch. 7): ink that bleeds one ring at every press
 //         A  angle gate (vol. 2 ch. 8 「灯位」, docs/design-ch8.md): a paper flap that is floor only while the page leans
 //            (91°–154°, the lamp window); flat or closed it is a gap. Stand on it when the lean ends and you fall.
+//         r  loose stone (vol. 3 ch. 9 「滚」, docs/design-ch9.md): a stone that is not glued down. Blocks, shades and crushes
+//            like a stone, but every time the lifted page passes upright (the hinge crosses 90°) it rolls one cell towards
+//            the crease — see roll(). Glue that pulls it holds it: it arrives as a stone (x).
 //
 // Lamp (vol. 2 ch. 8): level.lamp = 'R' (default, vol. 1 ch. 3 on: the lamp on the right bank, the lifted page's stones
 // shade the flat left page), 'L' (the lamp on the left bank: the flat left page's stones throw their shadows UP onto the
@@ -26,6 +29,7 @@
   const FOLD_MIN = 155;              // folded: stacked tiles connect
   const POP_MIN = 60, POP_MAX = 120; // pop-up tabs stand and bridge the crease
   const SHADE_MIN = 91;              // leaning page casts shadows onto the flat page until it folds
+  const STAND = 90;                  // the lifted page is upright or past it: loose stones roll when the hinge crosses this
 
   const mirror = (c) => 2 * N - 1 - c;
   const proj = (c) => (c < N ? c : mirror(c));
@@ -38,8 +42,9 @@
   }
 
   const isFloor = (t) => '.SGkiopgI'.includes(t);
-  const isBlock = (t) => t === 'x' || t === 'D';
-  const isOpaque = (t) => t === 'x';   // stones block the light; paper and ink let it through
+  const isBlock = (t) => t === 'x' || t === 'r' || t === 'D';
+  const isOpaque = (t) => t === 'x' || t === 'r';   // stones (fixed or loose) block the light; paper and ink let it through
+  const standing = (a) => a >= STAND;               // vol. 3: which side of upright the lifted page is on
 
   // Shadows: a stone d cells from the hinge on the leaning right page shades the left cell
   // round(d * -cos a) from the hinge. Flat (<=90) nothing; folded, the stone itself lands there.
@@ -147,13 +152,13 @@
     if (mode === 'fold') {
       const q = proj(c), L = at(s, q, r), R = at(s, mirror(q), r);
       if (foldOpen(s, q, r)) return null;
-      if (R === 'x' || (L === 'x' && !isFloor(R))) return 'stone';
-      if (L === 'x') return 'card';
+      if (isOpaque(R) || (isOpaque(L) && !isFloor(R))) return 'stone';
+      if (isOpaque(L)) return 'card';
       if (L === 'D' || R === 'D' || L === 'A' || R === 'A') return 'door';
       return 'gap';
     }
     const t = at(s, c, r);
-    if (t === 'x') return 'stone';
+    if (isOpaque(t)) return 'stone';
     if (t === 'D' || (t === 'A' && !(sh && sh.has(c + ',' + r)))) return 'door';
     if (isFloor(t) || (sh && sh.has(c + ',' + r))) return null;
     return 'gap';
@@ -282,7 +287,7 @@
           } else if ((A === 'i' || A === 'I') && B === '-') {
             put(s, b, r, A);
             events.push({ type: 'ink', wet: A === 'I', cells: [{ c: a, r }, { c: b, r }] });
-          } else if (A === 'g' && B === 'x') {
+          } else if (A === 'g' && isOpaque(B)) {   // a loose stone the glue takes is held: it arrives as a stone
             put(s, a, r, 'x'); put(s, b, r, '.');
             events.push({ type: 'glue', cells: [{ c: b, r }, { c: a, r }] });
           }
@@ -291,6 +296,30 @@
     }
     return events;
   }
+
+  // Loose stones (vol. 3 ch. 9 「滚」, docs/design-ch9.md): 'r' is a stone that is not glued down. Every time the lifted page
+  // passes upright — the hinge crosses 90° in either direction: a lean that comes back flat counts twice, a close once and
+  // the opening after it once more — every loose stone on the page that is lifted (the page facing the left page, read
+  // through columns N..2N-1, so after a turn it is the third page's stones that roll) rolls ONE cell towards the crease:
+  // onto paper it rolls (its old square is paper now); into a gap it drops and fills it (the gap is paper from then on and
+  // the stone is gone); against anything else — a stone, a door, a gate, ink, glue, a key, her square, the start, or the
+  // figure standing in front of it — it stays. The stone nearest the crease rolls first, so a line of them rolls together;
+  // one that stands beside the crease has nowhere lower to go. Stones on the flat left page never roll. Returns the events,
+  // nearest the crease first; `fig` is the figure's cell (default s.char), the one thing on the page that can hold a stone.
+  function roll(s, fig = s.char) {
+    const events = [];
+    for (let r = 0; r < s.h; r++) for (let c = N + 1; c < 2 * N; c++) {
+      if (at(s, c, r) !== 'r') continue;
+      if (fig && fig.c === c - 1 && fig.r === r) continue;
+      const ahead = at(s, c - 1, r);
+      if (ahead !== '.' && ahead !== '-') continue;
+      put(s, c - 1, r, ahead === '-' ? '.' : 'r'); put(s, c, r, '.');
+      events.push({ type: 'roll', cells: [{ c, r }, { c: c - 1, r }], filled: ahead === '-' });
+    }
+    return events;
+  }
+  // The hinge moved from a0 to a1: did the lifted page pass upright (so loose stones roll)?
+  const passes = (a0, a1) => standing(a0) !== standing(a1);
 
   // Turning the page (vol. 2 ch. 6): only a closed book can be turned over, and only by someone standing on the page
   // that stays — the left page. The leaf under your feet cannot be turned. Why not, or null when allowed:
@@ -320,8 +349,8 @@
     return mode === 'fold' && at(s, mirror(c), r) === 'G';
   }
 
-  const api = { N, FOLD_MIN, POP_MIN, POP_MAX, SHADE_MIN, mirror, proj, isRight, modeOf, isFloor, isBlock,
-    isOpaque, shadowColumn, shadowColumnL, lampOf, lit, shadows, crushed, crushCause, cellBlock, stepBlock, pathBlock, ride, create, restart, at, colOf, neighbours, findPath, stamp,
-    bleed, flipBlock, flip, isWin };
+  const api = { N, FOLD_MIN, POP_MIN, POP_MAX, SHADE_MIN, STAND, mirror, proj, isRight, modeOf, isFloor, isBlock,
+    isOpaque, standing, passes, shadowColumn, shadowColumnL, lampOf, lit, shadows, crushed, crushCause, cellBlock, stepBlock, pathBlock, ride, create, restart, at, colOf, neighbours, findPath, stamp,
+    bleed, roll, flipBlock, flip, isWin };
   if (typeof module !== 'undefined') module.exports = api; else root.FoldLogic = api;
 })(this);
