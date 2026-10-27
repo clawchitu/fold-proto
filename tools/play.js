@@ -70,7 +70,7 @@ function setAngle(target) {
   const a0 = fold(), a1 = 180 - target, step = a1 > a0 ? 5 : -5;
   let src = null, prevMode = mode(), carriedFrom = null;
   for (let a = a0 + step; step > 0 ? a <= a1 : a >= a1; a += step) {
-    const onShadow = !L.isRight(s.char.c) && !L.isFloor(L.at(s, s.char.c, s.char.r));
+    const onShadow = !L.isFloor(L.at(s, s.char.c, s.char.r));
     if (onShadow) { if (src == null) src = L.shadows(s, a - step).get(s.char.c + ',' + s.char.r) ?? null; } else src = null;
     const cause = L.crushCause(s, s.char, a);
     const to = L.ride(s, s.char, src, a);

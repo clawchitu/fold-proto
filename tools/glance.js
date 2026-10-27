@@ -39,7 +39,7 @@ function levelNumber(i) {
   return `${ch}-${n}`;
 }
 
-const worldOf = (B, g, face) => ({ grid: B.grids[g], h: B.base.h, w: B.base.w, pages: B.pages, face, start: B.base.start, char: { ...B.base.start } });
+const worldOf = (B, g, face) => ({ grid: B.grids[g], h: B.base.h, w: B.base.w, pages: B.pages, face, start: B.base.start, char: { ...B.base.start }, lamp: B.base.lamp });
 const tile = (t) => (t === 'S' ? '@' : t);
 const pageName = (w) => (w.face ? 'THIRD page' : 'right page');
 
@@ -54,16 +54,33 @@ function flat(w, title) {
   return rows;
 }
 
-// the left page at every lean angle, side by side: shadows slide outward (towards column 1) as the book closes
-function leans(w, title) {
-  const rows = [title];
-  const cells = (a) => { const sh = L.shadows(w, 180 - a); const out = []; for (let r = 0; r < w.h; r++) { let s = ''; for (let c = 0; c < L.N; c++) { const t = L.at(w, c, r); const k = c + ',' + r; s += (t === 'x' ? 'x' : sh.has(k) ? (L.isFloor(t) ? '▒' : '░') : tile(t)) + ' '; } out.push(s); } return out; };
+// a page at every lean angle, side by side. Right-bank lamp: the left page, shadows slide outward (towards column 1) as
+// the book closes. Left-bank lamp (ch. 8): the lifted page, shadows slide outward (towards column 8). Two lamps: both.
+// Open angle gates print as 'o'.
+function leansPage(w, c0) {
+  const rows = [];
+  const cells = (a) => { const sh = L.shadows(w, 180 - a); const out = []; for (let r = 0; r < w.h; r++) { let s = ''; for (let c = c0; c < c0 + L.N; c++) { const t = L.at(w, c, r); const k = c + ',' + r; s += (t === 'x' ? 'x' : t === 'A' ? (sh.has(k) ? 'o' : 'A') : sh.has(k) ? (L.isFloor(t) ? '▒' : '░') : tile(t)) + ' '; } out.push(s); } return out; };
   const cols = LEANS.map((a) => ({ a, rows: cells(a) }));
   rows.push('         ' + cols.map(({ a }) => `${String(a).padStart(3)}°     `).join(''));
-  rows.push('         ' + cols.map(() => '1 2 3 4   ').join(''));
+  rows.push('         ' + cols.map(() => [1, 2, 3, 4].map((k) => k + c0).join(' ') + '   ').join(''));
   for (let r = 0; r < w.h; r++) rows.push(`row ${r + 1}    ` + cols.map(({ rows: rr }) => rr[r] + '  ').join(''));
-  const stones = []; for (let r = 0; r < w.h; r++) for (let c = L.N; c < w.w; c++) if (L.at(w, c, r) === 'x') stones.push(`${c + 1},${r + 1}`);
-  rows.push(stones.length ? `(stones on the ${pageName(w)} at col,row ${stones.join(' · ')} cast these; a shadow over a gap ░ is walkable and carries you when the hinge moves; a shadow over paper ▒ is just paper)` : `(no stone on the ${pageName(w)}: no shadow at any angle)`);
+  return rows;
+}
+function leans(w, title) {
+  const lamp = L.lampOf(w), rows = [title];
+  const stonesOn = (c0) => { const out = []; for (let r = 0; r < w.h; r++) for (let c = c0; c < c0 + L.N; c++) if (L.at(w, c, r) === 'x') out.push(`${c + 1},${r + 1}`); return out; };
+  if (lamp.includes('R')) {
+    const st = stonesOn(L.N);
+    rows.push(`-- the LEFT page (lamp on the right bank: the ${pageName(w)}'s stones shade it) --`, ...leansPage(w, 0));
+    rows.push(st.length ? `(stones on the ${pageName(w)} at col,row ${st.join(' · ')} cast these; a shadow over a gap ░ is walkable and carries you when the hinge moves; a shadow over paper ▒ is just paper)` : `(no stone on the ${pageName(w)}: no shadow on the left page at any angle)`);
+  }
+  if (lamp.includes('L')) {
+    const st = stonesOn(0);
+    rows.push(`-- the LIFTED ${pageName(w)} (lamp on the LEFT bank: the flat left page's stones throw their shadows up onto it) --`, ...leansPage(w, L.N));
+    rows.push(st.length ? `(stones on the left page at col,row ${st.join(' · ')} cast these onto the lifted page; they slide towards column 8 as the book closes; ░ walkable, ▒ just paper)` : '(no stone on the left page: no shadow on the lifted page at any angle)');
+  }
+  const gates = []; for (let r = 0; r < w.h; r++) for (let c = 0; c < w.w; c++) if (L.at(w, c, r) === 'A') gates.push(`${c + 1},${r + 1}`);
+  if (gates.length) rows.push(`(angle gates at col,row ${gates.join(' · ')} stand open = floor (o) at every lean angle shown; flat or closed they are gaps)`);
   return rows;
 }
 
@@ -107,12 +124,14 @@ function sheet(lv) {
   out.push(`LEVEL ${levelNumber(i)} · ${lv.id} · 「${t.zh.name || ''}」 / ${t.en.name || ''} · tier ${lv.optional ? '暗信 (optional challenge)' : lv.tier}`);
   out.push(`line shown under the title: 「${t.zh.line || ''}」 / “${t.en.line || ''}”`);
   out.push(`board ${B.base.h} rows × 8 visible columns${three ? '. This letter has THREE pages: the third page is the back of the right leaf; it is not visible until you close the book and turn it over (view 5–6 below)' : ' (two pages)'}.`);
-  out.push('legend: @ you (start, paper)  . paper  - gap  x stone  k key  D locked door  o open door  i ink  I WET ink (bleeds a ring at every press)  p pop-up tab (stands as a bridge across the crease at 60°–120°)  g glue  G the letter (goal)');
+  out.push('legend: @ you (start, paper)  . paper  - gap  x stone  k key  D locked door  o open door  i ink  I WET ink (bleeds a ring at every press)  p pop-up tab (stands as a bridge across the crease at 60°–120°)  g glue  A angle gate (floor only while the page leans 26°–89°)  G the letter (goal)');
+  const lamp = L.lampOf(B.base);
+  out.push(`LAMP: ${lamp === 'LR' ? 'TWO lamps, one on each bank — right-page stones shade the left page AND left-page stones shade the lifted page' : lamp === 'L' ? 'on the LEFT bank — the flat left page\'s stones throw their shadows up onto the lifted page (columns 5–8); no shadow falls on the left page' : 'on the right bank (as in every level so far)'}.`);
   out.push('');
   const w0 = worldOf(B, 0, 0);
   out.push(...flat(w0, '== VIEW 1 · as the level opens: book flat (180°) =='));
   out.push('');
-  out.push(...leans(w0, '== VIEW 2 · leaning the right page towards the lamp (left page only; the right page is unchanged). Reversible unless you are standing on a shadow =='));
+  out.push(...leans(w0, '== VIEW 2 · leaning the right page (the page(s) the lamp shades). Reversible unless you are standing on a shadow or an open gate =='));
   out.push('');
   const g1 = B.press(0, 0), w1 = worldOf(B, g1, 0);
   out.push('== VIEW 3 · closing the book (0°) from this spread ==');
@@ -180,6 +199,8 @@ RULES (everything you know)
 - CLOSING CRUSHES: if you stand on the left page and a stone on the facing page is over your square (its mirror), closing crushes you: back to the start, board unchanged otherwise. Standing on the facing page above a left-page stone is safe (you stand on its back) — and when the book closes you are then INSIDE a stack that the stack map marks blocked: you can walk out of it into neighbouring stacks, but no one can walk into it. (Earlier levels used this.)
 - THE PRESS (the moment the book closes, wherever you stand, all at once): a key pressed against a door opens it; ink pressed against a gap prints onto it (that gap becomes paper); glue pressed against a stone pulls the stone onto the glue square (the stone changes page; its old square becomes paper; its shadow and its crushing go with it; the glue is used up). Standing on glue when it pulls a stone = crushed.
 - WET INK (I): walkable like ink, but it has not dried. At EVERY press (a close, a turn of the closed book), before anything else, every wet square spreads one ring into the GAP and GLUE squares beside it on its own page (paper, stones, doors, the hinge and the page edge stop it; glue it covers is spoiled and pulls nothing). Then it prints, like ink, onto the gap facing it — and what it prints is wet too. So each close grows the ink one ring on both pages; a gap you were going to cross on a shadow may be paper by then (a shadow over paper carries no one), and the ink never dries or shrinks.
+- LAMP POSITION (chapter 8 「灯位」; the sheet says where the lamp is): with the lamp on the LEFT bank the shadows go the other way — every stone on the flat LEFT page throws its shadow UP onto the lifted page (columns 5–8) in its row; the shadow starts beside the hinge and slides OUTWARD towards column 8 as the book closes (at 0° it reaches the stone's mirror square, col 9−c; a stone at col 1 shades col 6 at 60° and col 7 at 45°–30°, a stone at col 4 shades col 5 at 60°–30°), and no shadow falls on the left page. Rides on the lifted page work the same way: a shadow over a gap carries you; when the lean ends (closing past 26°, or opening past 89°) you fall. With TWO lamps both sets of shadows exist at once. A stone that changes page (glue) changes which page its shadow falls on.
+- ANGLE GATE (A): a paper flap over a gap. It stands = it is floor ONLY while the page leans (physical 26°–89°, the same window in which shadows exist). Flat (> 89°) or closed it is a gap: you cannot step on it, a closed stack with a gate on one side is open only if the other side is paper, and if you are standing on a gate when the lean ends you fall (back to the start). Ink does not print onto it, wet ink does not bleed into it.
 - THREE-PAGE letters only: the third page is the back of the right leaf. With the book CLOSED and you standing on the LEFT page you may TURN the book over: the third page now faces the left page (columns 5–8 show the third page). Turning is a press too (keys/ink/glue between left and third page act; a third-page stone over your square crushes you — then the whole level restarts). Turn again to come back to the right page (another press). The letter may lie on the third page.
 - Undo exists in the game, but THIS test is one shot.
 

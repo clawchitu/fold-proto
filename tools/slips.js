@@ -80,6 +80,27 @@ const SLIPS = [
       { walkStack: [2, 0] },                      // the stack with a gap on the left and her on the third page
       { win: true },
     ] },
+  { id: 'lamp', level: '8-1', tile: 'lamp', lamp: 'L',
+    map: ['x---S-G-', '--------'],
+    beats: [
+      { step: [1, 0], blocked: 'gap' },           // the gap between you and her on the lifted page
+      { angle: 120, shadowAt: [5, 0] },           // physical 60°: the LEFT page's stone throws its shadow up onto the lifted page, beside you
+      { walk: [5, 0] },                           // onto the shadow
+      { angle: 135, at: [6, 0] },                 // physical 45°: it slides away from the hinge and carries you onto her square
+      { win: true },
+    ] },
+  { id: 'gate', level: '8-4', tile: 'A',
+    map: ['S.A-----', '-.AG----'],
+    beats: [
+      { walk: [1, 0] },
+      { step: [1, 0], blocked: 'door' },          // flat: the gate lies down — a flap over a gap, not floor
+      { angle: 120 },                             // lean (physical 60°): the flap stands, the gate is floor
+      { walk: [2, 0] },                           // onto it …
+      { angle: 0, falls: true },                  // … and flatten the book while standing on it: the flap lies down, you fall, back to the start
+      { walk: [1, 1] },
+      { angle: 120 },                             // lean again
+      { walk: [3, 1] }, { win: true },            // through the lower gate onto her paper square
+    ] },
   { id: 'wet', level: '7-1', tile: 'I',
     map: ['S--I----', '-G------'],
     beats: [
@@ -94,7 +115,7 @@ const SLIPS = [
 ];
 
 function run(slip) {
-  const s = F.create({ map: slip.map });
+  const s = F.create({ map: slip.map, lamp: slip.lamp });
   let angle = 0, src = null;
   const mode = () => F.modeOf(angle);
   const sh = () => F.shadows(s, angle);
@@ -115,10 +136,10 @@ function run(slip) {
         const prevMode = mode(), before = sh(); angle = a;
         if (F.crushed(s, s.char, angle)) { crushed = true; break; }
         const here = F.at(s, s.char.c, s.char.r);
-        if (!F.isRight(s.char.c) && !F.isFloor(here)) {
+        if (!F.isFloor(here)) {
           if (src == null) src = before.get(s.char.c + ',' + s.char.r) ?? sh().get(s.char.c + ',' + s.char.r) ?? null;
           const to = F.ride(s, s.char, src, angle);
-          if (!to) fail(`fell at fold ${angle}`);
+          if (!to) { if (b.falls) { s.char = { ...s.start }; src = null; log.push(`fell at fold ${angle}, back to the start`); break; } fail(`fell at fold ${angle}`); }
           s.char = to;
         } else src = null;
         if (prevMode !== 'fold' && mode() === 'fold') events = F.stamp(s);

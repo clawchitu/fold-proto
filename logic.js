@@ -8,6 +8,13 @@
 //         x  stone      k  key        D door     o opened door
 //         i  ink blot   p  pop-up tab (pairs across the hinge)
 //         g  glue (vol. 2): walkable; when the book closes it pulls the stone facing it onto itself (one use)
+//         I  wet ink (vol. 2 ch. 7): ink that bleeds one ring at every press
+//         A  angle gate (vol. 2 ch. 8 「灯位」, docs/design-ch8.md): a paper flap that is floor only while the page leans
+//            (91°–154°, the lamp window); flat or closed it is a gap. Stand on it when the lean ends and you fall.
+//
+// Lamp (vol. 2 ch. 8): level.lamp = 'R' (default, vol. 1 ch. 3 on: the lamp on the right bank, the lifted page's stones
+// shade the flat left page), 'L' (the lamp on the left bank: the flat left page's stones throw their shadows UP onto the
+// lifted page, by the mirror of the same formula) or 'LR' (two lamps: both sets of shadows at once).
 //
 // Pages (vol. 2 ch. 6 「翻页」, docs/design-ch6.md): a map row is 8 columns (left page | right page) or 12 columns
 // (left page | right page | third page). The third page is the back of the right leaf. Turning the closed book over and
@@ -38,13 +45,30 @@
   // round(d * -cos a) from the hinge. Flat (<=90) nothing; folded, the stone itself lands there.
   const shadowOffset = (d, a) => Math.round(d * -Math.cos((a * Math.PI) / 180));
   const shadowColumn = (c, a) => { const e = shadowOffset(c - N + 1, a); return e < 1 ? -1 : N - e; };
+  // Lamp on the left bank: a left-page stone d cells from the hinge shades the lifted page's cell round(d * -cos a) from
+  // the hinge (the mirror of shadowColumn); closed, that is the stone's mirror cell — the stack the stone blocks.
+  const shadowColumnL = (c, a) => { const e = shadowOffset(N - c, a); return e < 1 ? -1 : N - 1 + e; };
+  const lampOf = (s) => s.lamp || 'R';
+  const lit = (a) => a >= SHADE_MIN && a < FOLD_MIN;   // the lean window: shadows are cast, angle gates stand open
+  // Everything that is floor only while the page leans: 'q,r' -> source. Shadows map to the column of the stone that
+  // casts them (right-page stones onto the left page under the right-bank lamp, left-page stones onto the facing page
+  // under the left-bank lamp); open angle gates map to 'A'.
   function shadows(s, a) {
-    const out = new Map();                       // 'q,r' on the left page -> source column
-    if (a < SHADE_MIN || a >= FOLD_MIN) return out;
-    for (let r = 0; r < s.h; r++) for (let c = N; c < 2 * N; c++) {
-      if (!isOpaque(at(s, c, r))) continue;
-      const q = shadowColumn(c, a);
-      if (q >= 0 && !out.has(q + ',' + r)) out.set(q + ',' + r, c);
+    const out = new Map();
+    if (!lit(a)) return out;
+    const lamp = lampOf(s);
+    for (let r = 0; r < s.h; r++) {
+      if (lamp.includes('R')) for (let c = N; c < 2 * N; c++) {
+        if (!isOpaque(at(s, c, r))) continue;
+        const q = shadowColumn(c, a);
+        if (q >= 0 && !out.has(q + ',' + r)) out.set(q + ',' + r, c);
+      }
+      if (lamp.includes('L')) for (let c = N - 1; c >= 0; c--) {
+        if (!isOpaque(at(s, c, r))) continue;
+        const q = shadowColumnL(c, a);
+        if (q >= 0 && !out.has(q + ',' + r)) out.set(q + ',' + r, c);
+      }
+      for (let c = 0; c < 2 * N; c++) if (at(s, c, r) === 'A' && !out.has(c + ',' + r)) out.set(c + ',' + r, 'A');
     }
     return out;
   }
@@ -54,7 +78,7 @@
     let start = null;
     grid.forEach((row, r) => row.forEach((t, c) => { if (t === 'S') start = { c, r }; }));
     // pages: 2 (left | right) or 3 (left | right | third, the back of the right leaf). The start is on the first spread.
-    return { grid, h: grid.length, w: 2 * N, pages: grid[0].length / N, face: 0, char: { ...start }, start, init: level.map };
+    return { grid, h: grid.length, w: 2 * N, pages: grid[0].length / N, face: 0, char: { ...start }, start, init: level.map, lamp: level.lamp || 'R' };
   }
 
   // Back to how the level began: the grids as drawn, the right page facing the left page again, the figure on the start.
@@ -125,12 +149,12 @@
       if (foldOpen(s, q, r)) return null;
       if (R === 'x' || (L === 'x' && !isFloor(R))) return 'stone';
       if (L === 'x') return 'card';
-      if (L === 'D' || R === 'D') return 'door';
+      if (L === 'D' || R === 'D' || L === 'A' || R === 'A') return 'door';
       return 'gap';
     }
     const t = at(s, c, r);
     if (t === 'x') return 'stone';
-    if (t === 'D') return 'door';
+    if (t === 'D' || (t === 'A' && !(sh && sh.has(c + ',' + r)))) return 'door';
     if (isFloor(t) || (sh && sh.has(c + ',' + r))) return null;
     return 'gap';
   }
@@ -171,11 +195,14 @@
 
   // Standing on nothing but a shadow? Then the shadow carries the character when the angle changes.
   // Returns the cell the character ends up on, or null when it falls (or is crushed).
+  // On an angle gate the character stays while the lean lasts and falls when it ends (the flap lies down).
   function ride(s, from, src, a) {
     if (crushed(s, from, a)) return null;
-    if (isFloor(at(s, from.c, from.r))) return from;
-    if (src == null) return null;
-    const q = shadowColumn(src, a);
+    const t = at(s, from.c, from.r);
+    if (isFloor(t)) return from;
+    if (t === 'A') return lit(a) ? from : null;
+    if (src == null || src === 'A') return null;
+    const q = isRight(src) ? shadowColumn(src, a) : shadowColumnL(src, a);
     if (q < 0 || a >= FOLD_MIN || isBlock(at(s, q, from.r))) return null;
     return { c: q, r: from.r };
   }
@@ -294,7 +321,7 @@
   }
 
   const api = { N, FOLD_MIN, POP_MIN, POP_MAX, SHADE_MIN, mirror, proj, isRight, modeOf, isFloor, isBlock,
-    isOpaque, shadowColumn, shadows, crushed, crushCause, cellBlock, stepBlock, pathBlock, ride, create, restart, at, colOf, neighbours, findPath, stamp,
+    isOpaque, shadowColumn, shadowColumnL, lampOf, lit, shadows, crushed, crushCause, cellBlock, stepBlock, pathBlock, ride, create, restart, at, colOf, neighbours, findPath, stamp,
     bleed, flipBlock, flip, isWin };
   if (typeof module !== 'undefined') module.exports = api; else root.FoldLogic = api;
 })(this);

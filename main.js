@@ -142,10 +142,10 @@
   function paintTiles() {
     cells.forEach((row, r) => row.forEach((el, c) => {
       const t = F.at(state, c, r);
-      const kind = { '-': 'empty', '.': 'floor', S: 'floor', G: 'goal', x: 'stone', k: 'key', D: 'door', o: 'open', i: 'ink', I: 'wet', p: 'pop', g: 'glue' }[t];
+      const kind = { '-': 'empty', '.': 'floor', S: 'floor', G: 'goal', x: 'stone', k: 'key', D: 'door', o: 'open', i: 'ink', I: 'wet', p: 'pop', g: 'glue', A: 'gate' }[t];
       if (el.dataset.kind === kind) return;
       el.dataset.kind = kind;
-      el.innerHTML = kind === 'empty' ? '' : `<div class="tile">${SVG[t === 'S' ? '' : t === 'I' ? 'i' : t] || ''}</div>`;
+      el.innerHTML = kind === 'empty' ? '' : `<div class="tile">${SVG[t === 'S' ? '' : t === 'I' ? 'i' : t === 'A' ? 'o' : t] || ''}</div>`;
     }));
   }
   function buildTabs() {
@@ -250,7 +250,7 @@
     const { c, r } = state.char;
     const key = c + ',' + r;
     if (F.crushed(state, state.char, angle)) return fall();
-    if (!F.isRight(c) && !F.isFloor(F.at(state, c, r))) {
+    if (!F.isFloor(F.at(state, c, r))) {
       if (rideSrc == null) rideSrc = before.get(key) ?? shade.get(key) ?? null;
       const to = F.ride(state, state.char, rideSrc, angle);
       if (!to) return fall();

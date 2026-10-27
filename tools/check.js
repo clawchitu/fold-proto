@@ -23,7 +23,7 @@ const WET_CHAPTER = 7;   // final 2 → 3 (Chitu 10/25, difficulty-v3.md §6: th
 const CHAPTER_PAR_MAX = 24;
 const CHAPTER_START = [0, 5, 13, 19, 25];   // first level index of chapters 1–5 (levels.js comments); later levels may carry `chapter`
 const chapterOf = (lv, i) => lv.chapter || CHAPTER_START.filter((s) => s <= i).length;
-const MECHANICS = ['needsFold', 'needsPop', 'needsShade', 'needsRide', 'needsKey', 'needsInk', 'needsGlue', 'needsFlip', 'needsWet'];
+const MECHANICS = ['needsFold', 'needsPop', 'needsShade', 'needsRide', 'needsKey', 'needsInk', 'needsGlue', 'needsFlip', 'needsWet', 'needsLamp', 'needsGate'];
 
 function turn(world, from, a0, a1) {
   // returns the character cell after turning the hinge from a0 to a1, or null if it falls
@@ -31,7 +31,7 @@ function turn(world, from, a0, a1) {
   const step = a1 > a0 ? 5 : -5;
   for (let a = a0 + step; step > 0 ? a <= a1 : a >= a1; a += step) {
     const w = { ...world, char: cur };
-    const onShadow = !L.isRight(cur.c) && !L.isFloor(L.at(w, cur.c, cur.r));
+    const onShadow = !L.isFloor(L.at(w, cur.c, cur.r));   // a shadow on either page (ch. 8 lamp), or an open angle gate
     if (onShadow) { if (src == null) src = L.shadows(w, a - step).get(cur.c + ',' + cur.r) ?? null; } else src = null;
     const to = L.ride(w, cur, src, a);   // rides, falls, or is crushed when the book closes on a stone
     if (!to) return null;
@@ -51,7 +51,7 @@ function grids(level) {
   const press = (g, face) => {
     const k = g + ',' + face;
     if (memo.has(k)) return memo.get(k);
-    const s = { grid: table[g].map((row) => row.slice()), h: base.h, w: base.w, pages: base.pages, face };
+    const s = { grid: table[g].map((row) => row.slice()), h: base.h, w: base.w, pages: base.pages, face, lamp: base.lamp };
     L.stamp(s);
     const key = s.grid.flat().join('');
     let idx = sig.get(key);
@@ -62,7 +62,7 @@ function grids(level) {
   return { base, grids: table, press, pages: base.pages };
 }
 const keyOf = (s) => [s.c, s.r, s.a, s.face, s.g].join();
-const worldOf = (B, s) => ({ grid: B.grids[s.g], h: B.base.h, w: B.base.w, pages: B.pages, face: s.face, char: { c: s.c, r: s.r }, start: B.base.start });
+const worldOf = (B, s) => ({ grid: B.grids[s.g], h: B.base.h, w: B.base.w, pages: B.pages, face: s.face, char: { c: s.c, r: s.r }, start: B.base.start, lamp: B.base.lamp });
 const after = (B, s, a) => (a >= L.FOLD_MIN ? B.press(s.g, s.face) : s.g);
 const startOf = (B) => ({ c: B.base.char.c, r: B.base.char.r, a: 0, face: 0, g: 0 });
 // the goal in visible columns, with the face it lives on (null = left page)
@@ -315,10 +315,12 @@ function report(lv, withDifficulty = true) {
   const noPop = solve(lv, ANGLES.filter((a) => a < L.POP_MIN || a > L.POP_MAX));
   const noShade = solve(lv, ANGLES.filter((a) => !SHADE.includes(a)));
   const oneShade = SHADE.some((keep) => solve(lv, ANGLES.filter((a) => !SHADE.includes(a) || a === keep)));
-  const without = (ch) => solve({ map: lv.map.map((row) => row.split(ch).join('.')) });
+  const without = (ch) => solve({ ...lv, map: lv.map.map((row) => row.split(ch).join('.')) });
   const all = lv.map.join('');
   const out = { solvable: !!full, changes: full ? full.cost : null, needsFold: !noFold, needsPop: !noPop };
-  if (lv.map.some((row) => row.slice(L.N).includes('x')) || (all.includes('g') && all.includes('x'))) { out.needsShade = !noShade; out.needsRide = !oneShade; }
+  if (all.includes('x') && (lv.map.some((row) => row.slice(L.N).includes('x')) || all.includes('g') || (lv.lamp || '').includes('L'))) { out.needsShade = !noShade; out.needsRide = !oneShade; }
+  if (lv.lamp && lv.lamp !== 'R') out.needsLamp = !solve({ ...lv, lamp: 'R' });   // ch. 8: unsolvable with the lamp back on the right bank
+  if (all.includes('A')) out.needsGate = !without('A');                          // ch. 8: unsolvable with the angle gate laid down as paper
   if (all.includes('k')) out.needsKey = !without('k');
   if (all.includes('i')) out.needsInk = !without('i');
   if (all.includes('I')) out.needsWet = !without('I');                 // unsolvable with the wet ink dried into plain paper
@@ -372,6 +374,8 @@ LEVELS.forEach((lv, i) => {
     ('needsInk' in r ? `  needsInk=${r.needsInk}` : '') +
     ('needsGlue' in r ? `  needsGlue=${r.needsGlue} glueFires=${r.glueFires}` : '') +
     ('needsWet' in r ? `  needsWet=${r.needsWet}` : '') +
+    ('needsLamp' in r ? `  needsLamp=${r.needsLamp}` : '') +
+    ('needsGate' in r ? `  needsGate=${r.needsGate}` : '') +
     ('needsFlip' in r ? `  needsFlip=${r.needsFlip}` : ''));
   if (!full) { fail('UNSOLVABLE'); return; }
   console.log('   ' + full.steps.join(' → '));
