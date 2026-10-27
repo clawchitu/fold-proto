@@ -78,7 +78,7 @@ const T = {
         const c0 = L.isRight(p.c) ? 4 : 0; for (let r = 0; r < X.B.h; r++) for (let c = c0; c < c0 + 4; c++) if (L.at(wb, c, r) === 'h' && L.at(wa, c, r) !== 'h') off = true; }
       return [(m.carries || 0) >= 1, off, m.needsCrane, m.closes >= 2]; } },
   ground: { rows: 5, pages: 2, lamp: null, tiles: '.-xrh', par: 4, closes: 2, minpar: 3, need: 'roll+crane', elements: 8, minlen: 15, phases: 0, backs: 0, carries: 1,
-    seed: ['..h.-.r.', 'S.-.-...', '.x-..-.G', '--.-x...', '.-..r-..'],
+    seed: ['-.h...r-', 'S.----..', '.x-.--..', 'x.-.--.G', '--------'],   // the hand seed meets the predicate (len 12): the climb starts feasible
     pred: (m, X) => { // the drawn board shows a left-page crane's landing free with a loose stone one square outward of it: a close from flat rolls the stone onto the landing FIRST and the crane stays (with you on it, the stone comes down on you). The solution's FIRST close rides THAT crane (after passes that rolled the stone past the landing)
       const b = X.B.base.grid, st = X.states; let set = false, grounded = false, n = 0; const g1 = X.B.G[X.B.press(X.B.roll(0, 0, null), 0)];
       for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (s.face !== p.face || G_posture(s.a) !== 'fold' || G_posture(p.a) === 'fold') continue; n++;

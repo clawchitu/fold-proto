@@ -95,6 +95,10 @@
       'kind.r': '松石', 'noun.r': '松石', rolled: '松石滚到了{col}', rolledIn: '松石掉进缺口，那里是纸了', rollHeld: '你挡住了松石',
       'letter.9.title': '左岸来信', 'letter.9.body': '我过不去，就把东西送过去。\n书立起来的时候，什么都往低处滚——\n低处是折痕，折痕是你。\n别接，让它滚到底。', 'letter.9.sign': '——左岸', 'letter.9.end': '卷三《倾》第一章完。\n下一章，石头太重了。',
       'slip.roll.title': '松石', 'slip.roll.body': '一颗没粘住的石头。书每立起来一次——经过 90°，不用合上——它就往折痕滚一格；滚进缺口，缺口就成了纸。它不会滚回来。', 'slip.roll.pic': '图：斜起，石头滚了一格；放平，它掉进缺口，缺口成了桥。',
+      'chHead.10': '十 · 鹤', 'ch.10.line': '每合一次书，鹤就飞到对页。', 'paper.ch10': '硬卡纸。角上折了只鹤。', 'pre.crane': '纸鹤',
+      'kind.h': '纸鹤', 'noun.h': '纸鹤', carried: '鹤带你飞到了{col}', craneFlew: '鹤飞到了{col}', craneStuck: '落点被占了，鹤飞不动', craneSoaked: '鹤染了墨，不飞了', craneGlued: '鹤粘在胶上了',
+      'letter.10.title': '右岸来信', 'letter.10.body': '石头太重了，我折了只鹤。\n每合一次书，它就飞到你那页同样的位置——\n同样的位置，在你那页是反过来的。\n站在它上面。', 'letter.10.sign': '——右岸', 'letter.10.end': '卷三《倾》第二章完。\n下一章，什么都没发生的时候。',
+      'slip.crane.title': '纸鹤', 'slip.crane.body': '一格折成鹤的纸，能站。书每合上一次——翻也算——它就飞到对页同一行的镜像格，站在它上面的人跟着飞。落点上有东西，它就不飞。', 'slip.crane.pic': '图：站上鹤，合上，你在对页；落点有石头，它留在原地。',
       'letter.6.title': '右岸来信', 'letter.6.body': '你翻过来了。\n我在这一页等了很久，久到字都写到了背面。\n不要紧——合上的时候，\n哪一面对着你，由你定。', 'letter.6.sign': '——右岸', 'letter.6.end': '卷二《翻页》第二章完。\n背面还有字。',
     },
 
@@ -180,6 +184,10 @@
       'kind.r': 'loose stone', 'noun.r': 'loose stone', rolled: 'the loose stone rolled to {col}', rolledIn: 'the loose stone dropped into the gap: paper now', rollHeld: 'you are holding the loose stone',
       'letter.9.title': 'A Letter from the Left Bank', 'letter.9.body': 'I cannot cross, so I send things over.\nWhen the book stands, everything rolls to the low place —\nthe low place is the crease, and the crease is you.\nDon’t catch it. Let it roll all the way.', 'letter.9.sign': '— the Left Bank', 'letter.9.end': 'End of Book Three, chapter one.\nNext, the stones are too heavy.',
       'slip.roll.title': 'Loose Stone', 'slip.roll.body': 'A stone that is not glued down. Each time the book stands up — past 90°, no need to close — it rolls one square towards the crease; into a gap, and the gap is paper. It never rolls back.', 'slip.roll.pic': 'Picture: leaning, the stone rolls one square; flat again, it drops into the gap and the gap is a bridge.',
+      'chHead.10': '10 · Crane', 'ch.10.line': 'Each time the book closes, the crane flies to the other page.', 'paper.ch10': 'Card. A crane folded from the corner.', 'pre.crane': 'paper crane',
+      'kind.h': 'paper crane', 'noun.h': 'paper crane', carried: 'the crane carried you to {col}', craneFlew: 'the crane flew to {col}', craneStuck: 'its landing is taken: the crane cannot fly', craneSoaked: 'the crane is soaked with ink and will not fly', craneGlued: 'the crane is stuck on the glue',
+      'letter.10.title': 'A Letter from the Right Bank', 'letter.10.body': 'The stones were too heavy, so I folded a crane.\nEach time the book closes it flies to the same square on your page —\nthe same square, which on your page is the other way round.\nStand on it.', 'letter.10.sign': '— the Right Bank', 'letter.10.end': 'End of Book Three, chapter two.\nNext, when nothing happens.',
+      'slip.crane.title': 'Paper Crane', 'slip.crane.body': 'A square of paper folded into a crane; you can stand on it. Each time the book closes — a turn counts too — it flies to the mirror square on the facing page, and whoever stands on it flies with it. If something sits on its landing, it does not fly.', 'slip.crane.pic': 'Picture: stand on the crane, close, and you are on the other page; with a stone on its landing it stays.',
       'letter.6.title': 'A Letter from the Right Bank', 'letter.6.body': 'You turned the page.\nI waited on this one so long the writing ran onto the back.\nNever mind — when the book is shut,\nwhich face is towards you is yours to choose.', 'letter.6.sign': '— the Right Bank', 'letter.6.end': 'End of Book Two, chapter two.\nThere is more on the back.',
     },
 
@@ -265,6 +273,10 @@
       'kind.r': '転がる石', 'noun.r': '転がる石', rolled: '石が{col}へ転がった', rolledIn: '石が隙間に落ちて、そこは紙になった', rollHeld: 'きみが石を止めている',
       'letter.9.title': '左岸からの手紙', 'letter.9.body': '渡れないなら、ものを送る。\n本を立てると、なにもかも低いほうへ転がる——\n低いほうは折り目、折り目はきみ。\n受け止めないで。最後まで転がして。', 'letter.9.sign': '——左岸より', 'letter.9.end': '第三巻『傾』第一章 了。\n次の章、石は重すぎる。',
       'slip.roll.title': '転がる石', 'slip.roll.body': '糊づけされていない石。本を立てるたび——90° を越えれば、閉じなくても——折り目へ一枡転がる。隙間に落ちれば、そこは紙になる。戻ってはこない。', 'slip.roll.pic': '図：傾けると石が一枡転がる。平らに戻すと隙間に落ち、隙間は橋になる。',
+      'chHead.10': '十 · 鶴', 'ch.10.line': '本を閉じるたび、鶴は向かいの頁へ飛ぶ。', 'paper.ch10': '厚紙。角で鶴を折った。', 'pre.crane': '紙の鶴',
+      'kind.h': '紙の鶴', 'noun.h': '紙の鶴', carried: '鶴がきみを{col}へ運んだ', craneFlew: '鶴が{col}へ飛んだ', craneStuck: '降り場がふさがっている：鶴は飛べない', craneSoaked: '鶴は墨に染みて、もう飛ばない', craneGlued: '鶴は糊に貼りついた',
+      'letter.10.title': '右岸からの手紙', 'letter.10.body': '石は重すぎたから、鶴を折った。\n本を閉じるたび、きみの頁の同じ場所へ飛ぶ——\n同じ場所は、きみの頁では裏返し。\nその上に立って。', 'letter.10.sign': '——右岸より', 'letter.10.end': '第三巻『傾』第二章 了。\n次の章、何も起きなかったとき。',
+      'slip.crane.title': '紙の鶴', 'slip.crane.body': '鶴に折った一枡の紙。立てる。本を閉じるたび——翻すのも数える——向かいの頁の同じ行の鏡の枡へ飛び、上に立つ人も一緒に飛ぶ。降り場に何かあれば飛ばない。', 'slip.crane.pic': '図：鶴に乗って閉じれば向こうの頁。降り場に石があれば、その場に残る。',
       'letter.6.title': '右岸からの手紙', 'letter.6.body': 'めくってくれたね。\nこの頁で長く待ちすぎて、字が裏まで続いた。\nかまわない——閉じたとき、\nどちらの面がきみに向くかは、きみが決める。', 'letter.6.sign': '——右岸より', 'letter.6.end': '第二巻『頁をめくる』第二章 了。\n裏にも、まだ字がある。',
     },
 
@@ -350,6 +362,10 @@
       'kind.r': '구르는 돌', 'noun.r': '구르는 돌', rolled: '돌이 {col:으로} 굴러갔어요', rolledIn: '돌이 틈에 떨어져 거기는 종이가 됐어요', rollHeld: '네가 돌을 막고 있어요',
       'letter.9.title': '왼쪽 강가에서 온 편지', 'letter.9.body': '건널 수 없으니, 물건을 보낼게.\n책을 세우면 모든 게 낮은 곳으로 굴러가——\n낮은 곳은 접힌 금, 접힌 금은 너야.\n받지 마. 끝까지 구르게 둬.', 'letter.9.sign': '— 왼쪽 강가에서', 'letter.9.end': '제3권 《기울다》 1장 끝.\n다음 장, 돌이 너무 무거워.',
       'slip.roll.title': '구르는 돌', 'slip.roll.body': '풀로 붙이지 않은 돌. 책을 세울 때마다——90°를 넘으면, 닫지 않아도——접힌 금 쪽으로 한 칸 굴러가요. 틈에 떨어지면 틈은 종이가 돼요. 다시 굴러오지 않아요.', 'slip.roll.pic': '그림: 기울이면 돌이 한 칸 굴러요. 다시 펴면 틈에 떨어지고, 틈은 다리가 돼요.',
+      'chHead.10': '10장 · 학', 'ch.10.line': '책을 닫을 때마다 학은 맞은편 면으로 날아가요.', 'paper.ch10': '두꺼운 종이. 모서리로 학을 접었어요.', 'pre.crane': '종이학',
+      'kind.h': '종이학', 'noun.h': '종이학', carried: '학이 너를 {col:으로} 데려갔어요', craneFlew: '학이 {col:으로} 날아갔어요', craneStuck: '내려앉을 자리가 막혀서 학이 못 날아요', craneSoaked: '학이 먹에 물들어 더는 못 날아요', craneGlued: '학이 풀에 붙었어요',
+      'letter.10.title': '오른쪽 강가에서 온 편지', 'letter.10.body': '돌이 너무 무거워서, 학을 접었어.\n책을 닫을 때마다 네 면의 같은 자리로 날아가——\n같은 자리는, 네 면에선 거꾸로야.\n그 위에 올라서.', 'letter.10.sign': '— 오른쪽 강가에서', 'letter.10.end': '제3권 《기울다》 2장 끝.\n다음 장, 아무 일도 없었을 때.',
+      'slip.crane.title': '종이학', 'slip.crane.body': '학으로 접은 종이 한 칸. 올라설 수 있어요. 책을 닫을 때마다——넘기는 것도 쳐요——맞은편 면 같은 줄의 거울 칸으로 날아가고, 위에 선 사람도 함께 날아요. 내려앉을 자리에 뭔가 있으면 날지 않아요.', 'slip.crane.pic': '그림: 학 위에서 닫으면 맞은편 면. 자리에 돌이 있으면 그대로 있어요.',
       'letter.6.title': '오른쪽 강가에서 온 편지', 'letter.6.body': '네가 페이지를 넘겼구나.\n이 페이지에서 너무 오래 기다려 글이 뒷면까지 이어졌다.\n괜찮아. 책을 닫았을 때\n어느 면이 너를 향할지는 네가 정하니까.', 'letter.6.sign': '— 오른쪽 강가에서', 'letter.6.end': '제2권 《페이지를 넘기다》 제2장 끝.\n뒷면에 글이 더 있다.',
     },
   };

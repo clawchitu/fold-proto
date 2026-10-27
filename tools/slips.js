@@ -111,6 +111,14 @@ const SLIPS = [
       { angle: 180 },                             // close (the third pass rolls nothing: the stone is gone)
       { walkStack: [2, 0] }, { win: true },       // the stack with her on the left and the filled gap above
     ] },
+  { id: 'crane', level: '10-1', tile: 'h',                   // vol. 3 ch. 10 「鹤」 (docs/design-ch10.md §5)
+    map: ['S.h.....', '--x--G--'],
+    beats: [
+      { walk: [2, 0] },                           // onto the crane (it is paper: you can stand on it)
+      { angle: 180, stamp: 'crane', at: [5, 0] }, // close: at the press the crane flies to its mirror square on the facing page — with you
+      { angle: 0 },                               // open: you are on the right page
+      { walk: [5, 1] }, { win: true },            // one step down to her (her stack is blocked by the left stone: only the crane gets you here)
+    ] },
   { id: 'wet', level: '7-1', tile: 'I',
     map: ['S--I----', '-G------'],
     beats: [
