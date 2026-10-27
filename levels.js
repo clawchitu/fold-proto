@@ -481,7 +481,26 @@ const LEVELS = [
       '-I-..---',
       'g.x--.-x',
       '-x-S.I.-',
-      '--x.-g-G',
+      'G-x.-g--',
+    ],
+  },
+  {
+    id: 'pocket', tier: 'hard', chapter: 7, backs: 1, phases: 2, needs: ['needsFold', 'needsWet'],   // 7-5 · the first ring opens the road up the right page to column 6, row 2 — the square on the back of the left page's stone. Close there and you stand inside a blocked stack; one step left is a stack whose right half is still a gap, so it puts you down in the pocket (left page). The pocket has no opening: lean to 30° and the stone's shadow lies on the gap beside her. Hand-drawn (J17; (0,3) stone stops the ink climbing column 1 from the bottom prints, which let a five-close brute force walk the stacks to her): len 15, wrong 8, phases 2, backs 1, idle 70%; the stone at (1,2) seals the pocket's side so three or four closes cannot grow a way in — the ring reaches column 6, row 2 at the fourth press and the window stack is then paper on both halves
+    map: [
+      'G-----x-',
+      '-.x--.--',
+      '-x--..--',
+      'x---.x-S',
+      '----.I-.',
+    ],
+  },
+  {
+    id: 'through', tier: 'final', chapter: 7, backs: 1, phases: 3, needs: ['needsFold', 'needsFlip', 'needsWet'],   // 7-7 · final · close once (the ink prints the road down the right page), close a second time standing on the back of the left page's stone (7,3) — inside the blocked stack, one step left is the only square of the left page you can reach — and turn the book from there: the turn is the third press, the third ring bleeds and prints onto the third page, and only a three-ring print opens the stacks to her. The glance sheet prints the third page after close → turn (two rings), never after close → open → close → turn. Hand-drawn (F7b): len 19, wrong 9, dead 17% / 3 basins, phases 3, backs 1, idle 79% (three-page limit 80%)
+    map: [
+      '----...SG.--',
+      '----.-----..',
+      '.x----------',
+      'x.-I--..----',
     ],
   },
 ];

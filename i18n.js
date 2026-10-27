@@ -375,6 +375,9 @@
       print: ['印', '印过去的，也是湿的。', '墨印到右页之后，右页的那片墨也会洇。合一次不够，合两次：第二圈洇到右下角。', '对面那片墨，也会长。'],
       ring: ['圈', '一圈够。', '站在右页左下角那格纸上合书——它正对着左页的石头，你在石头背上；合着走到左页第 3 行。斜起到 40° 踩上第 3 列的影子，再开到 80°：影子把你带到第 4 列，往上一格就是她。', '合第二次，影子底下的缺口就没了。'],
       spoiled: ['胶', '墨旁边有胶。', '湿墨挨着胶：合上那一拍，墨先洇到胶上，胶就粘不动石头了——而且墨能洇过胶，洇不过纸。第一合站在第 4 列第 2 行（先斜到 70° 踩影子上去），合着走到右页；斜到 50° 走到第 7 列第 4 行，再合一次：第二圈沿底行洇到她那格旁边。', '墨比胶快。'],
+      pocket: ['袋', '口袋没有口。', '合一次：墨洇到缺口，路通到右页第 6 列第 2 行——它正对着左页的石头。站在那里合第二次：你在一叠堵死的纸里，往左一步那一叠右半边还是缺口，它把你放到左页的口袋里。斜到 30°，石头的影子落在她旁边的缺口上。', '堵死的那一叠，从里面走得出来。'],
+      turned: ['翻墨', '翻过去也算一次。', '斜到 70°：右页的石头把影子投在左页第 4 列顶上的缺口。踩上去合书——合的过程中影子滑动，把你放在胶那一格。合着走到左页最外一列，翻书：翻也是一次压，胶把第三页的石头粘过来，湿墨印过去，叠合图通到她。', '翻书的那一拍，也压。'],
+      through: ['透', '字透到背面了。', '合一次，墨把右页的路印出来。走到右页右下角的纸上——它正对着左页的石头——再合：你在堵死的一叠里，往左一步是左页唯一站得住的格。就在那里翻书：翻是第三次压，第三圈墨洇出来、印到第三页上；合着从第三页第 1 行走到她。合三次再翻，印出来的是四圈——也一样到得了；合一次就翻，第三页少一圈，路不通。', '翻书也是一次合。第三页印着你合过的次数。'],
     },
     en: {
       bridge: ['Bridge', 'Across the gap, a scrap of card.', 'Close the phone: the card on the right lands exactly over the gap.'],
@@ -427,8 +430,18 @@
       print: ['Print', 'What it prints is wet too.', 'Once the ink has printed onto the right page, that print bleeds as well. One close is not enough; close twice and the second ring reaches the bottom-right corner.', 'The blot on the far page grows too.'],
       ring: ['Ring', 'One ring is enough.', 'Close standing on the bottom-left paper of the right page — it faces the left page’s stone, you are on its back — and walk the stacks to row 3 of the left page. Lean to 40° onto the shadow in column 3, then open to 80°: it carries you to column 4, one step below her.', 'Close a second time and the gap under the shadow is gone.'],
       spoiled: ['Glue', 'There is glue beside the ink.', 'Wet ink next to glue: the moment the book closes the ink bleeds onto the glue first, and the glue pulls no stone — and ink bleeds through glue where paper would stop it. First close at column 4, row 2 (lean to 70° to reach it on the shadow), walk the stacks to the right page; lean to 50°, walk to column 7, row 4, close again: the second ring runs along the bottom row to the square beside her.', 'Ink is quicker than glue.'],
+      pocket: ['Pocket', 'A pocket with no opening.', 'Close once: the ink bleeds into the gap and the road runs up the right page to column 6, row 2 — the square facing the left page’s stone. Close a second time standing there: you are inside a blocked stack, and one step left the stack’s right half is still a gap, so it sets you down in the pocket on the left page. Lean to 30°: the stone’s shadow lies on the gap beside her.', 'A blocked stack can be walked out of.'],
+      turned: ['Turned Ink', 'Turning the book counts too.', 'Lean to 70°: the right page’s stone shades the gap at the top of column 4. Step onto it and close — the shadow slides as the book closes and sets you down on the glue square. Walk the stacks to the left page’s far column and turn the book: the turn is a press, the glue pulls the third page’s stone across, the wet ink prints, and the stacks open to her.', 'The moment the book turns, it presses.'],
+      through: ['Through', 'The words have come through to the back.', 'Close once: the ink prints the road down the right page. Walk to the bottom-right paper of the right page — it faces the left page’s stone — and close again: you are inside a blocked stack, and one step left is the only square of the left page you can stand on. Turn the book right there: the turn is the third press, the third ring bleeds and prints onto the third page; closed, walk the third page’s top row to her. Turn after a single close and the third page is one ring short.', 'The turn is a press too. The third page prints how many times you closed.'],
     },
     ja: {
+      wet: ['濡', 'この墨はまだ乾いていない。', '本を閉じる：墨が一枡外へ滲み、スタート横の隙間が墨になる。開いて歩いて渡る。', '一度閉じて、広がるのを見て。'],   // TODO ja review
+      print: ['写', '写ったほうも濡れている。', '右頁に写った墨も滲む。一度では足りない。二度閉じると、二周目が右下の角に届く。', '向こうの墨も育つ。'],   // TODO ja review
+      ring: ['輪', 'ひとまわりで足りる。', '右頁左下の紙の上で閉じる——左頁の石の真上、石の背だ。重ねたまま左頁の 3 行目へ。40° に傾けて 3 列目の影に乗り、80° まで開くと影が 4 列目へ運ぶ。その一つ上が彼女。', '二度目に閉じると、影の下の隙間が消える。'],   // TODO ja review
+      spoiled: ['糊', '墨のとなりに糊がある。', '濡れた墨が糊に接している：閉じた瞬間、墨が先に糊へ滲み、糊は石を引けない——しかも墨は糊の上は通るが紙は通らない。最初は 4 列目 2 行目で閉じ（70° に傾けて影で上がる）、重ねたまま右頁へ。50° に傾けて 7 列目 4 行目へ歩き、もう一度閉じる：二周目が下の行を伝って彼女の横まで届く。', '墨は糊より速い。'],   // TODO ja review
+      pocket: ['袋', '口のない袋。', '一度閉じる：墨が隙間に滲み、道が右頁の 6 列目 2 行目まで通る——左頁の石と向かい合う枡だ。そこで二度目を閉じる：塞がった束の中にいる。左へ一歩、その束の右半分はまだ隙間なので、左頁の袋に降ろされる。30° に傾けると、石の影が彼女の横の隙間に落ちる。', '塞がった束からは、中から出られる。'],   // TODO ja review
+      turned: ['返墨', '裏返すのも一度のうち。', '70° に傾ける：右頁の石が 4 列目いちばん上の隙間に影を落とす。乗って閉じる——閉じるあいだに影が滑り、糊の枡に降ろされる。重ねたまま左頁の外側の列へ歩き、本を返す：返すのも押すこと、糊が第三頁の石を引き寄せ、濡れた墨が写り、束が彼女へつながる。', '返す瞬間も、押している。'],   // TODO ja review
+      through: ['透', '字が裏まで透けた。', '一度閉じる：墨が右頁の道を写す。右頁右下の紙へ——左頁の石と向かい合う——もう一度閉じる：塞がった束の中、左へ一歩が左頁で唯一立てる枡。そこで本を返す：返すのは三度目の押し、三周目が滲んで第三頁に写る。重ねたまま第三頁の 1 行目を彼女まで歩く。一度だけ閉じて返すと、第三頁はひとまわり足りない。', '返すのも押すこと。第三頁には閉じた回数が写る。'],   // TODO ja review
       bridge: ['橋', 'すき間の向こうに、厚紙が一枚。', 'スマホを閉じると、右の厚紙がすき間にぴたりと重なる。'],
       facing: ['見開き', '手紙は同じページに。道は違う。', '（TODO ja）まっすぐの重なりは石でふさがれている。上の列を右ページの最初の枡まで歩いて閉じる。閉じたまま下へ歩くと左ページに移り、さらに下・右で右ページに戻る。開けば手紙はとなり。', '閉じたあと、あなたはどの重なりに？'],
       back: ['隣の頁', '手紙は一枚向こうに。', '（TODO ja）右ページを下まで歩いて閉じる。閉じたまま左・下へ、いちばん右の列まで行って開く。一枡上がって、もう一度閉じる。その重なりが左上の手紙まで続く。', '二度閉じる。二度目はどこで？'],
@@ -474,6 +487,13 @@
       darkInk: ['墨', '……墨が乾いたら閉じて。', '右頁の墨に乗って閉じる。墨が左頁に写り、糊が石を右へ引く。閉じたまま写った墨へ歩き、55°まで開き、4列目を上って頂上の影へ、40°まで開くと3列目、もう一つの墨へ。墨の上で閉じ、重なりを右頁の上の枡まで歩き、開いて一枡下、また閉じる。左頁の石の背に立っている。そこから彼女の重なりへ。', '三度閉じ、二つの墨。'],
     },
     ko: {
+      wet: ['젖음', '이 먹은 아직 마르지 않았어요.', '책을 닫아요: 먹이 한 칸 밖으로 번지고, 출발점 옆 빈칸이 먹이 돼요. 열고 건너가요.', '한 번 닫고, 자라는 걸 봐요.'],   // TODO ko review
+      print: ['찍힘', '찍힌 쪽도 젖어 있어요.', '오른쪽 면에 찍힌 먹도 번져요. 한 번으로는 모자라요. 두 번 닫으면 두 번째 겹이 오른쪽 아래 모서리에 닿아요.', '건너편 먹도 자라요.'],   // TODO ko review
+      ring: ['고리', '한 겹이면 돼요.', '오른쪽 면 왼쪽 아래 종이 위에서 닫아요 — 왼쪽 면 돌 바로 위, 돌의 등이에요. 겹친 채 왼쪽 면 3행으로. 40°로 기울여 3열 그림자에 올라서고, 80°까지 열면 그림자가 4열로 데려가요. 한 칸 위가 그녀예요.', '두 번째로 닫으면 그림자 아래 빈칸이 사라져요.'],   // TODO ko review
+      spoiled: ['풀', '먹 옆에 풀이 있어요.', '젖은 먹이 풀에 닿아 있어요: 닫는 순간 먹이 먼저 풀로 번져서 풀은 돌을 끌지 못해요 — 게다가 먹은 풀 위로는 번지고 종이 위로는 못 번져요. 첫 번째는 4열 2행에서 닫고(70°로 기울여 그림자로 올라가요) 겹친 채 오른쪽 면으로. 50°로 기울여 7열 4행으로 가서 한 번 더 닫아요: 두 번째 겹이 아랫줄을 따라 그녀 옆까지 와요.', '먹이 풀보다 빨라요.'],   // TODO ko review
+      pocket: ['주머니', '입구 없는 주머니.', '한 번 닫아요: 먹이 빈칸으로 번지고 길이 오른쪽 면 6열 2행까지 이어져요 — 왼쪽 면 돌과 마주 보는 칸이에요. 거기서 두 번째로 닫아요: 막힌 묶음 안에 서 있어요. 왼쪽으로 한 칸, 그 묶음의 오른쪽 반은 아직 빈칸이라 왼쪽 면 주머니에 내려놓아요. 30°로 기울이면 돌 그림자가 그녀 옆 빈칸에 떨어져요.', '막힌 묶음은 안에서 걸어 나올 수 있어요.'],   // TODO ko review
+      turned: ['뒤집은 먹', '뒤집는 것도 한 번이에요.', '70°로 기울여요: 오른쪽 면 돌이 4열 맨 위 빈칸에 그림자를 드리워요. 올라서서 닫아요 — 닫히는 동안 그림자가 미끄러져 풀 칸에 내려놓아요. 겹친 채 왼쪽 면 바깥 열로 걸어가 책을 뒤집어요: 뒤집는 것도 누르는 것, 풀이 셋째 면의 돌을 끌어오고 젖은 먹이 찍히고 묶음이 그녀에게 이어져요.', '뒤집는 순간에도 눌러요.'],   // TODO ko review
+      through: ['비침', '글이 뒷면까지 비쳤어요.', '한 번 닫아요: 먹이 오른쪽 면의 길을 찍어요. 오른쪽 면 오른쪽 아래 종이로 — 왼쪽 면 돌과 마주 보는 칸 — 한 번 더 닫아요: 막힌 묶음 안, 왼쪽 한 칸이 왼쪽 면에서 설 수 있는 유일한 칸이에요. 거기서 책을 뒤집어요: 세 번째 누름, 세 번째 겹이 번져 셋째 면에 찍혀요. 겹친 채 셋째 면 1행을 따라 그녀에게. 한 번만 닫고 뒤집으면 셋째 면에 한 겹이 모자라요.', '뒤집는 것도 누름이에요. 셋째 면에는 닫은 횟수가 찍혀요.'],   // TODO ko review
       bridge: ['다리', '틈 건너편에 종이판 한 장.', '폰을 닫으면 오른쪽 종이판이 틈을 꼭 덮어요.'],
       facing: ['맞은편', '편지는 같은 페이지에, 길은 아니다.', '(TODO ko) 곧장 가는 겹은 돌에 막혀 있어요. 윗줄을 따라 오른쪽 페이지 첫 칸까지 가서 닫아요. 닫은 채 아래로 걸으면 왼쪽 페이지로 옮겨지고, 다시 아래·오른쪽으로 가면 오른쪽으로 돌아와요. 펼치면 편지가 옆에.', '닫은 뒤, 나는 어느 겹에 있지?'],
       back: ['건너 쪽', '편지는 한 장 건너에.', '(TODO ko) 오른쪽 페이지를 끝까지 내려가 닫아요. 닫은 채 왼쪽·아래로 맨 오른쪽 열까지 가서 펼쳐요. 한 칸 올라가 다시 닫아요. 그 겹이 왼쪽 위 편지까지 이어져요.', '두 번 닫아요. 두 번째는 어디서?'],
