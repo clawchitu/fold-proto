@@ -242,7 +242,7 @@ function measure(level) {
   // the chapter's twists
   out.before = !solvableFrom(B, { ...B.start, g: B.press(0, 0) });
   out.made = states.some((s) => {
-    if (s.g === 0 || posture(s.a) !== 'lean' || L.isRight(s.c) || L.isFloor(L.at(wof(B, s), s.c, s.r))) return false;
+    if (s.g === 0 || posture(s.a) !== 'lean' || L.isFloor(L.at(wof(B, s), s.c, s.r))) return false;   // either page: under the left-bank lamp a glued stone makes a shadow on the lifted page (ch. 8)
     const src = B.shadowsAt(s.g, s.face, s.a).get(s.c + ',' + s.r);
     return src != null && B.base.grid[s.r][act(src, s.face)] !== 'x';
   });

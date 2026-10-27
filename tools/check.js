@@ -295,7 +295,7 @@ function analyse(level) {
   const stampedStart = solve(level, ANGLES, { ...start, g: B.press(0, 0) }, { B });
   const before = !stampedStart;
   const made = best.path.some((s) => {
-    if (s.g === 0 || posture(s.a) !== 'lean' || L.isRight(s.c) || L.isFloor(L.at(world(s), s.c, s.r))) return false;
+    if (s.g === 0 || posture(s.a) !== 'lean' || L.isFloor(L.at(world(s), s.c, s.r))) return false;   // either page (ch. 8: a glued stone's shadow on the lifted page)
     const src = L.shadows(world(s), s.a).get(s.c + ',' + s.r);
     return src != null && B.base.grid[s.r][L.colOf(s, src)] !== 'x';
   });

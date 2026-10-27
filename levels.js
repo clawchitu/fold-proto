@@ -507,7 +507,7 @@ const LEVELS = [
   // lifted page; shadows slide outward towards column 8 as the book closes) or 'LR' (two lamps, both sets). Tile A = angle gate: floor
   // only while the page leans. Vol. 2 finale: pays off the turn (6), glue (5) and wet ink (7) together. Main path: `chapter: 8`.
   {
-    id: 'lamp', tier: 'teach', chapter: 8, lamp: 'L', needs: ['needsShade', 'needsLamp'],   // 8-1 · teaching · lean to 60°: the left page's stone shades the gap beside you on the lifted page — walk across it to her (a ride version, G one square further, scores 3 = easy; the slip 'lamp' shows the outward slide instead)
+    id: 'leftLamp', tier: 'teach', chapter: 8, lamp: 'L', needs: ['needsShade', 'needsLamp'],   // 8-1 · teaching · lean to 60°: the left page's stone shades the gap beside you on the lifted page — walk across it to her (a ride version, G one square further, scores 3 = easy; the slip 'lamp' shows the outward slide instead)
     map: [
       'x---S-G-',
       '--------',

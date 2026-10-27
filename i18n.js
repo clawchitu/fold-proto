@@ -395,11 +395,10 @@
       turned: ['翻墨', '翻过去也算一次。', '斜到 70°：右页的石头把影子投在左页第 4 列顶上的缺口。踩上去合书——合的过程中影子滑动，把你放在胶那一格。合着走到左页最外一列，翻书：翻也是一次压，胶把第三页的石头粘过来，湿墨印过去，叠合图通到她。', '翻书的那一拍，也压。'],
       through: ['透', '字透到背面了。', '合一次，墨把右页的路印出来。走到右页右下角的纸上——它正对着左页的石头——再合：你在堵死的一叠里，往左一步是左页唯一站得住的格。就在那里翻书：翻是第三次压，第三圈墨洇出来、印到第三页上；合着从第三页第 1 行走到她。合三次再翻，印出来的是四圈——也一样到得了；合一次就翻，第三页少一圈，路不通。', '翻书也是一次合。第三页印着你合过的次数。'],
       // ---- chapter 8 「灯位」 (docs/design-ch8.md) ----
-      lamp: ['灯', '灯挪到左边了。', '斜起到 60°：左页石头的影子落在右页你旁边的缺口上。走上去，再合到 45°——影子往外滑，把你带到她那格。', '影子落在你举起来的那页上，越合越往外。'],
+      leftLamp: ['灯', '灯挪到左边了。', '斜起到 60°：左页石头的影子落在右页你旁边的缺口上。走上去，再合到 45°——影子往外滑，把你带到她那格。', '影子落在你举起来的那页上，越合越往外。'],
       lift: ['举', '举起来的那页也有影子。', '斜到 50°，左页石头的影子落在你下面一行的缺口上，踩上去；开到 70°，影子滑回铰链边，把你放在一格纸的上面。合上，叠合走到她。', '合书影子往外滑，开书它回来。'],
       banks: ['两岸', '两盏灯都亮着。', '右页石头照在左页上的影子哪一道都到不了纸。走到右页左下，30° 踩左页石头的影子，开到 60° 回到铰链边，上一步是纸；合上，叠合图从那里一路换页到她。', '两套影子，只有一套是路。'],
       gate: ['门', '灯亮着，门就开着。', '40°：左页石头的影子落在门下面的缺口上，门立着。同一次斜起里走过影子、走过门，到门上面那格纸——它正对着左页的石头。就地合上：你在堵死的叠里，走出去到左页，开书一步到她。', '门上不能合书；门那头的纸是石背。'],
-      back: ['石背', '影子的尽头是石背。', '左页石头的影子合到底落在石头的镜像格上——那就是石背。乘到它前一格下船，走到石背再合：你在堵死的一叠里。墨在第二合把渡船洇沉，所以乘影夹在两合之间。', '乘影只能在第一合之后、第二合之前。'],
       taken: ['拿走', '合一次，有一道影子就没了。', '先在 50° 踩着右页石头的影子走过左页，到胶旁边的角上再合：胶把右页的石头粘过来，你走过来的那道影子跟着没了，而叠合把你放到右页。在右页，左页石头的影子在 40° 落在你脚边，开到 60° 它把你送回铰链边——她就在下面。', '合书之前先把左页走完：合一次，来路就没了。'],
       twolamps: ['两盏灯', '信翻到最后一页了。', '第一合：胶粘来石头，抬起页上长出新影子。乘它过门到石背，再合：你在堵死的叠里。翻过去——左页石头照在第三页上，墨也印到第三页上；翻之前合了几次，第三页就有几圈墨。', '翻之前合几次，第三页就有几圈；石背从里面走得出来。'],
     },
@@ -458,11 +457,10 @@
       turned: ['Turned Ink', 'Turning the book counts too.', 'Lean to 70°: the right page’s stone shades the gap at the top of column 4. Step onto it and close — the shadow slides as the book closes and sets you down on the glue square. Walk the stacks to the left page’s far column and turn the book: the turn is a press, the glue pulls the third page’s stone across, the wet ink prints, and the stacks open to her.', 'The moment the book turns, it presses.'],
       through: ['Through', 'The words have come through to the back.', 'Close once: the ink prints the road down the right page. Walk to the bottom-right paper of the right page — it faces the left page’s stone — and close again: you are inside a blocked stack, and one step left is the only square of the left page you can stand on. Turn the book right there: the turn is the third press, the third ring bleeds and prints onto the third page; closed, walk the third page’s top row to her. Turn after a single close and the third page is one ring short.', 'The turn is a press too. The third page prints how many times you closed.'],
       // ---- chapter 8 「灯位」 (docs/design-ch8.md) ----
-      lamp: ['The Lamp', 'The lamp has moved to the left.', 'Lean to 60°: the left page’s stone shades the gap beside you on the right page. Step on, then close to 45° — the shadow slides outward and carries you to her square.', 'Shadows fall on the page you lift, and slide outward as you close.'],
+      leftLamp: ['The Lamp', 'The lamp has moved to the left.', 'Lean to 60°: the left page’s stone shades the gap beside you on the right page. Step on, then close to 45° — the shadow slides outward and carries you to her square.', 'Shadows fall on the page you lift, and slide outward as you close.'],
       lift: ['Lift', 'The lifted page has shadows too.', 'Lean to 50°: the left stone’s shadow lies on the gap below you; step on. Open to 70° and it slides back towards the hinge, setting you above a square of paper. Close, and the stacks lead to her.', 'Closing slides a shadow outward; opening brings it back.'],
       banks: ['Two Banks', 'Both lamps are lit.', 'None of the right stones’ shadows on the left page reaches paper. Walk to the right page’s bottom-left, step onto the left stone’s shadow at 30°, open to 60° to ride back to the hinge side; the square above is paper. Close, and the stacks change page all the way to her.', 'Two sets of shadows; only one is a road.'],
       gate: ['Gate', 'While the lamp is lit the gate stands.', 'At 40° the left stone’s shadow lies on the gap below the gate, and the gate stands. In that one lean walk over the shadow, through the gate, onto the paper above it — the square facing the left page’s stone. Close right there: you are inside a blocked stack; walk out to the left page, open, and she is one step away.', 'You cannot close the book on a gate; the paper beyond it is the stone’s back.'],
-      back: ['Stone’s Back', 'The shadow ends at the stone’s back.', 'The left page’s stone shades the square that is its own mirror when the book closes — the stone’s back. Ride to the square before it, step off, walk to the back and close: you are inside a blocked stack. The ink sinks the ferry at the second close, so the ride goes between the two closes.', 'Ride after the first close and before the second.'],
       taken: ['Taken', 'One close, and a shadow is gone.', 'First cross the left page at 50° on the right stones’ shadows to the corner beside the glue, then close: the glue pulls the right page’s stone across, the shadow you came on goes with it, and the stacks put you on the right page. There the left stone’s shadow lies at your feet at 40°; open to 60° and it carries you back to the hinge side — she is just below.', 'Cross the left page before you close: one close and the way you came is gone.'],
       twolamps: ['Two Lamps', 'The letter is turned to its last page.', 'First close: the glue pulls a stone across and a new shadow grows on the lifted page. Ride it through the gate to the stone’s back and close again: you are inside a blocked stack. Turn the book — the left page’s stone shades the third page, and the ink prints there too; the third page carries as many rings as you closed before the turn.', 'The third page prints how many times you closed before the turn; a blocked stack can be left from inside.'],
     },
@@ -475,11 +473,10 @@
       turned: ['返墨', '裏返すのも一度のうち。', '70° に傾ける：右頁の石が 4 列目いちばん上の隙間に影を落とす。乗って閉じる——閉じるあいだに影が滑り、糊の枡に降ろされる。重ねたまま左頁の外側の列へ歩き、本を返す：返すのも押すこと、糊が第三頁の石を引き寄せ、濡れた墨が写り、束が彼女へつながる。', '返す瞬間も、押している。'],   // TODO ja review
       through: ['透', '字が裏まで透けた。', '一度閉じる：墨が右頁の道を写す。右頁右下の紙へ——左頁の石と向かい合う——もう一度閉じる：塞がった束の中、左へ一歩が左頁で唯一立てる枡。そこで本を返す：返すのは三度目の押し、三周目が滲んで第三頁に写る。重ねたまま第三頁の 1 行目を彼女まで歩く。一度だけ閉じて返すと、第三頁はひとまわり足りない。', '返すのも押すこと。第三頁には閉じた回数が写る。'],   // TODO ja review
       // ---- chapter 8 (drafts, TODO ja review) ----
-      lamp: ['灯', '灯が左へ移った。', '60° まで傾ける：左頁の石の影が右頁の隣の隙間に落ちる。乗って 45° まで閉じる——影が外へ滑り、彼女の枡まで運ぶ。', '影は持ち上げた頁に落ち、閉じるほど外へ滑る。'],
+      leftLamp: ['灯', '灯が左へ移った。', '60° まで傾ける：左頁の石の影が右頁の隣の隙間に落ちる。乗って 45° まで閉じる——影が外へ滑り、彼女の枡まで運ぶ。', '影は持ち上げた頁に落ち、閉じるほど外へ滑る。'],
       lift: ['持ち上げ', '持ち上げた頁にも影がある。', '閉じると綴じ目から遠ざかる。影に乗って外へ、石の束に着く前に降りる。', '向きが逆。影は外へ滑り、端で落ちる。'],
       banks: ['両岸', '二つの灯がともっている。', '同じ行に影が二つ、頁ごとに一つ。一方は紙へ、他方は石の束へ滑る。正しい方に乗り、一度閉じて頁を替え、もう一方に乗る。', '影が二つ。道と罠。'],
       gate: ['扉', '灯がともるあいだ、扉は立つ。', '扉は傾けているあいだだけ床。同じ傾きの中で扉を抜け影に乗り、閉じる前に紙へ。', '扉の上では本を閉じられない。'],
-      back: ['石の背', '影の果ては石の背。', '左頁の石の影は、閉じ切ると石の鏡の枡——石の背——に落ちる。その一つ手前で降り、背まで歩いて閉じる：塞がった束の中。二度目の閉じで墨が渡し舟を沈めるので、乗るのは二つの閉じの間。', '乗るのは一度目の閉じの後、二度目の前。'],
       taken: ['消えた影', '一度閉じると、影がひとつ消える。', 'まず 50° で右頁の石の影を踏んで左頁を渡り、糊の隣の角で閉じる：糊が右頁の石を引き寄せ、渡ってきた影は消え、束はきみを右頁に置く。そこでは左頁の石の影が 40° で足元に落ちる。60° まで開くと綴じ目側へ運ばれる——彼女はすぐ下。', '閉じる前に左頁を渡り切る。一度閉じれば来た道は無い。'],
       twolamps: ['二つの灯', '手紙は最後の頁まで。', '一度目の閉じ：糊が石を引き、持ち上げた頁に新しい影。それに乗って扉を抜け石の背へ、もう一度閉じる：塞がった束の中。本を返す——左頁の石が第三頁を照らし、墨も第三頁に写る。返す前に閉じた回数だけ、第三頁に輪ができる。', '返す前に閉じた回数が第三頁に写る。塞がった束は中から出られる。'],
       bridge: ['橋', 'すき間の向こうに、厚紙が一枚。', 'スマホを閉じると、右の厚紙がすき間にぴたりと重なる。'],
@@ -535,11 +532,10 @@
       turned: ['뒤집은 먹', '뒤집는 것도 한 번이에요.', '70°로 기울여요: 오른쪽 면 돌이 4열 맨 위 빈칸에 그림자를 드리워요. 올라서서 닫아요 — 닫히는 동안 그림자가 미끄러져 풀 칸에 내려놓아요. 겹친 채 왼쪽 면 바깥 열로 걸어가 책을 뒤집어요: 뒤집는 것도 누르는 것, 풀이 셋째 면의 돌을 끌어오고 젖은 먹이 찍히고 묶음이 그녀에게 이어져요.', '뒤집는 순간에도 눌러요.'],   // TODO ko review
       through: ['비침', '글이 뒷면까지 비쳤어요.', '한 번 닫아요: 먹이 오른쪽 면의 길을 찍어요. 오른쪽 면 오른쪽 아래 종이로 — 왼쪽 면 돌과 마주 보는 칸 — 한 번 더 닫아요: 막힌 묶음 안, 왼쪽 한 칸이 왼쪽 면에서 설 수 있는 유일한 칸이에요. 거기서 책을 뒤집어요: 세 번째 누름, 세 번째 겹이 번져 셋째 면에 찍혀요. 겹친 채 셋째 면 1행을 따라 그녀에게. 한 번만 닫고 뒤집으면 셋째 면에 한 겹이 모자라요.', '뒤집는 것도 누름이에요. 셋째 면에는 닫은 횟수가 찍혀요.'],   // TODO ko review
       // ---- chapter 8 (drafts, TODO ko review) ----
-      lamp: ['등불', '등불이 왼쪽으로 옮겨 갔어요.', '60°까지 기울여요: 왼쪽 면 돌의 그림자가 오른쪽 면 옆 틈에 떨어져요. 올라서서 45°까지 닫아요. 그림자가 바깥으로 미끄러져 그녀의 칸까지 데려다줘요.', '그림자는 들어 올린 면에 떨어지고, 닫을수록 바깥으로 미끄러져요.'],
+      leftLamp: ['등불', '등불이 왼쪽으로 옮겨 갔어요.', '60°까지 기울여요: 왼쪽 면 돌의 그림자가 오른쪽 면 옆 틈에 떨어져요. 올라서서 45°까지 닫아요. 그림자가 바깥으로 미끄러져 그녀의 칸까지 데려다줘요.', '그림자는 들어 올린 면에 떨어지고, 닫을수록 바깥으로 미끄러져요.'],
       lift: ['들어 올림', '들어 올린 면에도 그림자가 있어요.', '닫으면 경첩에서 멀어져요. 그림자를 타고 바깥으로, 돌의 묶음에 닿기 전에 내려요.', '방향이 반대예요. 그림자는 바깥으로 미끄러지고 끝에서 떨어져요.'],
       banks: ['두 강가', '두 등불이 다 켜져 있어요.', '같은 행에 그림자 둘, 면마다 하나. 하나는 종이로, 하나는 돌의 묶음으로 미끄러져요. 맞는 쪽을 타고, 한 번 닫아 면을 바꾸고, 다른 쪽을 타요.', '그림자 둘. 하나는 길, 하나는 함정.'],
       gate: ['문', '등불이 켜진 동안 문이 서 있어요.', '문은 기울인 동안에만 바닥이에요. 한 번의 기울임 안에서 문을 지나고 그림자를 타고, 닫기 전에 종이에 닿아요.', '문 위에서는 책을 닫을 수 없어요.'],
-      back: ['돌의 등', '그림자의 끝은 돌의 등.', '왼쪽 면 돌의 그림자는 다 닫히면 돌의 거울 칸, 곧 돌의 등에 떨어져요. 그 한 칸 앞에서 내려 등까지 걸어가 닫아요: 막힌 묶음 안이에요. 두 번째 닫음에 먹이 나룻배를 가라앉히니, 타는 건 두 닫음 사이.', '첫 닫음 뒤, 둘째 닫음 전에 타요.'],
       taken: ['사라진 그림자', '한 번 닫으면 그림자 하나가 사라져요.', '먼저 50°에서 오른쪽 면 돌의 그림자를 밟고 왼쪽 면을 건너 풀 옆 모서리에서 닫아요: 풀이 오른쪽 면 돌을 당겨 오고, 건너온 그림자는 함께 사라지고, 묶음이 당신을 오른쪽 면에 놓아요. 거기선 왼쪽 면 돌의 그림자가 40°에서 발밑에 떨어져요. 60°까지 열면 경첩 쪽으로 데려다줘요. 그녀는 바로 아래.', '닫기 전에 왼쪽 면을 다 건너요. 한 번 닫으면 온 길이 없어져요.'],
       twolamps: ['두 등불', '편지는 마지막 장까지.', '첫 닫음: 풀이 돌을 당기고 들어 올린 면에 새 그림자가 생겨요. 그걸 타고 문을 지나 돌의 등으로, 다시 닫아요: 막힌 묶음 안. 책을 뒤집어요. 왼쪽 면 돌이 셋째 면을 비추고 먹도 셋째 면에 찍혀요. 뒤집기 전에 닫은 만큼 셋째 면에 겹이 생겨요.', '뒤집기 전에 닫은 횟수가 셋째 면에 찍혀요. 막힌 묶음은 안에서 나갈 수 있어요.'],
       bridge: ['다리', '틈 건너편에 종이판 한 장.', '폰을 닫으면 오른쪽 종이판이 틈을 꼭 덮어요.'],
