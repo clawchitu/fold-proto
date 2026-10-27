@@ -95,7 +95,7 @@
     D: '<svg viewBox="0 0 40 40"><circle cx="20" cy="17" r="3.6" fill="var(--accent)"/><path d="M20 19v8" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/></svg>',
     i: '<svg viewBox="0 0 40 40"><path d="M20 7c6 1 12 5 12 12 1 7-5 13-12 13-8 0-13-5-13-12 0-6 4-9 6-10 2-2 4-3 7-3z" fill="#2b2a28"/><circle cx="33" cy="9" r="2" fill="#2b2a28"/></svg>',
     // glue (vol. 2): a wet drop with a highlight; the amber smear itself is the tile background (style.css)
-    h: '<svg viewBox="0 0 40 40"><path d="M6 25l10-4 4-13 4 13 10 4-12 2-2 7-2-7z" fill="none" stroke="#8a5a14" stroke-width="2" stroke-linejoin="round"/><path d="M16 21l4 2 4-2" fill="none" stroke="#8a5a14" stroke-width="1.4" stroke-linecap="round"/></svg>',   // vol. 3 ch. 10: the paper crane (an outline + one fold line; design-vol3.md §1.2)
+    h: '<svg viewBox="0 0 40 40"><path d="M6 25l10-4 4-13 4 13 10 4-12 2-2 7-2-7z" fill="none" stroke="#4a433b" stroke-width="2" stroke-linejoin="round"/><path d="M16 21l4 2 4-2" fill="none" stroke="#4a433b" stroke-width="1.4" stroke-linecap="round"/></svg>',   // vol. 3 ch. 10: the paper crane (an outline + one fold line; design-vol3.md §1.2)
     g: '<svg viewBox="0 0 40 40"><path d="M20 9c4 6 8 10 8 15a8 8 0 0 1-16 0c0-5 4-9 8-15z" fill="none" stroke="#8a5a14" stroke-width="2.2" stroke-linejoin="round"/><path d="M16 24a4 4 0 0 0 3 4" fill="none" stroke="#8a5a14" stroke-width="1.6" stroke-linecap="round"/></svg>',
   };
 
