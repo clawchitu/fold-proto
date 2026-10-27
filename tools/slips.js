@@ -154,7 +154,7 @@ function run(slip) {
           if (!to) { if (b.falls) { s.char = { ...s.start }; src = null; log.push(`fell at fold ${angle}, back to the start`); break; } fail(`fell at fold ${angle}`); }
           s.char = to;
         } else src = null;
-        if (prevMode !== 'fold' && mode() === 'fold') events = F.stamp(s);
+        if (prevMode !== 'fold' && mode() === 'fold') { events = F.stamp(s); s.char = F.carried(events, s.char); }   // ch. 10: a crane carries
       }
       if (b.crushed !== undefined && crushed !== b.crushed) fail(`at fold ${b.angle} crushed=${crushed}, expected ${b.crushed}`);
       if (crushed) { s.char = { ...s.start }; angle = 180; log.push('crushed, back to the start'); }

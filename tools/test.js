@@ -171,3 +171,37 @@ console.log('wet ink tests passed');
   assert.strictEqual(v.grid[0].join(''), 'S---.-r-' + '-r.-', 'the facing (third) page rolled; the right page, on the back of the leaf, did not');
 }
 console.log('loose stone tests passed');
+
+// Paper crane (vol. 3 ch. 10 「鹤」): at every press each crane flies to its mirror cell and carries whoever stands on it.
+{
+  const s = mk(['S.h--...',     // row 0: the crane at (2,0) faces a gap (5,0): it lands there (the gap is its floor), (2,0) is paper
+                '....h.x.',     // row 1: the crane at (4,1) faces paper (3,1): it flies across
+                'h......x',     // row 2: the crane faces a stone: it cannot fly
+                '.I....h.',     // row 3: the crane faces wet ink: soaked — it stays, as wet ink, and will not fly again
+                '........',     // row 4: paper stops the bleed (wet ink bleeds into glue BEFORE the cranes fly: a glue beside wet ink would soak the crane facing it)
+                '.g....h.']);   // row 5: the crane faces glue: stuck — it carries over one last time, both squares plain paper
+  s.char = { c: 2, r: 0 };
+  const ev = L.stamp(s);
+  assert.strictEqual(s.grid.map((r) => r.join('')).join('/'), 'S..--h../...h..x./h......x/.I....I./......../........');
+  assert.strictEqual(ev.filter((e) => e.type === 'crane').length, 4, 'four cranes did something; the one facing the stone did not');
+  assert.deepStrictEqual(L.carried(ev, { c: 2, r: 0 }), { c: 5, r: 0 }, 'standing on the crane you fly with it to the other page');
+  assert.deepStrictEqual(L.carried(ev, { c: 6, r: 5 }), { c: 1, r: 5 }, 'the glued crane carries you one last time');
+  assert.deepStrictEqual(L.carried(ev, { c: 6, r: 3 }), { c: 6, r: 3 }, 'the soaked crane carries no one');
+  assert.deepStrictEqual(L.carried(ev, { c: 0, r: 2 }), { c: 0, r: 2 }, 'a crane facing a stone carries no one');
+  // order within a press: the roll of the sweep comes first (a loose stone that rolled into the landing stops the crane);
+  // glue comes before the flight (glue that takes the stone off the landing frees the crane)
+  const t = mk(['..h.-.r.', 'g.h.x...']);
+  L.roll(t); L.stamp(t);
+  assert.strictEqual(t.grid[0].join(''), '..h.-r..', 'row 0: the stone rolled onto the landing first — the crane stays');
+  assert.strictEqual(t.grid[1].join(''), 'g...xh..', 'row 1: NOTE (design-vol3 §1.2 says glue can free a landing — it cannot: the glue that would pull the stone off the landing m stands at mirror(m) = the crane\'s own square). The only glue–crane interaction is landing ON glue: stuck');
+  // a crane stops a loose stone like any non-paper square
+  const u = mk(['....hr..']);
+  L.roll(u); assert.strictEqual(u.grid[0].join(''), '....hr..', 'a loose stone does not roll onto a crane');
+  // the turn is a press: a crane on the left page flies to the THIRD page's mirror cell, with you; a crane on the right page, now on the back of the leaf, does not fly
+  const v = L.create({ map: ['S.h...h..-..'] });
+  v.char = { c: 2, r: 0 };
+  const { crush } = L.flip(v);
+  assert.strictEqual(crush, null);
+  assert.strictEqual(v.grid[0].join(''), 'S.....h..h..', 'the left crane landed in the third page\'s gap; the right page\'s crane stayed');
+  assert.deepStrictEqual(v.char, { c: 5, r: 0 }, 'carried to the third page (visible column 6)');
+}

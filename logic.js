@@ -14,6 +14,8 @@
 //         r  loose stone (vol. 3 ch. 9 「滚」, docs/design-ch9.md): a stone that is not glued down. Blocks, shades and crushes
 //            like a stone, but every time the lifted page passes upright (the hinge crosses 90°) it rolls one cell towards
 //            the crease — see roll(). Glue that pulls it holds it: it arrives as a stone (x).
+//         h  paper crane (vol. 3 ch. 10 「鹤」, docs/design-ch10.md): a square of paper folded into a crane, floor you can stand
+//            on. At every press it flies to its mirror cell and carries whoever stands on it — see fly().
 //
 // Lamp (vol. 2 ch. 8): level.lamp = 'R' (default, vol. 1 ch. 3 on: the lamp on the right bank, the lifted page's stones
 // shade the flat left page), 'L' (the lamp on the left bank: the flat left page's stones throw their shadows UP onto the
@@ -41,7 +43,7 @@
     return 'open';
   }
 
-  const isFloor = (t) => '.SGkiopgI'.includes(t);
+  const isFloor = (t) => '.SGkiopgIh'.includes(t);
   const isBlock = (t) => t === 'x' || t === 'r' || t === 'D';
   const isOpaque = (t) => t === 'x' || t === 'r';   // stones (fixed or loose) block the light; paper and ink let it through
   const standing = (a) => a >= STAND;               // vol. 3: which side of upright the lifted page is on
@@ -294,7 +296,36 @@
         }
       }
     }
+    events.push(...fly(s));   // vol. 3 ch. 10: last of all, the cranes fly (after the roll of the sweep, the bleed, the keys, the ink, the glue)
     return events;
+  }
+
+  // Paper crane (vol. 3 ch. 10 「鹤」, docs/design-ch10.md): 'h' is paper folded into a crane — floor, like any paper. At EVERY
+  // press (a close, a turn of the closed book) — after the roll of the same sweep, the bleed, the keys, the ink and the glue —
+  // each crane flies to its mirror cell (c → 7 − c), and the figure standing on it flies with it: the book's second way to
+  // change page (the first is the stack walk). Landing on paper or on a gap it lands (its old square is paper; a gap it sits
+  // in is floor for as long as it stays). Landing on WET INK it is soaked: it stays where it is, as wet ink, and never flies
+  // again (it bleeds with the rest). Landing on GLUE it is stuck: it carries you over one last time and is plain paper there
+  // (the glue is used up). Landing on anything else — a stone, a loose stone (one that rolled in during the same sweep
+  // counts), a door, a gate, a key, dry ink, her square, the start, another crane — it cannot fly and stays where it is.
+  // All cranes are judged on the board as it is after the glue. Returns the events: a 'crane' event with `to` carried
+  // whoever stood on cells[0] (see carried()).
+  function fly(s) {
+    const events = [], cranes = [];
+    for (let r = 0; r < s.h; r++) for (let c = 0; c < s.w; c++) if (at(s, c, r) === 'h') cranes.push({ c, r });
+    for (const { c, r } of cranes) {
+      const m = mirror(c), t = at(s, m, r);
+      if (t === '-' || t === '.') { put(s, m, r, 'h'); put(s, c, r, '.'); events.push({ type: 'crane', cells: [{ c, r }, { c: m, r }], to: { c: m, r } }); }
+      else if (t === 'I') { put(s, c, r, 'I'); events.push({ type: 'crane', cells: [{ c, r }], inked: true }); }
+      else if (t === 'g') { put(s, m, r, '.'); put(s, c, r, '.'); events.push({ type: 'crane', cells: [{ c, r }, { c: m, r }], to: { c: m, r }, glued: true }); }
+    }
+    return events;
+  }
+  // Where the figure stands after a press: carried by the crane it stood on (to the crane's landing, on the other page),
+  // or where it was. Closed, the landing is the same stack — you notice only when the book opens.
+  function carried(events, fig) {
+    const e = events.find((e) => e.type === 'crane' && e.to && e.cells[0].c === fig.c && e.cells[0].r === fig.r);
+    return e ? { c: e.to.c, r: e.to.r } : fig;
   }
 
   // Loose stones (vol. 3 ch. 9 「滚」, docs/design-ch9.md): 'r' is a stone that is not glued down. Every time the lifted page
@@ -340,6 +371,7 @@
     s.face ^= 1;
     const crush = crushCause(s, s.char, FOLD_MIN);
     const events = crush ? [] : stamp(s);
+    if (!crush) s.char = carried(events, s.char);   // vol. 3 ch. 10: a crane under your feet flies to the page you turned to, with you
     return { events, crush };
   }
 
@@ -351,6 +383,6 @@
 
   const api = { N, FOLD_MIN, POP_MIN, POP_MAX, SHADE_MIN, STAND, mirror, proj, isRight, modeOf, isFloor, isBlock,
     isOpaque, standing, passes, shadowColumn, shadowColumnL, lampOf, lit, shadows, crushed, crushCause, cellBlock, stepBlock, pathBlock, ride, create, restart, at, colOf, neighbours, findPath, stamp,
-    bleed, roll, flipBlock, flip, isWin };
+    bleed, roll, fly, carried, flipBlock, flip, isWin };
   if (typeof module !== 'undefined') module.exports = api; else root.FoldLogic = api;
 })(this);

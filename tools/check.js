@@ -23,7 +23,7 @@ const WET_CHAPTER = 7;   // final 2 → 3 (Chitu 10/25, difficulty-v3.md §6: th
 const CHAPTER_PAR_MAX = 24;
 const CHAPTER_START = [0, 5, 13, 19, 25];   // first level index of chapters 1–5 (levels.js comments); later levels may carry `chapter`
 const chapterOf = (lv, i) => lv.chapter || CHAPTER_START.filter((s) => s <= i).length;
-const MECHANICS = ['needsFold', 'needsPop', 'needsShade', 'needsRide', 'needsKey', 'needsInk', 'needsGlue', 'needsFlip', 'needsWet', 'needsLamp', 'needsGate', 'needsRoll'];
+const MECHANICS = ['needsFold', 'needsPop', 'needsShade', 'needsRide', 'needsKey', 'needsInk', 'needsGlue', 'needsFlip', 'needsWet', 'needsLamp', 'needsGate', 'needsRoll', 'needsCrane'];
 
 // One hinge move: the state after turning the hinge from s.a to a, or null if the figure falls or is crushed on the way.
 // The angle walks in 5° steps; a figure on a shadow rides it. Each time the lifted page passes upright (vol. 3: the
@@ -42,7 +42,7 @@ function move(B, s, a) {
     if (!to) return null;
     cur = to;
   }
-  if (a >= L.FOLD_MIN) g = B.press(g, s.face);
+  if (a >= L.FOLD_MIN) { const g0 = g; g = B.press(g0, s.face); cur = B.carry(g0, s.face, cur); }   // vol. 3 ch. 10: the crane you stand on carries you across
   return { c: cur.c, r: cur.r, a, face: s.face, g };
 }
 
@@ -65,9 +65,14 @@ function grids(level) {
     const k = g + ',' + face;
     if (memo.has(k)) return memo.get(k);
     const s = { grid: table[g].map((row) => row.slice()), h: base.h, w: base.w, pages: base.pages, face, lamp: base.lamp };
-    L.stamp(s);
+    const ev = L.stamp(s);
+    flights.set(k, new Map(ev.filter((e) => e.type === 'crane' && e.to).map((e) => [e.cells[0].c + ',' + e.cells[0].r, e.to])));
     return store(k, s.grid);
   };
+  // vol. 3 ch. 10: the figure's cell after press(g, face) — carried by the crane it stood on, or unchanged. The grid a press
+  // makes does not depend on where the figure stands, so the flights are memoised beside the grid.
+  const flights = new Map();
+  const carry = (g, face, fig) => { press(g, face); const to = flights.get(g + ',' + face).get(fig.c + ',' + fig.r); return to ? { c: to.c, r: to.r } : fig; };
   // the lifted page passed upright (vol. 3 ch. 9): the loose stones on the facing page roll, unless the figure (fig) holds
   // one. Keyed on the figure's cell only when it stands on the facing page — on the left page it is in nobody's way.
   const roll = (g, face, fig) => {
@@ -79,7 +84,7 @@ function grids(level) {
     if (!ev.length) { memo.set(k, g); return g; }
     return store(k, s.grid);
   };
-  return { base, grids: table, press, roll, pages: base.pages };
+  return { base, grids: table, press, roll, carry, pages: base.pages };
 }
 const keyOf = (s) => [s.c, s.r, s.a, s.face, s.g].join();
 const worldOf = (B, s) => ({ grid: B.grids[s.g], h: B.base.h, w: B.base.w, pages: B.pages, face: s.face, char: { c: s.c, r: s.r }, start: B.base.start, lamp: B.base.lamp });
@@ -96,7 +101,8 @@ function flipOf(B, s) {
   if (L.flipBlock(w, s.a)) return undefined;
   const turned = { ...w, face: s.face ^ 1 };
   if (L.crushed(turned, w.char, s.a)) return null;
-  return { c: s.c, r: s.r, a: s.a, face: s.face ^ 1, g: B.press(s.g, s.face ^ 1) };
+  const to = B.carry(s.g, s.face ^ 1, { c: s.c, r: s.r });   // a crane under your feet flies to the page you turned to, with you
+  return { c: to.c, r: to.r, a: s.a, face: s.face ^ 1, g: B.press(s.g, s.face ^ 1) };
 }
 // What one node on a path reads as: the posture, '·T' when the third page faces, or 'flip' for the turn itself.
 const stepLabel = (s, prev) => (prev && prev.a === s.a && prev.face !== s.face ? 'flip' : `${L.modeOf(s.a)}${s.a}${s.face ? '·T' : ''}`);
@@ -339,6 +345,7 @@ function report(lv, withDifficulty = true) {
   const out = { solvable: !!full, changes: full ? full.cost : null, needsFold: !noFold, needsPop: !noPop };
   if (/[xr]/.test(all) && (lv.map.some((row) => /[xr]/.test(row.slice(L.N))) || all.includes('g') || (lv.lamp || '').includes('L'))) { out.needsShade = !noShade; out.needsRide = !oneShade; }
   if (all.includes('r')) out.needsRoll = !without('r', 'x');            // vol. 3 ch. 9: unsolvable with the loose stones glued down
+  if (all.includes('h')) out.needsCrane = !without('h');                // vol. 3 ch. 10: unsolvable with the cranes unfolded into plain paper
   if (lv.lamp && lv.lamp !== 'R') out.needsLamp = !solve({ ...lv, lamp: 'R' });   // ch. 8: unsolvable with the lamp back on the right bank
   if (all.includes('A')) out.needsGate = !without('A');                          // ch. 8: unsolvable with the angle gate laid down as paper
   if (all.includes('k')) out.needsKey = !without('k');
@@ -397,6 +404,7 @@ LEVELS.forEach((lv, i) => {
     ('needsLamp' in r ? `  needsLamp=${r.needsLamp}` : '') +
     ('needsGate' in r ? `  needsGate=${r.needsGate}` : '') +
     ('needsRoll' in r ? `  needsRoll=${r.needsRoll}` : '') +
+    ('needsCrane' in r ? `  needsCrane=${r.needsCrane}` : '') +
     ('needsFlip' in r ? `  needsFlip=${r.needsFlip}` : ''));
   if (!full) { fail('UNSOLVABLE'); return; }
   console.log('   ' + full.steps.join(' → '));

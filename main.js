@@ -309,6 +309,7 @@
       sound.crease();
       if (state.pages > 2 && !localStorage.getItem('fold.layerRule')) { localStorage.setItem('fold.layerRule', '1'); toast(t('layerRule')); }
       const events = F.stamp(state);
+      state.char = F.carried(events, state.char);   // vol. 3 ch. 10: the crane under your feet flew to its mirror cell, with you (same stack while closed; TODO figure repaint + toast when ch. 10 ships)
       lastStamp = events;
       if (events.length) {
         paintTiles();

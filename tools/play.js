@@ -83,7 +83,10 @@ function setAngle(target) {
   const before = reach().size;
   if (mode() === 'fold' && prevMode !== 'fold') {
     const ev = L.stamp(s);
-    say('book closed' + (ev.length ? ': ' + ev.map((e) => ({ door: 'the key opened the door', ink: 'the ink printed onto the facing page', glue: 'the glue pulled a stone across', bleed: 'the wet ink bled one ring outward (' + e.cells.length + ' squares)' })[e.type]).join(', ') : ''));
+    const was = s.char; s.char = L.carried(ev, s.char);   // ch. 10: the crane under you flew to the other page, with you
+    say('book closed' + (ev.length ? ': ' + ev.map((e) => ({ door: 'the key opened the door', ink: 'the ink printed onto the facing page', glue: 'the glue pulled a stone across', bleed: 'the wet ink bled one ring outward (' + e.cells.length + ' squares)',
+      crane: e.inked ? `the crane at col ${e.cells[0].c + 1}, row ${e.cells[0].r + 1} faced wet ink: it is soaked and will not fly again` : e.glued ? `the crane at col ${e.cells[0].c + 1}, row ${e.cells[0].r + 1} flew onto the glue at col ${e.cells[1].c + 1}: stuck there, plain paper now` : `the crane at col ${e.cells[0].c + 1}, row ${e.cells[0].r + 1} flew to col ${e.cells[1].c + 1} on the other page` })[e.type]).join(', ') : '') +
+      (s.char !== was ? ` — it carried you: you are on col ${s.char.c + 1}, row ${s.char.r + 1} (the other page) now` : ''));
   } else say(`book at ${angle}°`);
   if (L.isWin(s, mode())) won = true;
 }
