@@ -124,24 +124,59 @@ function sheet(lv) {
   out.push(`LEVEL ${levelNumber(i)} · ${lv.id} · 「${t.zh.name || ''}」 / ${t.en.name || ''} · tier ${lv.optional ? '暗信 (optional challenge)' : lv.tier}`);
   out.push(`line shown under the title: 「${t.zh.line || ''}」 / “${t.en.line || ''}”`);
   out.push(`board ${B.base.h} rows × 8 visible columns${three ? '. This letter has THREE pages: the third page is the back of the right leaf; it is not visible until you close the book and turn it over (view 5–6 below)' : ' (two pages)'}.`);
-  out.push('legend: @ you (start, paper)  . paper  - gap  x stone  k key  D locked door  o open door  i ink  I WET ink (bleeds a ring at every press)  p pop-up tab (stands as a bridge across the crease at 60°–120°)  g glue  A angle gate (floor only while the page leans 26°–89°)  G the letter (goal)');
+  out.push('legend: @ you (start, paper)  . paper  - gap  x stone  r LOOSE stone (rolls one square towards the crease each time the lifted page passes upright)  k key  D locked door  o open door  i ink  I WET ink (bleeds a ring at every press)  p pop-up tab (stands as a bridge across the crease at 60°–120°)  g glue  A angle gate (floor only while the page leans 26°–89°)  G the letter (goal)');
   const lamp = L.lampOf(B.base);
   out.push(`LAMP: ${lamp === 'LR' ? 'TWO lamps, one on each bank — right-page stones shade the left page AND left-page stones shade the lifted page' : lamp === 'L' ? 'on the LEFT bank — the flat left page\'s stones throw their shadows up onto the lifted page (columns 5–8); no shadow falls on the left page' : 'on the right bank (as in every level so far)'}.`);
   out.push('');
   const w0 = worldOf(B, 0, 0);
   out.push(...flat(w0, '== VIEW 1 · as the level opens: book flat (180°) =='));
   out.push('');
-  out.push(...leans(w0, '== VIEW 2 · leaning the right page (the page(s) the lamp shades). Reversible unless you are standing on a shadow or an open gate =='));
+  // vol. 3 ch. 9 (docs/design-vol3.md §4 ③): loose stones roll each time the page passes upright, so the board you lean on is
+  // the board after one pass, the board you lean on a second time (after flattening) is the board after three, and the
+  // board you close on is always the board after an odd number of passes. Print the chain until the stones settle.
+  const loose = lv.map.join('').includes('r');
+  const chain = [0];
+  if (loose) for (let g = 0, k = 1; k <= 5; k++) { const n = B.roll(g, 0, null); if (n === g) break; chain.push(n); g = n; }
+  const K = chain.length - 1, sig = (g) => B.grids[g].flat().join('');
+  if (loose) {
+    out.push(`LOOSE STONES: every time the lifted page passes upright (90°) — on the way to a lean, on the way back flat, on the way to a close, on the way open again — each loose stone on the right page rolls one square towards the hinge: onto paper it rolls, into a gap it drops and the gap is PAPER from then on (the stone is gone), against anything else (a stone, a door, ink, glue, her, the start, YOU standing in front of it) it stays. The views below assume you are in no stone's way; standing on the right page directly hinge-side of a loose stone holds it. The stones settle after ${K} pass${K === 1 ? '' : 'es'}.`);
+    out.push('');
+    for (let k = 1; k <= K; k++) {
+      const wk = worldOf(B, chain[k], 0);
+      out.push(...flat(wk, `== VIEW 2·${k} · after the page has passed upright ${k} time${k > 1 ? 's' : ''} (${k % 2 ? 'the page is lifted now' : 'the page is flat again'}) ==`));
+      if (k % 2 || k === K) { out.push(''); out.push(...leans(wk, `== VIEW 2·${k}b · leaning on this board (${k % 2 ? `the lean that made pass ${k}` : `the next lean, pass ${k + 1}, rolls nothing more`}) ==`)); }
+      out.push('');
+    }
+  } else {
+    out.push(...leans(w0, '== VIEW 2 · leaning the right page (the page(s) the lamp shades). Reversible unless you are standing on a shadow or an open gate =='));
+    out.push('');
+  }
+  // closing: from flat the close is itself a pass (board after 1 pass is pressed); after a lean-and-back it is pass 3, …
+  const pressFrom = loose ? chain[Math.min(1, K)] : 0;
+  const g1 = B.press(pressFrom, 0), w1 = worldOf(B, g1, 0), wp = worldOf(B, pressFrom, 0);
+  out.push(loose ? '== VIEW 3 · closing the book (0°) from flat: the close passes upright first (pass 1), then presses ==' : '== VIEW 3 · closing the book (0°) from this spread ==');
+  out.push(...closed(wp, w1, 'closing'));
   out.push('');
-  const g1 = B.press(0, 0), w1 = worldOf(B, g1, 0);
-  out.push('== VIEW 3 · closing the book (0°) from this spread ==');
-  out.push(...closed(w0, w1, 'closing'));
-  out.push('');
+  if (loose) {
+    const seen = new Set([sig(pressFrom)]);
+    for (let k = 3; k <= K + 1; k += 2) {
+      const gk = chain[Math.min(k, K)]; if (seen.has(sig(gk))) continue; seen.add(sig(gk));
+      const gq = B.press(gk, 0);
+      out.push(`== VIEW 3·${k} · closing after the page has passed upright ${k} times (lean, back flat, … then close) ==`);
+      out.push(...closed(worldOf(B, gk, 0), worldOf(B, gq, 0), 'closing'));
+      out.push('');
+    }
+  }
   if (g1 !== 0 && w1.grid.flat().join('') !== w0.grid.flat().join('')) {
-    out.push(...flat(w1, '== VIEW 4 · opened again after that close: the board as it now is =='));
+    if (loose) {
+      const go = B.roll(g1, 0, null), wo = worldOf(B, go, 0);
+      out.push(...leans(w1, '== VIEW 4a · opened PARTWAY after that close (a lean: no pass, the stones stay where the press left them) =='));
+      out.push('');
+      out.push(...flat(wo, '== VIEW 4 · opened FLAT after that close: opening passes upright once more, the loose stones roll again =='));
+    } else out.push(...flat(w1, '== VIEW 4 · opened again after that close: the board as it now is =='));
     out.push('');
-    out.push(...leans(w1, '== VIEW 4b · leaning after the close (the stones that moved cast new shadows) =='));
-    out.push('');
+    if (!loose) out.push(...leans(w1, '== VIEW 4b · leaning after the close (the stones that moved cast new shadows) =='));
+    if (!loose) out.push('');
     const g1b = B.press(g1, 0);
     // wet ink (ch. 7): every press grows the ink, so print the board after a second and a third close too (the player
     // can close / undo as often as they like); the route between the closes is what the sheet cannot show
@@ -201,6 +236,7 @@ RULES (everything you know)
 - WET INK (I): walkable like ink, but it has not dried. At EVERY press (a close, a turn of the closed book), before anything else, every wet square spreads one ring into the GAP and GLUE squares beside it on its own page (paper, stones, doors, the hinge and the page edge stop it; glue it covers is spoiled and pulls nothing). Then it prints, like ink, onto the gap facing it — and what it prints is wet too. So each close grows the ink one ring on both pages; a gap you were going to cross on a shadow may be paper by then (a shadow over paper carries no one), and the ink never dries or shrinks.
 - LAMP POSITION (chapter 8 「灯位」; the sheet says where the lamp is): with the lamp on the LEFT bank the shadows go the other way — every stone on the flat LEFT page throws its shadow UP onto the lifted page (columns 5–8) in its row; the shadow starts beside the hinge and slides OUTWARD towards column 8 as the book closes (at 0° it reaches the stone's mirror square, col 9−c; a stone at col 1 shades col 6 at 60° and col 7 at 45°–30°, a stone at col 4 shades col 5 at 60°–30°), and no shadow falls on the left page. Rides on the lifted page work the same way: a shadow over a gap carries you; when the lean ends (closing past 26°, or opening past 89°) you fall. With TWO lamps both sets of shadows exist at once. A stone that changes page (glue) changes which page its shadow falls on.
 - ANGLE GATE (A): a paper flap over a gap. It stands = it is floor ONLY while the page leans (physical 26°–89°, the same window in which shadows exist). Flat (> 89°) or closed it is a gap: you cannot step on it, a closed stack with a gate on one side is open only if the other side is paper, and if you are standing on a gate when the lean ends you fall (back to the start). Ink does not print onto it, wet ink does not bleed into it.
+- LOOSE STONE (r, chapter 9 「滚」): a stone that is not glued down. It blocks, shades and crushes like a stone. Every time the lifted (right) page passes upright — the hinge crosses 90° in either direction: leaning from flat is one pass, leaning back flat is another, closing from flat is one, opening flat after a close is one more; opening only partway (to a lean) after a close is none — every loose stone on the right page rolls ONE square towards the hinge (col 8 → 7 → 6 → 5; at col 5 it stops). Onto paper it rolls (its old square is paper). Into a gap it DROPS and fills it: that gap is paper from then on and the stone is gone (a bridge). Against anything else — a stone, a loose stone that cannot move, a door, ink, glue, a key, her square, the start square, or YOU standing on the square in front of it — it stays. The stone nearest the hinge rolls first, so a line of loose stones rolls together. Stones on the flat left page never roll. The roll happens BEFORE anything else in the same hinge move: before the shadows at the new angle are cast, before the press (so a close presses the board AFTER the roll: crushes, stacks and glue are judged on the rolled board), and the shadow a loose stone casts moves with it. Glue that pulls a loose stone holds it: it becomes a fixed stone.
 - THREE-PAGE letters only: the third page is the back of the right leaf. With the book CLOSED and you standing on the LEFT page you may TURN the book over: the third page now faces the left page (columns 5–8 show the third page). Turning is a press too (keys/ink/glue between left and third page act; a third-page stone over your square crushes you — then the whole level restarts). Turn again to come back to the right page (another press). The letter may lie on the third page.
 - Undo exists in the game, but THIS test is one shot.
 

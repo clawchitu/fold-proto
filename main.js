@@ -142,10 +142,10 @@
   function paintTiles() {
     cells.forEach((row, r) => row.forEach((el, c) => {
       const t = F.at(state, c, r);
-      const kind = { '-': 'empty', '.': 'floor', S: 'floor', G: 'goal', x: 'stone', k: 'key', D: 'door', o: 'open', i: 'ink', I: 'wet', p: 'pop', g: 'glue', A: 'gate' }[t];
+      const kind = { '-': 'empty', '.': 'floor', S: 'floor', G: 'goal', x: 'stone', r: 'loose', k: 'key', D: 'door', o: 'open', i: 'ink', I: 'wet', p: 'pop', g: 'glue', A: 'gate' }[t];
       if (el.dataset.kind === kind) return;
       el.dataset.kind = kind;
-      el.innerHTML = kind === 'empty' ? '' : `<div class="tile">${SVG[t === 'S' ? '' : t === 'I' ? 'i' : t === 'A' ? 'o' : t] || ''}</div>`;
+      el.innerHTML = kind === 'empty' ? '' : `<div class="tile">${SVG[t === 'S' ? '' : t === 'I' ? 'i' : t === 'A' ? 'o' : t === 'r' ? 'x' : t] || ''}</div>`;
     }));
   }
   function buildTabs() {
@@ -282,12 +282,25 @@
     sound.rustle(Math.abs(a - lastA) / dt * 16);
     lastA = a; lastT = now;
     clearTimeout(setAngle.quiet); setAngle.quiet = setTimeout(() => sound.rustle(0), 90);
+    const prevA = angle;
     angle = a;
     const next = F.modeOf(a);
+    if (state && F.passes(prevA, a)) rollStones();   // vol. 3: the lifted page passed upright — loose stones roll before the shadows are read
     if (!demo && state) updateShade();
     if (next !== mode) changeMode(mode, next);
     if (next === 'fold' && !demo) document.body.classList.remove('coach-fold');
     applyAngle();
+  }
+
+  // Loose stones (vol. 3 ch. 9): the page passed upright. Roll them, repaint, say what moved.
+  function rollStones() {
+    const events = F.roll(state);
+    if (!events.length) return;
+    paintTiles(); sound.slide();
+    events.forEach((e) => flash(cells[e.cells[1].r][e.cells[1].c]));
+    const last = events[events.length - 1];
+    toast(t(last.filled ? 'rolledIn' : 'rolled', { col: t('col', { c: last.cells[1].c + 1 }) }));
+    bus.emit('roll', events);
   }
 
   function changeMode(prev, next) {
@@ -535,7 +548,8 @@
 
   // chapter headings in the Levels sheet: first level index of each chapter (tools/check.js CHAPTER_START), its volume
   const CHAPTERS = [{ at: 0, vol: 1, ch: 1 }, { at: 5, ch: 2 }, { at: 13, ch: 3 }, { at: 19, ch: 4 }, { at: 25, vol: 2, ch: 5 },
-    { at: LEVELS.findIndex((l) => l.chapter === 6), ch: 6 }, { at: LEVELS.findIndex((l) => l.chapter === 7), ch: 7 }];
+    { at: LEVELS.findIndex((l) => l.chapter === 6), ch: 6 }, { at: LEVELS.findIndex((l) => l.chapter === 7), ch: 7 }, { at: LEVELS.findIndex((l) => l.chapter === 8), ch: 8 },
+    { at: LEVELS.findIndex((l) => l.chapter === 9), vol: 3, ch: 9 }];
   function openLevels() {
     ui.levelGrid.innerHTML = '';
     const head = (cls, text) => { const h = document.createElement('h3'); h.className = cls; h.textContent = text; ui.levelGrid.appendChild(h); };

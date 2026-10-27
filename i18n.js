@@ -87,9 +87,14 @@
       'letter.7.title': '左岸来信', 'letter.7.body': '墨还没干。\n我每合一次书，字就往你那边洇一圈——\n洇到页边，洇到背面。\n别等它干。合上来。', 'letter.7.sign': '——左岸', 'letter.7.end': '卷二《翻页》第三章完。\n下一章，灯换了岸。',
       'slip.wet.title': '墨晕', 'slip.wet.body': '这滴墨还没干。每合一次书，它往四周洇一格，也印到对面——印过去的也是湿的。合几次，墨就长几圈。', 'slip.wet.pic': '图：合一次，墨洇一圈，还差一格；再合一次，路接上了。',
       'ch.8.line': '灯挪到你那岸了。', 'paper.ch8': '信笺。灯在左边。', 'chHead.8': '八 · 灯位', 'pre.lamp': '灯位', gate: '活页门', gateOpen: '门立起来了', gateDown: '门趴下了', 'lampSide.L': '灯在左岸', 'lampSide.LR': '两盏灯都亮着',
-      'letter.8.title': '右岸来信', 'letter.8.body': '我把灯挪到你那岸了。\n这样你每举起一页，落在上面的都是我这边的影子。\n两盏灯一起亮的时候，影子会在同一页上遇见。\n信翻完了。灯留给你。', 'letter.8.sign': '——右岸', 'letter.8.end': '卷二《翻页》完。\n卷三，把纸举到灯前。',
+      'letter.8.title': '右岸来信', 'letter.8.body': '我把灯挪到你那岸了。\n这样你每举起一页，落在上面的都是我这边的影子。\n两盏灯一起亮的时候，影子会在同一页上遇见。\n信翻完了。灯留给你。', 'letter.8.sign': '——右岸', 'letter.8.end': '卷二《翻页》完。\n卷三，把书立起来。',
       'slip.lamp.title': '灯位', 'slip.lamp.body': '灯挪到左边了。现在是平放那页的石头，把影子投到你举起来的页上——贴着铰链起，越合越往外。', 'slip.lamp.pic': '图：斜起，左页石头的影子落在右页缺口上；再合一点，影子往外滑，把人带到她那格。',
       'slip.gate.title': '活页门', 'slip.gate.body': '一片纸折的门。页斜起来它才立着，能走；放平或合上，它就趴回缺口里。站在上面的时候别让它趴下。', 'slip.gate.pic': '图：斜起，门立起来；站在门上放平，人掉下去；再斜起，走过门到她。',
+      // vol. 3 「倾」 · chapter 9 「滚」 (docs/design-vol3.md, docs/design-ch9.md): card paper, the loose stone, the ninth letter
+      'vol.3': '卷三', 'chHead.9': '九 · 滚', 'ch.9.line': '书立起来，什么都往折痕滚。', 'paper.ch9': '硬卡纸。立得住。', 'pre.roll': '松石',
+      'kind.r': '松石', 'noun.r': '松石', rolled: '松石滚到了{col}', rolledIn: '松石掉进缺口，那里是纸了', rollHeld: '你挡住了松石',
+      'letter.9.title': '左岸来信', 'letter.9.body': '我过不去，就把东西送过去。\n书立起来的时候，什么都往低处滚——\n低处是折痕，折痕是你。\n别接，让它滚到底。', 'letter.9.sign': '——左岸', 'letter.9.end': '卷三《倾》第一章完。\n下一章，石头太重了。',
+      'slip.roll.title': '松石', 'slip.roll.body': '一颗没粘住的石头。书每立起来一次——经过 90°，不用合上——它就往折痕滚一格；滚进缺口，缺口就成了纸。它不会滚回来。', 'slip.roll.pic': '图：斜起，石头滚了一格；放平，它掉进缺口，缺口成了桥。',
       'letter.6.title': '右岸来信', 'letter.6.body': '你翻过来了。\n我在这一页等了很久，久到字都写到了背面。\n不要紧——合上的时候，\n哪一面对着你，由你定。', 'letter.6.sign': '——右岸', 'letter.6.end': '卷二《翻页》第二章完。\n背面还有字。',
     },
 
@@ -167,9 +172,14 @@
       'letter.7.title': 'A Letter from the Left Bank', 'letter.7.body': 'The ink is not dry.\nEach time I close the book the words bleed a ring towards you —\nto the margin, through to the back.\nDon’t wait for it to dry. Close the book.', 'letter.7.sign': '— the Left Bank', 'letter.7.end': 'End of Book Two, chapter three.\nNext, the lamp changes banks.',
       'slip.wet.title': 'Wet Ink', 'slip.wet.body': 'This blot has not dried. Every time the book closes it bleeds one square outward and prints onto the facing page — and the print is wet too. Close twice, it grows two rings.', 'slip.wet.pic': 'Picture: one close, one ring, one square short; a second close, and the road joins.',
       'ch.8.line': 'The lamp is on your bank now.', 'paper.ch8': 'Letter paper. The lamp is on the left.', 'chHead.8': '8 · The Lamp', 'pre.lamp': 'the lamp', gate: 'paper gate', gateOpen: 'the gate stands', gateDown: 'the gate lies down', 'lampSide.L': 'lamp on the left bank', 'lampSide.LR': 'both lamps lit',
-      'letter.8.title': 'A Letter from the Right Bank', 'letter.8.body': 'I have moved the lamp to your bank.\nNow every page you lift carries a shadow from my side.\nWhen both lamps are lit, the shadows meet on the same page.\nThe letter is turned to its last page. Keep the lamp.', 'letter.8.sign': '— the Right Bank', 'letter.8.end': 'End of Book Two, Turning the Page.\nBook Three: hold the paper up to the lamp.',
+      'letter.8.title': 'A Letter from the Right Bank', 'letter.8.body': 'I have moved the lamp to your bank.\nNow every page you lift carries a shadow from my side.\nWhen both lamps are lit, the shadows meet on the same page.\nThe letter is turned to its last page. Keep the lamp.', 'letter.8.sign': '— the Right Bank', 'letter.8.end': 'End of Book Two, Turning the Page.\nBook Three: stand the book up.',
       'slip.lamp.title': 'The Lamp', 'slip.lamp.body': 'The lamp has moved to the left. Now the stones on the flat page throw their shadows onto the page you lift — starting at the hinge, sliding outward as you close.', 'slip.lamp.pic': 'Picture: leaning, the left page’s stone shades a gap on the right page; closing a little more, the shadow slides outward and carries her to the letter.',
       'slip.gate.title': 'Paper Gate', 'slip.gate.body': 'A door folded from paper. It stands only while the page leans — then it is floor. Flat or closed, it lies back down into the gap. Do not be standing on it when it does.', 'slip.gate.pic': 'Picture: leaning, the gate stands; flattening while standing on it, she falls; leaning again, she walks through to the letter.',
+      // vol. 3 「倾」 · chapter 9 「滚」 (docs/design-vol3.md, docs/design-ch9.md)
+      'vol.3': 'Book Three', 'chHead.9': '9 · Roll', 'ch.9.line': 'Stand the book up and everything rolls to the crease.', 'paper.ch9': 'Card. It stands on its own.', 'pre.roll': 'loose stone',
+      'kind.r': 'loose stone', 'noun.r': 'loose stone', rolled: 'the loose stone rolled to {col}', rolledIn: 'the loose stone dropped into the gap: paper now', rollHeld: 'you are holding the loose stone',
+      'letter.9.title': 'A Letter from the Left Bank', 'letter.9.body': 'I cannot cross, so I send things over.\nWhen the book stands, everything rolls to the low place —\nthe low place is the crease, and the crease is you.\nDon’t catch it. Let it roll all the way.', 'letter.9.sign': '— the Left Bank', 'letter.9.end': 'End of Book Three, chapter one.\nNext, the stones are too heavy.',
+      'slip.roll.title': 'Loose Stone', 'slip.roll.body': 'A stone that is not glued down. Each time the book stands up — past 90°, no need to close — it rolls one square towards the crease; into a gap, and the gap is paper. It never rolls back.', 'slip.roll.pic': 'Picture: leaning, the stone rolls one square; flat again, it drops into the gap and the gap is a bridge.',
       'letter.6.title': 'A Letter from the Right Bank', 'letter.6.body': 'You turned the page.\nI waited on this one so long the writing ran onto the back.\nNever mind — when the book is shut,\nwhich face is towards you is yours to choose.', 'letter.6.sign': '— the Right Bank', 'letter.6.end': 'End of Book Two, chapter two.\nThere is more on the back.',
     },
 
@@ -247,9 +257,14 @@
       'letter.7.title': '左岸からの手紙', 'letter.7.body': '墨はまだ乾いていない。\n本を閉じるたび、字はきみのほうへひとまわり滲む——\n頁の端まで、裏まで。\n乾くのを待たないで。閉じて。', 'letter.7.sign': '——左岸より', 'letter.7.end': '第二巻『頁をめくる』第三章 了。\n次の章で、灯が岸を変える。',   // TODO ja review
       'slip.wet.title': '滲み', 'slip.wet.body': 'この墨はまだ乾いていない。本を閉じるたびに四方へ一枡滲み、向かいにも写る——写ったほうも濡れている。閉じた回数だけ、墨は広がる。', 'slip.wet.pic': '図：一度閉じるとひとまわり滲み、あと一枡届かない。もう一度閉じると道がつながる。',   // TODO ja review
       'ch.8.line': '灯をきみの岸へ移した。', 'paper.ch8': '便箋。灯は左に。', 'chHead.8': '八 · 灯', 'pre.lamp': '灯の位置', gate: '紙の扉', gateOpen: '扉が立った', gateDown: '扉が倒れた', 'lampSide.L': '灯は左岸に', 'lampSide.LR': '二つの灯がともる',   // TODO ja review
-      'letter.8.title': '右岸からの手紙', 'letter.8.body': '灯をきみの岸へ移した。\nこれで、きみが頁を持ち上げるたび、そこに落ちるのはこちら側の影。\n二つの灯がともるとき、影は同じ頁で出会う。\n手紙は最後の頁までめくった。灯は、きみに。', 'letter.8.sign': '——右岸より', 'letter.8.end': '第二巻『頁をめくる』 了。\n第三巻、紙を灯にかざして。',   // TODO ja review
+      'letter.8.title': '右岸からの手紙', 'letter.8.body': '灯をきみの岸へ移した。\nこれで、きみが頁を持ち上げるたび、そこに落ちるのはこちら側の影。\n二つの灯がともるとき、影は同じ頁で出会う。\n手紙は最後の頁までめくった。灯は、きみに。', 'letter.8.sign': '——右岸より', 'letter.8.end': '第二巻『頁をめくる』 了。\n第三巻、本を立てて。',   // TODO ja review
       'slip.lamp.title': '灯の位置', 'slip.lamp.body': '灯が左へ移った。いまは平らな頁の石が、持ち上げた頁に影を落とす——綴じ目から始まり、閉じるほど外へ滑る。', 'slip.lamp.pic': '図：傾けると左頁の石の影が右頁の隙間に落ちる。さらに閉じると影が外へ滑り、彼女の枡へ運ぶ。',   // TODO ja review
       'slip.gate.title': '紙の扉', 'slip.gate.body': '紙を折った扉。頁を傾けているあいだだけ立ち、歩ける。平らにするか閉じると、隙間へ倒れる。その上に立ったまま倒さないこと。', 'slip.gate.pic': '図：傾けると扉が立つ。扉の上で平らにすると落ちる。もう一度傾け、扉を抜けて彼女へ。',   // TODO ja review
+      // vol. 3 chapter 9 (drafts, TODO ja review)
+      'vol.3': '第三巻', 'chHead.9': '九 · 転', 'ch.9.line': '本を立てると、なにもかも折り目へ転がる。', 'paper.ch9': '厚紙。ひとりで立つ。', 'pre.roll': '転がる石',
+      'kind.r': '転がる石', 'noun.r': '転がる石', rolled: '石が{col}へ転がった', rolledIn: '石が隙間に落ちて、そこは紙になった', rollHeld: 'きみが石を止めている',
+      'letter.9.title': '左岸からの手紙', 'letter.9.body': '渡れないなら、ものを送る。\n本を立てると、なにもかも低いほうへ転がる——\n低いほうは折り目、折り目はきみ。\n受け止めないで。最後まで転がして。', 'letter.9.sign': '——左岸より', 'letter.9.end': '第三巻『傾』第一章 了。\n次の章、石は重すぎる。',
+      'slip.roll.title': '転がる石', 'slip.roll.body': '糊づけされていない石。本を立てるたび——90° を越えれば、閉じなくても——折り目へ一枡転がる。隙間に落ちれば、そこは紙になる。戻ってはこない。', 'slip.roll.pic': '図：傾けると石が一枡転がる。平らに戻すと隙間に落ち、隙間は橋になる。',
       'letter.6.title': '右岸からの手紙', 'letter.6.body': 'めくってくれたね。\nこの頁で長く待ちすぎて、字が裏まで続いた。\nかまわない——閉じたとき、\nどちらの面がきみに向くかは、きみが決める。', 'letter.6.sign': '——右岸より', 'letter.6.end': '第二巻『頁をめくる』第二章 了。\n裏にも、まだ字がある。',
     },
 
@@ -327,9 +342,14 @@
       'letter.7.title': '왼쪽 강가에서 온 편지', 'letter.7.body': '먹이 아직 마르지 않았다.\n책을 닫을 때마다 글이 네 쪽으로 한 겹 번진다.\n여백까지, 뒷면까지.\n마르기를 기다리지 마. 닫아 줘.', 'letter.7.sign': '— 왼쪽 강가에서', 'letter.7.end': '제2권 《페이지를 넘기다》 제3장 끝.\n다음 장에서 등불이 강가를 바꾼다.',   // TODO ko review
       'slip.wet.title': '번짐', 'slip.wet.body': '이 먹은 아직 마르지 않았어요. 책을 닫을 때마다 사방으로 한 칸 번지고, 맞은편에도 찍혀요. 찍힌 쪽도 젖어 있어요. 닫은 횟수만큼 먹이 자라요.', 'slip.wet.pic': '그림: 한 번 닫으면 한 겹 번지고 한 칸이 모자라요. 한 번 더 닫으면 길이 이어져요.',   // TODO ko review
       'ch.8.line': '등불을 네 강가로 옮겼어.', 'paper.ch8': '편지지. 등불은 왼쪽에.', 'chHead.8': '8장 · 등불', 'pre.lamp': '등불의 자리', gate: '종이 문', gateOpen: '문이 섰어요', gateDown: '문이 누웠어요', 'lampSide.L': '등불은 왼쪽 강가에', 'lampSide.LR': '두 등불이 켜져 있어요',   // TODO ko review
-      'letter.8.title': '오른쪽 강가에서 온 편지', 'letter.8.body': '등불을 네 강가로 옮겼어.\n이제 네가 페이지를 들어 올릴 때마다, 거기 떨어지는 건 내 쪽의 그림자야.\n두 등불이 함께 켜질 때, 그림자는 같은 페이지에서 만나.\n편지는 마지막 장까지 넘겼어. 등불은 네게 둘게.', 'letter.8.sign': '— 오른쪽 강가에서', 'letter.8.end': '제2권 《페이지를 넘기다》 끝.\n제3권, 종이를 등불에 비추어.',   // TODO ko review
+      'letter.8.title': '오른쪽 강가에서 온 편지', 'letter.8.body': '등불을 네 강가로 옮겼어.\n이제 네가 페이지를 들어 올릴 때마다, 거기 떨어지는 건 내 쪽의 그림자야.\n두 등불이 함께 켜질 때, 그림자는 같은 페이지에서 만나.\n편지는 마지막 장까지 넘겼어. 등불은 네게 둘게.', 'letter.8.sign': '— 오른쪽 강가에서', 'letter.8.end': '제2권 《페이지를 넘기다》 끝.\n제3권, 책을 세워 봐.',   // TODO ko review
       'slip.lamp.title': '등불의 자리', 'slip.lamp.body': '등불이 왼쪽으로 옮겨 갔어요. 이제 평평한 페이지의 돌이, 들어 올린 페이지에 그림자를 드리워요. 경첩에서 시작해 닫을수록 바깥으로 미끄러져요.', 'slip.lamp.pic': '그림: 기울이면 왼쪽 면 돌의 그림자가 오른쪽 면 틈에 떨어져요. 조금 더 닫으면 그림자가 바깥으로 미끄러져 그녀를 편지까지 데려가요.',   // TODO ko review
       'slip.gate.title': '종이 문', 'slip.gate.body': '종이를 접어 만든 문. 페이지를 기울이는 동안에만 서 있고, 그때만 걸을 수 있어요. 평평하게 펴거나 닫으면 틈으로 다시 누워요. 그 위에 서 있을 때 눕히지 마세요.', 'slip.gate.pic': '그림: 기울이면 문이 서요. 문 위에서 펴면 떨어져요. 다시 기울여 문을 지나 그녀에게.',   // TODO ko review
+      // vol. 3 chapter 9 (drafts, TODO ko review)
+      'vol.3': '제3권', 'chHead.9': '9장 · 구르기', 'ch.9.line': '책을 세우면 모든 게 접힌 금으로 굴러가요.', 'paper.ch9': '두꺼운 종이. 혼자 서 있어요.', 'pre.roll': '구르는 돌',
+      'kind.r': '구르는 돌', 'noun.r': '구르는 돌', rolled: '돌이 {col:으로} 굴러갔어요', rolledIn: '돌이 틈에 떨어져 거기는 종이가 됐어요', rollHeld: '네가 돌을 막고 있어요',
+      'letter.9.title': '왼쪽 강가에서 온 편지', 'letter.9.body': '건널 수 없으니, 물건을 보낼게.\n책을 세우면 모든 게 낮은 곳으로 굴러가——\n낮은 곳은 접힌 금, 접힌 금은 너야.\n받지 마. 끝까지 구르게 둬.', 'letter.9.sign': '— 왼쪽 강가에서', 'letter.9.end': '제3권 《기울다》 1장 끝.\n다음 장, 돌이 너무 무거워.',
+      'slip.roll.title': '구르는 돌', 'slip.roll.body': '풀로 붙이지 않은 돌. 책을 세울 때마다——90°를 넘으면, 닫지 않아도——접힌 금 쪽으로 한 칸 굴러가요. 틈에 떨어지면 틈은 종이가 돼요. 다시 굴러오지 않아요.', 'slip.roll.pic': '그림: 기울이면 돌이 한 칸 굴러요. 다시 펴면 틈에 떨어지고, 틈은 다리가 돼요.',
       'letter.6.title': '오른쪽 강가에서 온 편지', 'letter.6.body': '네가 페이지를 넘겼구나.\n이 페이지에서 너무 오래 기다려 글이 뒷면까지 이어졌다.\n괜찮아. 책을 닫았을 때\n어느 면이 너를 향할지는 네가 정하니까.', 'letter.6.sign': '— 오른쪽 강가에서', 'letter.6.end': '제2권 《페이지를 넘기다》 제2장 끝.\n뒷면에 글이 더 있다.',
     },
   };

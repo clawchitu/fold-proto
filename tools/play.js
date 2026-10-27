@@ -45,7 +45,7 @@ function render() {
     }
     rows.push(line);
   }
-  rows.push('legend: @ you  . paper  - gap  ░ shadow over a gap (walkable while it lasts; it carries you when the hinge moves)  ▒ shadow over paper (a shadow over paper is just paper: it does not carry you)  x stone  k key  D locked door  o open door  i ink  p tab  g glue  G the letter');
+  rows.push('legend: @ you  . paper  - gap  ░ shadow over a gap (walkable while it lasts; it carries you when the hinge moves)  ▒ shadow over paper (a shadow over paper is just paper: it does not carry you)  x stone  r LOOSE stone (rolls one square towards the crease each time the lifted page passes upright; into a gap it drops and fills it)  k key  D locked door  o open door  i ink  p tab  g glue  G the letter');
   if (mode() === 'fold') {
     rows.push(`closed: the ${s.face ? 'third' : 'right'} page lies ON TOP of the left page (the 8-column print above is only the unfolded map). Stacks (walk and step by STACK column 1–4; each cell = upper page / left page):`);
     rows.push('        1       2       3       4');
@@ -70,6 +70,7 @@ function setAngle(target) {
   const a0 = fold(), a1 = 180 - target, step = a1 > a0 ? 5 : -5;
   let src = null, prevMode = mode(), carriedFrom = null;
   for (let a = a0 + step; step > 0 ? a <= a1 : a >= a1; a += step) {
+    if (L.passes(a - step, a)) for (const e of L.roll(s)) say(`the lifted page passed upright: the loose stone at col ${e.cells[0].c + 1}, row ${e.cells[0].r + 1} rolled to col ${e.cells[1].c + 1}` + (e.filled ? ' and dropped into the gap there: that square is paper now (the stone is gone)' : ''));
     const onShadow = !L.isFloor(L.at(s, s.char.c, s.char.r));
     if (onShadow) { if (src == null) src = L.shadows(s, a - step).get(s.char.c + ',' + s.char.r) ?? null; } else src = null;
     const cause = L.crushCause(s, s.char, a);

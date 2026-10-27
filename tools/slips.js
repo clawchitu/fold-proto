@@ -101,6 +101,16 @@ const SLIPS = [
       { angle: 120 },                             // lean again
       { walk: [3, 1] }, { win: true },            // through the lower gate onto her paper square
     ] },
+  { id: 'roll', level: '9-1', tile: 'r',                      // vol. 3 ch. 9 「滚」 (docs/design-ch9.md §5)
+    map: ['--G--.rS', '--------'],
+    beats: [
+      { step: [-1, 0], blocked: 'stone' },        // the loose stone is a wall, like any stone
+      { angle: 100, rolled: [[6, 0], [5, 0]] },   // physical 80°: the page passed upright — the stone rolled one square towards the crease
+      { angle: 0, rolled: [[5, 0], [4, 0]] },     // back flat: it passed upright again — the stone dropped into the gap, which is paper now
+      { walk: [4, 0] },                           // across the bridge it made
+      { angle: 180 },                             // close (the third pass rolls nothing: the stone is gone)
+      { walkStack: [2, 0] }, { win: true },       // the stack with her on the left and the filled gap above
+    ] },
   { id: 'wet', level: '7-1', tile: 'I',
     map: ['S--I----', '-G------'],
     beats: [
@@ -130,10 +140,12 @@ function run(slip) {
     if (b.angle !== undefined) {
       // sweep in 5° steps so shadows carry (ride) and the close crushes as in the game
       const from = angle, dir = Math.sign(b.angle - from);
-      let crushed = false, events = [];
+      let crushed = false, events = [], rolled = [];
       for (let a = from; dir && a !== b.angle;) {
+        const prevA = a;
         a = dir > 0 ? Math.min(b.angle, a + 5) : Math.max(b.angle, a - 5);
         const prevMode = mode(), before = sh(); angle = a;
+        if (F.passes(prevA, a)) rolled.push(...F.roll(s));   // vol. 3: the lifted page passed upright, loose stones roll
         if (F.crushed(s, s.char, angle)) { crushed = true; break; }
         const here = F.at(s, s.char.c, s.char.r);
         if (!F.isFloor(here)) {
@@ -148,7 +160,8 @@ function run(slip) {
       if (crushed) { s.char = { ...s.start }; angle = 180; log.push('crushed, back to the start'); }
       if (b.stamp && !events.some((e) => e.type === b.stamp)) fail(`expected a ${b.stamp} stamp at fold ${b.angle}`);
       if (b.shadowAt && !sh().has(b.shadowAt.join(','))) fail(`no shadow at ${b.shadowAt} at fold ${b.angle} (${[...sh().keys()]})`);
-      log.push(`fold ${angle}${b.stamp ? ' · ' + b.stamp : ''}${b.shadowAt ? ' · shadow at ' + b.shadowAt : ''}`);
+      if (b.rolled && !rolled.some((e) => e.cells[0].c === b.rolled[0][0] && e.cells[0].r === b.rolled[0][1] && e.cells[1].c === b.rolled[1][0] && e.cells[1].r === b.rolled[1][1])) fail(`expected a loose stone to roll ${b.rolled[0]} → ${b.rolled[1]} on the way to fold ${b.angle}`);
+      log.push(`fold ${angle}${b.stamp ? ' · ' + b.stamp : ''}${b.shadowAt ? ' · shadow at ' + b.shadowAt : ''}${b.rolled ? ' · stone rolled to ' + b.rolled[1] + (rolled.some((e) => e.filled) ? ' (into the gap: paper now)' : '') : ''}`);
     }
     if (b.flip) {
       const why = F.flipBlock(s, angle); if (why) fail(`cannot turn: ${why}`);

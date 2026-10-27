@@ -129,3 +129,45 @@ console.log('logic tests passed');
   assert.deepStrictEqual(s.grid.map((r) => r.join('')), before, 'saturated ink is idempotent');
 }
 console.log('wet ink tests passed');
+// Loose stones (vol. 3 ch. 9 「滚」): roll() moves every loose stone on the lifted (facing) page one cell towards the crease.
+{
+  const s = mk(['S---.-rr',     // a train: the stone nearest the crease rolls first, so both move
+                '----..rx',     // a fixed stone behind a loose one: only the loose one rolls
+                '-----r--',     // into a gap: it drops and fills it
+                '----r---',     // beside the crease: nowhere lower
+                'r---.G.r']);   // left-page loose stones never roll; her square stops a stone
+  const ev = L.roll(s);
+  assert.deepStrictEqual(s.grid.map((r) => r.join('')), ['S---..r.', '----.r.x', '----..--', '----r---', 'r---.Gr.'],
+    'row 0: the front stone drops into the gap, the one behind rolls onto its square; row 1: the loose stone rolls, the fixed one stays; row 2: the gap is paper, the stone gone; row 3: no move; row 4: the left-page stone stays, the right one rolls up to her square');
+  assert.strictEqual(ev.length, 5);
+  assert.ok(ev.some((e) => e.filled && e.cells[1].c === 4 && e.cells[1].r === 2), 'the drop into the gap is flagged');
+  assert.strictEqual(L.roll(s).length, 2, 'a second pass: row 0 and row 1 roll once more; the rest is settled');
+  assert.deepStrictEqual(s.grid[0].join(''), 'S---.r..');
+}
+{
+  // the figure holds a stone by standing crease-side of it; a stone's roll is judged against the figure's cell
+  const s = mk(['----.Sr-']);
+  assert.deepStrictEqual(L.roll(s), [], 'held: she stands in front of it');
+  s.char = { c: 4, r: 0 };
+  assert.strictEqual(L.roll(s).length, 0, 'she stepped aside, but the start square is her home: it stops a stone too');
+}
+{
+  const t = mk(['---S..r-']);
+  L.roll(t); assert.strictEqual(t.grid[0].join(''), '---S.r.-');
+  L.roll(t); assert.strictEqual(t.grid[0].join(''), '---Sr..-', 'rolled to the crease-side column');
+  L.roll(t); assert.strictEqual(t.grid[0].join(''), '---Sr..-', 'and stays there');
+  assert.strictEqual(L.passes(85, 90), true); assert.strictEqual(L.passes(90, 95), false); assert.strictEqual(L.passes(90, 85), true); assert.strictEqual(L.passes(0, 180), true);
+  // a loose stone blocks, shades and crushes like a stone; glue holds it as a fixed stone
+  const u = mk(['.S..-..r', 'g---..-r']);
+  assert.strictEqual(L.cellBlock(u, 7, 0, 'open'), 'stone');
+  assert.deepStrictEqual([...L.shadows(u, 140).keys()].sort(), ['1,0', '1,1']);
+  assert.strictEqual(L.crushCause(u, { c: 0, r: 0 }, 180), 'stone');
+  L.stamp(u);
+  assert.strictEqual(u.grid[1].join(''), 'x---..-.', 'the glue took the loose stone and holds it: a fixed stone now');
+  // after the turn, the third page's loose stones roll and the right page's do not
+  const v = mk(['S---.-r-' + '-.r-']);
+  v.face = 1;
+  L.roll(v);
+  assert.strictEqual(v.grid[0].join(''), 'S---.-r-' + '-r.-', 'the facing (third) page rolled; the right page, on the back of the leaf, did not');
+}
+console.log('loose stone tests passed');

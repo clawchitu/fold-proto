@@ -1,6 +1,6 @@
 // Reversal hunt (design-ch7.md §8): hill-climb from a hand seed with gen.js fitness PLUS a structural predicate that states the level's expectation reversal (e.g. the turn fires a glue that takes a left stone; a glue becomes a stone before the ink ring reaches it). Boards that fail the predicate never enter the archive; the final ranking drops noise > 1. node tools/hunt.js <name> <seconds> <seed>
 'use strict';
-const P = require('path').join(__dirname, '..') + '/';   // run from anywhere: node tools/hunt.js <pocket|through|taken|twolamps> <seconds> <seed>
+const P = require('path').join(__dirname, '..') + '/';   // run from anywhere: node tools/hunt.js <pocket|through|taken|twolamps|jump|hold|late|order|settle> <seconds> <seed>
 const L = require(P + 'logic.js'), C = require(P + 'tools/check.js'), G = require(P + 'tools/gen.js');
 const [name, secs, seedN] = [process.argv[2], +process.argv[3] || 300, +process.argv[4] || 1];
 const T = {
@@ -32,6 +32,42 @@ const T = {
         for (let r = 0; r < a.length; r++) for (let c = 0; c < 4; c++) if (a[r][c] === 'x' && b[r][c] !== 'x') turnGlue = true; }
       for (const s of st) if (s.face === 1 && G_posture(s.a) === 'lean' && !L.isFloor(L.at(X.B.world(s.g, s.face), s.c, s.r))) rideT = true;
       return [turnGlue, rideT, m.needsFlip, m.needsLamp, m.needsGlue, m.phases >= 2, m.closes >= 1]; } },
+  // ---- vol. 3 ch. 9 「滚」 (docs/design-ch9.md): one predicate per reversal ----
+  jump: { rows: 4, pages: 2, lamp: null, tiles: '.-xr', par: 3, closes: 1, minpar: 2, need: 'roll+shade', elements: 6, minlen: 11, phases: 0, backs: 0,
+    seed: ['-----G.-', '-.-S.--.', '.--..---', '-.-....r'],
+    pred: (m, X) => { // the solution walks or rides a shadow that the DRAWN board does not cast at that angle: the stone rolled a column before the shadow appeared
+      let jump = false; for (const s of X.states) { if (G_posture(s.a) !== 'lean' || L.isFloor(L.at(X.B.world(s.g, s.face), s.c, s.r))) continue;
+        const src = X.B.shadowsAt(s.g, s.face, s.a).get(s.c + ',' + s.r); if (src == null || src === 'A') continue;
+        if (!L.shadows(X.B.world(0, s.face), s.a).has(s.c + ',' + s.r)) jump = true; }
+      return [jump, m.needsRoll, m.needsShade, m.closes <= 1]; } },
+  hold: { rows: 4, pages: 2, lamp: null, tiles: '.-xr', par: 3, closes: 1, minpar: 2, need: 'roll', elements: 6, minlen: 11, phases: 0, backs: 0,
+    seed: ['----..r-', '..-...r-', '----S-.G', '-.-.----'],
+    pred: (m, X) => { // at some pass of the solution the figure stands crease-side of a loose stone and holds it: the roll with her there differs from the roll without her
+      let held = false; const st = X.states; for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (p.face !== s.face || p.a === s.a || !L.passes(p.a, s.a) || !L.isRight(p.c)) continue;
+        if (X.B.roll(p.g, p.face, { c: p.c, r: p.r }) !== X.B.roll(p.g, p.face, null)) held = true; }
+      return [held, m.needsRoll, (m.rolls || 0) >= 2]; } },
+  late: { rows: 5, pages: 2, lamp: null, tiles: '.-xr', par: 4, closes: 2, minpar: 3, need: 'roll', elements: 8, minlen: 15, phases: 0, backs: 1,
+    seed: ['----S-r-', '.--..xx-', 'x---...r', '.x--r-.-', '---G----'],
+    pred: (m, X) => { // the solution closes from a square the DRAWN board marks as crushed (a loose stone over it): the roll of the same sweep moves the stone off it first
+      let late = false; const st = X.states; for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (s.face !== p.face || G_posture(s.a) !== 'fold' || G_posture(p.a) === 'fold') continue;
+        const w0 = { ...X.B.world(p.g, p.face), char: { c: p.c, r: p.r } }; if (L.crushed(w0, { c: p.c, r: p.r }, L.FOLD_MIN)) late = true; }
+      return [late, m.needsRoll, m.closes >= 1, (m.rolls || 0) >= 2]; } },
+  order: { rows: 5, pages: 2, lamp: null, tiles: '.-xrg', par: 4, closes: 2, minpar: 3, need: 'roll+glue', elements: 8, minlen: 15, phases: 1, backs: 0,
+    seed: ['Sg-x-.rr', 'x.-.---.', '----.r..', '--.--x--', '--G-----'],
+    pred: (m, X) => { // a glue that faces NOTHING on the board you close from takes a stone at the press: the roll of the same sweep put one in front of it (roll comes before glue)
+      let late = false; const st = X.states; for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (s.face !== p.face || G_posture(s.a) !== 'fold' || G_posture(p.a) === 'fold') continue;
+        const g0 = X.B.G[p.g], g1 = X.B.G[s.g]; for (let r = 0; r < g0.length; r++) for (let c = 0; c < 4; c++) if (g0[r][c] === 'g' && !L.isOpaque(g0[r][L.mirror(c)]) && g1[r][c] === 'x') late = true; }
+      return [late, m.needsRoll, m.needsGlue, m.closes >= 1]; } },
+  settle: { rows: 5, pages: 2, lamp: null, tiles: '.-xrg', par: 5, closes: 2, minpar: 4, need: 'roll', elements: 9, minlen: 18, phases: 1, backs: 1,
+    seed: ['.x.-...-', '..-..xr-', 'rx--S-gG', 'gr----.r', '.--.-.--'],
+    pred: (m, X) => { // the pass you do not see: a lean that comes back (two passes, no press) is on the solution, or the opening after a close rolls a stone the closed walk relied on
+      const st = X.states, hinge = []; for (let i = 1; i < st.length; i++) if (st[i].a !== st[i - 1].a && st[i].face === st[i - 1].face) hinge.push(i);
+      let fro = false, openRoll = false;
+      for (let k = 0; k < hinge.length; k++) { const i = hinge[k], p = st[i - 1], s = st[i];
+        if (L.passes(p.a, s.a) && G_posture(p.a) === 'fold' && X.B.roll(p.g, p.face, { c: p.c, r: p.r }) !== p.g) openRoll = true;
+        const j = hinge[k + 1]; if (j == null) continue; const q = st[j - 1], t = st[j];
+        if (L.passes(p.a, s.a) && L.passes(q.a, t.a) && G_posture(s.a) !== 'fold' && G_posture(p.a) !== 'fold' && G_posture(t.a) !== 'fold') fro = true; }
+      return [fro || openRoll, m.needsRoll, (m.rolls || 0) >= 2, (m.fills || 0) >= 1, m.before, m.closes >= 1]; } },
 };
 const G_posture = C.posture;
 const t = T[name]; if (!t) throw new Error('name');

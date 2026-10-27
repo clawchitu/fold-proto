@@ -119,6 +119,10 @@ nav button:hover, .presets button:hover { background: rgba(0, 0, 0, .05); color:
   background: linear-gradient(160deg, #d3ccbf, #b9b1a3); border-radius: 32%; cursor: default;
   box-shadow: 0 2px 0 rgba(0, 0, 0, .08), 0 12px 18px -10px rgba(50, 35, 20, .6);
 }
+.cell[data-kind="loose"] .tile {   /* vol. 3: a loose stone is round (a stone is square-ish); high contrast: dots vs the stone's hatching */
+  background: radial-gradient(circle at 38% 32%, #e0d9cc, #b3aa9a 70%); border-radius: 50%; cursor: default;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, .08), 0 12px 18px -10px rgba(50, 35, 20, .6);
+}
 .cell[data-kind="door"] .tile { background: #3a3835; cursor: default; }
 .cell[data-kind="open"] .tile { outline: 1.5px dashed var(--accent); outline-offset: -5px; }
 .cell[data-kind="pop"] .tile { background: linear-gradient(90deg, var(--card) 70%, #fbe6dd); }
