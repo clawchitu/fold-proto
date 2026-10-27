@@ -485,13 +485,13 @@ const LEVELS = [
     ],
   },
   {
-    id: 'pocket', tier: 'hard', chapter: 7, backs: 1, phases: 2, needs: ['needsFold', 'needsWet'],   // 7-5 · the first ring opens the road up the right page to column 6, row 2 — the square on the back of the left page's stone. Close there and you stand inside a blocked stack; one step left is a stack whose right half is still a gap, so it puts you down in the pocket (left page). The pocket has no opening: lean to 30° and the stone's shadow lies on the gap beside her. Hand-drawn (J17; (0,3) stone stops the ink climbing column 1 from the bottom prints, which let a five-close brute force walk the stacks to her): len 15, wrong 8, phases 2, backs 1, idle 70%; the stone at (1,2) seals the pocket's side so three or four closes cannot grow a way in — the ring reaches column 6, row 2 at the fourth press and the window stack is then paper on both halves
+    id: 'pocket', tier: 'hard', chapter: 7, phases: 2, needs: ['needsFold', 'needsShade', 'needsRide', 'needsWet'],   // 7-5 · v4 (retune 2026-10-27, after the owner's playtest: 7-4's reversal held, everything else was cleared in one pass). 7-4 taught "ink spoils glue". Here the blot (7,2) is TWO squares from the glue (6,1), so the player reads the glue as dead and the (6,1) square as the paper doorway to her — close once, walk the stacks to the bottom-right ink, open, walk up. But the glue fires at the first press, before the ring arrives: the stone it pulls lands ON the doorway, and the ring that reaches (6,1) at the second press stops against it. Her only door is (4,1), entered from the (3,1)|(4,1) stack — so: close at the start (the stack walk crosses pages three times, through the right-edge prints and the (0,0)|(7,0) window that the second press shuts: before), lean to 50° at the top-left: the glued stone's NEW shadow (made) lies at (2,1) past the hole it left at (1,1); ride it to 80° onto (3,1), step to the island (3,2), close again and walk the stack to her door. Hunt from a hand seed (pred: glue fires before the ring, the glue-dead reading has its own shorter route, the real solution differs; glueFires but not needsGlue — the glue-dead board is solvable, that is the point): len 17, wrong 10, dead 41% / 1 basin, before, made, ride, phases 2, idle 68%, noise 1 (the (2,4) stone: a stone's back for the first close, decorative). A (2,0) paper variant (idle 60%) lets you walk onto the shadow at 80° without the ride — kept as a gap
     map: [
-      'G-----x-',
-      '-.x--.--',
-      '-x--..--',
-      'x---.x-S',
-      '----.I-.',
+      '..-.xx.-',
+      '-x--.Gg-',
+      '-.-.--.I',
+      '.-.---.-',
+      '.-x-S.-.',
     ],
   },
   {
