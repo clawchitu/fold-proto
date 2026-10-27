@@ -558,6 +558,70 @@ const LEVELS = [
       '-.-xS-.I..-.',
     ],
   },
+  // ---- vol. 3 「倾」 · Chapter 9 「滚」 (docs/design-vol3.md, docs/design-ch9.md): card paper. The loose stone `r` rolls one cell towards the crease
+  // each time the lifted page passes upright (the hinge crosses 90°, closed or not); into a gap it drops and the gap is paper. Levels 9-1…9-7.
+  {
+    id: 'roll', tier: 'teach', chapter: 9, needs: ['needsRoll'],   // 9-1 · teaching · lean: the page passes upright and the loose stone rolls into the gap beside you — walk across to her. No close needed
+    map: [
+      '----G-rS',
+      '--------',
+    ],
+  },
+  {
+    id: 'twice', tier: 'easy', chapter: 9, needs: ['needsRoll'],   // 9-2 · a lean that comes back is two passes: the stone is two squares from the gap beside you. Lean (it rolls one), flatten (it drops into the gap): the bridge to her is there without a close — and closing then opening would have been the same two passes
+    map: [
+      '-----.r-',
+      '----S-.G',
+    ],
+  },
+  {
+    id: 'jump', tier: 'mid', chapter: 9, needs: ['needsFold', 'needsShade', 'needsRoll'],   // 9-3 · the shadow is where the stone WILL be: on the way to 50° the page passes upright and the far stone (7,3) rolls to (6,3), so its shadow falls on (2,3) — the gap you need — not on the paper at (1,3) the drawn stone would shade. Walk (3,2) over the near stone's shadow, down to (2,3), across to (1,3); flatten and close (passes 2 and 3 bring the far stone to (4,3)) and the stacks lead to her. hunt.js jump (seed 9): len 14, wrong 10, made, switches 3, noise 1 (the (5,1) stone drops into (4,1) at the first pass: visible, irrelevant)
+    map: [
+      '-S..--xG',
+      '---.-r-.',
+      '.---r---',
+      '-.-....r',
+    ],
+  },
+  {
+    id: 'hold', tier: 'mid', chapter: 9, needs: ['needsFold', 'needsRoll'],   // 9-4 · your body holds a stone: stand at (5,0), crease-side of the upper loose stone, and lean and flatten — the LOWER stone rolls two squares to the crease while the upper one waits behind you; then step down to (6,1), close, and the stacks lead to her. Stand anywhere else and the upper stone rolls to (5,0)…(4,0) and walls the corridor. hunt.js hold (seed 10) #1, the left-page loose stone removed: len 13, wrong 11, rolls 3, noise 1
+    map: [
+      '-x-...r-',
+      '......r-',
+      '----.--.',
+      '.---S-G-',
+    ],
+  },
+  {
+    id: 'late', tier: 'hard', chapter: 9, backs: 1, needs: ['needsFold', 'needsShade', 'needsRoll'],   // 9-5 · the crush map is the rolled board's, and so is the shadow map: at 60° the square (3,2) is shaded by the FAR stone — (7,2) after its roll to (6,2) — not by the near one (5,2 → 4,2, one square from the crease: no shadow yet at 60°). Stand on that shadow and close: the drawn board says the near stone comes down on you; the far stone's shadow carries you one square out, onto (2,2), and the near stone lands beside you. The stack walk puts you on the right page; flatten (the far stone rolls on), close again on the left stone's back, and the bottom stacks lead to her. hunt.js late (seed 9) #1: len 15, wrong 12, backs 1, made, noise 1 (the (6,0) stone: it drops into (5,0) at the first pass — visible, irrelevant)
+    map: [
+      '-..---rr',
+      '..-.--.-',
+      'Sx.-.r.r',
+      '-----.--',
+      '-.x.-.-G',
+    ],
+  },
+  {
+    id: 'order', tier: 'hard', chapter: 9, phases: 2, needs: ['needsFold', 'needsGlue', 'needsRoll'],   // 9-6 · the roll comes before the glue in the same close (7-4's reversal, on the hinge path): the glue at (2,0) faces paper, so it reads as dead; the glue at (1,0) faces the fixed stone (6,0) and takes it at the first close — and that opens the lane for the loose stone (7,0), which rolls to (6,0) on the way open and to (5,0) on the way to the SECOND close, where the "dead" glue takes it. Only then is the top stack (2,0)|(5,0) a wall that makes the stack walk land you on the right page's top corner, from which the bottom-right paper leads to her. hunt.js order (seed 9) #2, the left-page loose stone fixed as x (it never rolled): len 19, wrong 10, before, phases 2, rolls 3, fills 1, noise 0
+    map: [
+      '-ggS..xr',
+      '..-..-x-',
+      '---..-.-',
+      '.--x-.r.',
+      '---.---G',
+    ],
+  },
+  {
+    id: 'settle', tier: 'final', chapter: 9, phases: 1, needs: ['needsFold', 'needsShade', 'needsRide', 'needsGlue', 'needsRoll'],   // 9-7 · final · the glue (0,3) faces the loose stone (7,3): everyone who played chapter 5 expects the first close to take it. The roll comes first: on the way to the close the stone rolls to (6,3) and the glue takes nothing — it is the right page's glue (6,2) that fires, pulling the left stone (1,2) across (before: close anywhere first and that pull is spent in the wrong place). Walk the stacks to the left page's top corner, lean to 40°: the glued-in stone's new shadow (made) carries you down the left page; close from (3,4), walk the stacks to the right page's bottom row — and then OPEN FLAT: that opening is one more pass, and the far stone drops into (5,3), the last square of the road to her. Open only partway and the road never appears. gen.js E #1 (seed 95), the (1,0) stone stripped: len 21, wrong 12, before, made, ride, phases 1, rolls 2, fills 1, noise 1
+    map: [
+      '...-...-',
+      '..-..xr-',
+      'rx--S-gG',
+      'gr----.r',
+      '.--.-.--',
+    ],
+  },
 ];
 
 if (typeof module !== 'undefined') module.exports = LEVELS;

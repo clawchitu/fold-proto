@@ -49,8 +49,8 @@ const T = {
   late: { rows: 5, pages: 2, lamp: null, tiles: '.-xr', par: 4, closes: 2, minpar: 3, need: 'roll', elements: 8, minlen: 15, phases: 0, backs: 1,
     seed: ['----S-r-', '.--..xx-', 'x---...r', '.x--r-.-', '---G----'],
     pred: (m, X) => { // the solution closes from a square the DRAWN board marks as crushed (a loose stone over it): the roll of the same sweep moves the stone off it first
-      let late = false; const st = X.states; for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (s.face !== p.face || G_posture(s.a) !== 'fold' || G_posture(p.a) === 'fold') continue;
-        const w0 = { ...X.B.world(p.g, p.face), char: { c: p.c, r: p.r } }; if (L.crushed(w0, { c: p.c, r: p.r }, L.FOLD_MIN)) late = true; }
+      let late = false; const st = X.states; for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (s.face !== p.face || G_posture(s.a) !== 'fold' || !L.passes(p.a, s.a)) continue;   // a close from FLAT: the roll comes first
+        const w0 = { ...X.B.world(p.g, p.face), char: { c: p.c, r: p.r } }; if (L.isFloor(L.at(w0, p.c, p.r)) && L.crushed(w0, { c: p.c, r: p.r }, L.FOLD_MIN)) late = true; }   // standing on paper the drawn board marks crushed
       return [late, m.needsRoll, m.closes >= 1, (m.rolls || 0) >= 2]; } },
   order: { rows: 5, pages: 2, lamp: null, tiles: '.-xrg', par: 4, closes: 2, minpar: 3, need: 'roll+glue', elements: 8, minlen: 15, phases: 1, backs: 0,
     seed: ['Sg-x-.rr', 'x.-.---.', '----.r..', '--.--x--', '--G-----'],
@@ -105,7 +105,7 @@ while (Date.now() - t0 < secs * 1000) {
 }
 const top = [...archive.values()].sort((a, b) => b.f - a.f).slice(0, 40);
 for (const x of top) { const r = G.roles(mk(x.map), x.m); x.F = x.f - 4 * r.noise - 0.8 * r.irrelevant; x.r = r; }
-top.sort((a, b) => b.F - a.F); const top2 = top.filter((x) => x.r.noise <= 1); top.length = 0; top.push(...top2);
+top.sort((a, b) => b.F - a.F); const top2 = top.filter((x) => x.r.noise <= 1); const top3 = top2.length ? top2 : top.filter((x) => x.r.noise <= 2); top.length = 0; top.push(...top3);   // fall back to noise ≤ 2 (a decoy can be stripped by hand)
 console.log(`// hunt ${name} seed ${seedN}: ${n} evals, ${archive.size} kept`);
 for (const x of top.slice(0, 6)) { console.log(x.map.map((r) => "      '" + r + "',").join('\n')); const m = x.m;
   console.log(`  // par ${m.par} steps ${m.steps} len ${m.len} closes ${m.closes} flips ${m.flips || 0} | wrong ${m.wrong} first ${m.firstWrong} | dead ${m.deadFrac} basins ${m.deadEnds} | before ${+m.before} made ${+m.made} ride ${+m.ride} | phases ${m.phases} backs ${m.backs} switches ${m.stackSwitches} | noise ${x.r.noise} irrelevant ${x.r.irrelevant} decoys ${x.r.decoys.join(' ')} | F ${x.F.toFixed(1)}\n  // ${m.solution}\n`); }
