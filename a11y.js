@@ -8,7 +8,12 @@
   const I = window.I18N, { t } = I;
   const KIND = (tile) => t('kind.' + (tile === 'S' ? '.' : tile));
   const NOUN = (tile) => t('noun.' + (tile === 'S' ? '.' : tile));
-  const pos = (c, r) => t('pos', { r: r + 1, c: c + 1 });
+  // ch. 12: on a trifold, positions are MAP columns (1–12: left | right | third page), the columns the hints count in
+  const pos = (c, r) => t('pos', { r: r + 1, c: (G.mapCol ? G.mapCol(c, r) : c) + 1 });
+  const W = () => F.vw(G.state);   // visible columns: 12 on a trifold lying open, else 8
+  const tri = () => F.trifold(G.state);
+  // ch. 12, face 3: which layer of the folded leaf a visible right-page square shows
+  const layer = (c, r) => (tri() && G.state.face === 3 && c >= N ? t(F.colOf(G.state, c, r) < 2 * N ? 'tri.layerHole' : 'tri.layerThird') : '');
   const DIR = { '-1,0': 'left', '1,0': 'right', '0,-1': 'up', '0,1': 'down' };
   const lvName = (i) => I.level(G.levels[i].id).name;
   // English sentences start with a capital; a no-op for the CJK scripts
@@ -84,7 +89,7 @@
 
   let busyUntil = 0;
   function cellsByX(r) {
-    return [...Array(2 * N).keys()].map((c) => ({ c, x: spot(c, r).x })).sort((a, b) => a.x - b.x || a.c - b.c);
+    return [...Array(W()).keys()].map((c) => ({ c, x: spot(c, r).x })).sort((a, b) => a.x - b.x || a.c - b.c);
   }
   function scanRow(r) {
     say(rowWords(r));
@@ -99,7 +104,7 @@
   // the board in words, row by row (Shift+L; L reads one row): what a sighted player sees, in the current posture
   function rowWords(r) {
     const st = G.state, fold = G.mode === 'fold', bits = [];
-    for (let c = 0; c < (fold ? N : st.w); c++) {
+    for (let c = 0; c < (fold ? N : W()); c++) {
       const top = fold ? F.mirror(c) : c, under = c;
       const tl = F.at(st, top, r), bl = F.at(st, under, r), shaded = !fold && G.shade.has(c + ',' + r);
       let w;
@@ -109,6 +114,7 @@
       } else {
         if (tl === '-' && !shaded) continue;
         w = tl === '-' ? t('kindShadow') : KIND(tl);
+        if (layer(c, r)) w += ' (' + layer(c, r) + ')';
       }
       const ch = st.char, here = ch.r === r && (fold ? F.proj(ch.c) === c : ch.c === c);
       bits.push(t('col', { c: c + 1 }) + ' ' + w + (here ? t('sep') + t('hereYou') : ''));
@@ -117,7 +123,9 @@
   }
   function readBoard(rows) {
     const st = G.state, fold = G.mode === 'fold', a = Math.round(G.angle);
-    const head = fold ? t('book.closed') + t('sep') + t('foldedCols') : a === 0 ? t('book.opened') : t(a >= F.SHADE_MIN ? 'book.lean' : 'book.open', { a });
+    let head = fold ? t('book.closed') + t('sep') + t('foldedCols') : a === 0 ? t('book.opened') : t(a >= F.SHADE_MIN ? 'book.lean' : 'book.open', { a });
+    if (tri() && st.face === 2) head = t('tri.flapView', { a });   // ch. 12: the third page on its own crease
+    else if (tri() && st.face === 3) head = t('tri.foldedView') + t('sep') + head;
     say(head + t('semi') + rows.map(rowWords).join(t('semi')));
   }
   function scanAll() {
@@ -158,6 +166,7 @@
     let kind = shaded && !F.isFloor(tl) ? t('kindShadow') : KIND(tl);
     if (tl === 'p' && mode === 'pop') kind = t('kindTabUp');
     const parts = [pos(c, r), kind];
+    if (layer(c, r)) parts.push(layer(c, r));   // ch. 12: the folded leaf — third page on top, or the right page through a hole
     const ch = st.char;
     if (ch.c === c && ch.r === r) parts.push(t('hereYou'));
     else if (mode === 'fold' && ch.c === m && ch.r === r) parts.push(t('hereStack'));
@@ -193,7 +202,7 @@
       const row = document.createElement('div');
       row.setAttribute('role', 'row');
       gcells.push([]);
-      for (let c = 0; c < st.w; c++) {
+      for (let c = 0; c < W(); c++) {
         const el = document.createElement('div');
         el.setAttribute('role', 'gridcell');
         el.tabIndex = -1;
@@ -203,7 +212,7 @@
       }
       gridEl.appendChild(row);
     }
-    gridEl.setAttribute('aria-rowcount', st.h); gridEl.setAttribute('aria-colcount', st.w);
+    gridEl.setAttribute('aria-rowcount', st.h); gridEl.setAttribute('aria-colcount', W());
     focus = { ...st.char };
     relabel(); place();
   }
@@ -228,7 +237,7 @@
   }
   function focusCell(c, r) {
     const st = G.state;
-    c = Math.max(0, Math.min(st.w - 1, c)); r = Math.max(0, Math.min(st.h - 1, r));
+    c = Math.max(0, Math.min(W() - 1, c)); r = Math.max(0, Math.min(st.h - 1, r));
     focus = { c, r };
     gcells.flat().forEach((el) => (el.tabIndex = -1));
     gcells[r][c].tabIndex = 0; gcells[r][c].focus();
@@ -246,7 +255,7 @@
     if (mv && e.shiftKey) { e.preventDefault(); return G.step(mv[0], mv[1]); }
     if (mv) { e.preventDefault(); return focusCell(c + mv[0], r + mv[1]); }
     if (e.key === 'Home') { e.preventDefault(); return focusCell(0, e.ctrlKey ? 0 : r); }
-    if (e.key === 'End') { e.preventDefault(); return focusCell(G.state.w - 1, e.ctrlKey ? G.state.h - 1 : r); }
+    if (e.key === 'End') { e.preventDefault(); return focusCell(W() - 1, e.ctrlKey ? G.state.h - 1 : r); }
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); G.tap(c, r); }
   });
 
@@ -285,6 +294,7 @@
     saidAngle = a;
     const parts = [];
     if (p.mode) {
+      if (tri() && G.state.face === 2) parts.push(t('tri.layerThird'));   // ch. 12: the hinge in view is the third page's
       if (mode === 'fold') parts.push(t('book.closed'));
       else if (mode === 'pop') parts.push(t(G.tabs.length ? 'book.popBridge' : 'book.pop', { a }));
       else if (a === 0) parts.push(t('book.opened'));
@@ -315,12 +325,14 @@
     const lv = I.level(G.levels[G.index].id), st = G.state, g = goalCell();
     $('#bb-flip').hidden = st.pages < 3;   // 「翻」 only in books with a third page (vol. 2 ch. 6)
     buildGrid(); rebase(); pend = newPend(); saidAngle = Math.round(G.angle);
-    intro = t('intro', { n: G.index + 1, name: lv.name, line: lv.line, you: pos(st.char.c, st.char.r), goal: g ? pos(g.c, g.r) : t('elsewhere') });
+    intro = t('intro', { n: G.index + 1, name: lv.name, line: lv.line, you: pos(st.char.c, st.char.r), goal: g ? pos(g.c, g.r) : t('elsewhere') }) + (tri() ? ' ' + t('tri.help') : '');
     if (!G.angle) { say(intro); intro = null; }      // otherwise said once the book has swung open
     const ae = document.activeElement;
     if (gridActive && (!ae || ae === document.body || ae.closest('[hidden]') || gridEl.contains(ae))) setTimeout(() => focusCell(st.char.c, st.char.r), 30);
   });
   bus.on('layout', place);
+  // ch. 12: a crease was switched (or the letter laid flat again): the visible columns changed — rebuild the grid, keep focus
+  bus.on('view', () => { const had = gridActive && gridEl.contains(document.activeElement); buildGrid(); rebase(); if (had) { const ch = G.state.char; focusCell(Math.max(0, ch.c), ch.r); } });
   bus.on('angle', () => {
     place();
     if (opts.audio) G.sound.pan(Math.max(-0.85, Math.min(0.85, Math.cos((G.angle * Math.PI) / 180) * 0.85)));
@@ -369,7 +381,7 @@
   });
   bus.on('blocked', ({ c, r, why, dc, text }) => {
     const st = G.state, s = sfx();
-    const pc = Math.max(0, Math.min(st.w - 1, c));
+    const pc = Math.max(0, Math.min(W() - 1, c));
     if (s) s.thud(panOf(pc, Math.max(0, Math.min(st.h - 1, r))));
     if (text) return;                       // main.js showed the reason as a toast, which is announced
     if (why === 'path') return say(t('cantReach'));
@@ -413,7 +425,9 @@
       if (dx) bits.push(t('goalSteps', { dir: t(dx > 0 ? 'dir.right' : 'dir.left'), n: Math.abs(dx) }));
       goal = t('goal', { opp: F.isRight(g.c) === F.isRight(ch.c) || G.mode === 'fold' ? '' : t('goalOpp'), bits: bits.join(t('sep')) || t('here') });
     }
-    say(t('where', { pos: pos(ch.c, ch.r), page: t(F.isRight(ch.c) ? (G.state.face ? 'thirdPage' : 'rightPage') : 'leftPage'), ways: ways.join(t('list')) || t('nowhere'), a: Math.round(G.angle), goal }));
+    const mc = G.mapCol ? G.mapCol(ch.c, ch.r) : ch.c;   // ch. 12: the page by map column (face 2 / 3 shift and layer it)
+    const page = tri() ? (mc < N ? 'leftPage' : mc < 2 * N ? 'rightPage' : 'thirdPage') : F.isRight(ch.c) ? (G.state.face ? 'thirdPage' : 'rightPage') : 'leftPage';
+    say((tri() && G.state.face === 2 ? cap(t('tri.flapView', { a: Math.round(G.angle) })) + t('semi') : '') + t('where', { pos: pos(ch.c, ch.r), page: t(page), ways: ways.join(t('list')) || t('nowhere'), a: Math.round(G.angle), goal }));
     if (gridActive) focusCell(ch.c, ch.r);
   }
 
@@ -433,6 +447,7 @@
       KeyF: () => G.foldBy(e.shiftKey ? -1 : 1),
       KeyC: () => G.foldTo(180), KeyO: () => G.foldTo(0),
       KeyT: () => G.flip(),
+      KeyP: () => G.crease(),   // ch. 12: switch between the book's crease and the third page's
       KeyH: () => G.hint(), KeyR: () => G.reset(),
       KeyU: () => doUndo(), KeyZ: () => doUndo(),
       KeyL: () => (e.shiftKey ? scanAll() : scanRow(gridEl.contains(document.activeElement) ? focus.r : G.state.char.r)),

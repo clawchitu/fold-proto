@@ -22,7 +22,21 @@
   const done = new Set(JSON.parse(localStorage.getItem('fold.done') || '[]'));
 
   let index = 0, state, angle = 0, mode = 'open', won = false;
-  let cells = [], charEl, tabs = [], walkTimer = null, tween = null;
+  let cells = [], els = [], charEl, tabs = [], walkTimer = null, tween = null;
+  // vol. 3 ch. 12 「三折」 (docs/design-ch12.md §1): a trifold's third page hangs off the right page's outer edge on a crease of
+  // its own. It is drawn as a child of the right page (so flat, it lifts with it: one rigid leaf) and swings on its own
+  // left edge while the book lies flat. `angle` is always the hinge IN VIEW: the book's, or (face 2) the third page's —
+  // logic.js reads face 2 as an ordinary book right | third, so every rule below applies unchanged.
+  const tri = () => !!state && F.trifold(state);
+  ui.third = document.createElement('div'); ui.third.className = 'page third'; ui.third.id = 'page-third'; ui.third.hidden = true;
+  ui.third.innerHTML = '<div class="light"></div>'; ui.right.appendChild(ui.third);
+  ui.crease = document.createElement('button'); ui.crease.id = 'btn-crease'; ui.crease.className = 'crease'; ui.crease.hidden = true;
+  ui.crease.setAttribute('aria-keyshortcuts', 'P'); ui.crease.setAttribute('aria-pressed', 'false');
+  $('#btn-flip').after(ui.crease);
+  ui.bbCrease = document.createElement('button'); ui.bbCrease.id = 'bb-crease'; ui.bbCrease.hidden = true; ui.bbCrease.setAttribute('aria-keyshortcuts', 'P');
+  $('#bb-flip').after(ui.bbCrease);
+  // the map column (0–11) behind a visible column — what the trifold's texts and hints count in
+  const mapCol = (c, r) => (!tri() ? c : c < 0 ? c + N : F.colOf(state, c, r));
   let shade = new Map(), shadowEls = new Map(), rideSrc = null;
 
   // ---------- sound: tiny WebAudio synth ----------
@@ -81,7 +95,8 @@
     const availH = window.innerHeight - document.querySelector('.top').offsetHeight -
       document.querySelector('.controls').offsetHeight - 40;
     const k = opts.big ? 0.15 : 0.35;                // page margin, in cells
-    const cell = Math.floor(Math.min(availW / (2 * N + 4 * k), availH / (h + 2 * k), opts.big ? 150 : 92));
+    const pages = state && F.trifold(state) ? 3 : 2;   // ch. 12: the third page lies beside the right page
+    const cell = Math.floor(Math.min(availW / (pages * N + 2 * pages * k), availH / (h + 2 * k), opts.big ? 150 : 92));
     document.documentElement.style.setProperty('--cell', cell + 'px');
     document.documentElement.style.setProperty('--pad-k', k);
     bus.emit('layout');
@@ -110,20 +125,26 @@
     // from chapter 3 the lamp is lit: a Lean preset (135°) lands where the shadows show (Half, 90°, casts none)
     $('#btn-lean').hidden = index < 13;
     // from chapter 6 the book has a third page: 「翻」 turns the closed book over (logic.js flip)
-    $('#btn-flip').hidden = state.pages < 3;
+    $('#btn-flip').hidden = state.pages < 3 || tri();
+    // ch. 12: the second crease — the 「第三页」 toggle switches which hinge the slider and the buttons drive
+    ui.crease.hidden = ui.bbCrease.hidden = !tri(); ui.third.hidden = !tri();
+    document.body.classList.toggle('trifold', tri());
+    ui.crease.setAttribute('aria-pressed', 'false'); ui.bbCrease.setAttribute('aria-pressed', 'false'); ui.crease.classList.remove('on');
     stopWalk();
-    for (const page of [ui.left, ui.right]) page.querySelectorAll('.cell, .char, .tab, .shadow').forEach((e) => e.remove());
+    for (const page of [ui.left, ui.right, ui.third]) page.querySelectorAll('.cell, .char, .tab, .shadow').forEach((e) => e.remove());
     shadowEls = new Map(); shade = new Map(); rideSrc = null;
-    // one cell per visible column: the right page shows whichever face of the leaf is turned towards the left page
-    cells = Array.from({ length: state.h }, (_, r) => Array.from({ length: 2 * N }, (_, c) => {
+    // one element per visible column: the right page shows whichever face of the leaf is turned towards the left page.
+    // Trifold: one element per MAP column (left | right | third page); viewCells() says which one each visible column is.
+    els = Array.from({ length: state.h }, (_, r) => Array.from({ length: tri() ? 3 * N : 2 * N }, (_, m) => {
       const el = document.createElement('div');
       el.className = 'cell';
-      el.style.setProperty('--x', c % N); el.style.setProperty('--y', r);
-      el.dataset.c = c; el.dataset.r = r;
-      el.addEventListener('click', () => onTap(c, r));
-      (c < N ? ui.left : ui.right).appendChild(el);
+      el.style.setProperty('--x', m % N); el.style.setProperty('--y', r);
+      el.dataset.c = m; el.dataset.r = r;
+      el.addEventListener('click', () => { const v = visOf(m); if (v != null) onTap(v, r); });
+      (m < N ? ui.left : m < 2 * N ? ui.right : ui.third).appendChild(el);
       return el;
     }));
+    viewCells();
     buildTabs();
     charEl = document.createElement('div');
     charEl.className = 'char';
@@ -140,7 +161,47 @@
     bus.emit('build');
   }
 
+  // ch. 12: visible column ↔ element. Face 0 shows all twelve map columns; face 2 (the third page on its own crease) shows the
+  // right page as the flat page and the third page as the lifted one; face 3 reads the folded leaf through the right page's squares.
+  function visOf(m) {
+    if (!tri()) return m;
+    if (state.face === 2) return m < N ? null : m - N;
+    if (state.face === 3) return m < 2 * N ? m : null;
+    return m;
+  }
+  function viewCells() {
+    if (!tri()) { cells = els; return; }
+    const w = F.vw(state), off = state.face === 2 ? N : 0;
+    cells = els.map((row) => Array.from({ length: w }, (_, v) => row[v + off]));
+  }
+  // the face changed (a crease was switched, a death laid the letter flat, undo): redraw what each element shows
+  function refreshView() {
+    document.body.dataset.face = state.face;
+    viewCells();
+    shadowEls.forEach((el) => el.remove()); shadowEls = new Map();
+    els.flat().forEach((el) => { delete el.dataset.kind; el.classList.remove('through'); });
+    shade = F.shadows(state, angle); rideSrc = null;
+    ui.third.hidden = !tri() || state.face === 3;
+    const flap = tri() && state.face === 2;
+    ui.crease.setAttribute('aria-pressed', String(flap)); ui.bbCrease.setAttribute('aria-pressed', String(flap));
+    ui.crease.classList.toggle('on', flap);
+    paintTiles(); buildTabs(); applyAngle(); placeChar(true);
+    bus.emit('view', { face: state.face });
+  }
+  const KIND = { '-': 'empty', '.': 'floor', S: 'floor', G: 'goal', x: 'stone', r: 'loose', k: 'key', D: 'door', o: 'open', i: 'ink', I: 'wet', p: 'pop', g: 'glue', A: 'gate', h: 'crane' };
+  function paintEl(el, t) {
+    const kind = KIND[t];
+    if (el.dataset.kind === kind) return;
+    el.dataset.kind = kind;
+    el.innerHTML = kind === 'empty' ? '' : `<div class="tile">${SVG[t === 'S' ? '' : t === 'I' ? 'i' : t === 'A' ? 'o' : t === 'r' ? 'x' : t] || ''}</div>`;
+  }
   function paintTiles() {
+    if (tri()) {
+      // face 2: the left page lies flat aside, out of reach — drawn as it is; face 3: the right leaf has two layers, and a
+      // square showing the right page through a hole of the third page is marked (.through)
+      if (state.face === 2) for (let r = 0; r < state.h; r++) for (let m = 0; m < N; m++) paintEl(els[r][m], state.grid[r][m]);
+      if (state.face === 3) cells.forEach((row, r) => row.forEach((el, c) => el.classList.toggle('through', c >= N && F.colOf(state, c, r) < 2 * N && F.at(state, c, r) !== '-')));
+    }
     cells.forEach((row, r) => row.forEach((el, c) => {
       const t = F.at(state, c, r);
       const kind = { '-': 'empty', '.': 'floor', S: 'floor', G: 'goal', x: 'stone', r: 'loose', k: 'key', D: 'door', o: 'open', i: 'ink', I: 'wet', p: 'pop', g: 'glue', A: 'gate', h: 'crane' }[t];
@@ -195,24 +256,30 @@
 
   function placeChar(instant) {
     const { c, r } = state.char;
-    const page = c < N ? ui.left : ui.right;
+    let page = c < N ? ui.left : ui.right, x = c % N;
+    if (tri() && state.face === 2) { page = c < 0 ? ui.left : c < N ? ui.right : ui.third; x = (c + N) % N; }   // the flap's view: right | third, the left page aside
+    else if (tri() && c >= 2 * N) { page = ui.third; x = c - 2 * N; }
     if (charEl.parentNode !== page) { page.appendChild(charEl); instant = true; }
     charEl.classList.toggle('instant', !!instant);
-    charEl.style.setProperty('--x', c % N); charEl.style.setProperty('--y', r);
+    charEl.style.setProperty('--x', x); charEl.style.setProperty('--y', r);
     if (!instant) { charEl.classList.remove('hop'); void charEl.offsetWidth; charEl.classList.add('hop'); }
   }
 
   function applyAngle() {
     const a = angle, rad = (a * Math.PI) / 180;
-    ui.right.style.transform = `rotateY(${-a}deg) translateZ(${-(a / 180) * 2}px)`;
+    // ch. 12: in the flap's view (face 2) the book lies flat and the third page turns on its own crease
+    const flap = tri() && state.face === 2, lifted = flap ? ui.third : ui.right, still = flap ? ui.right : ui.third;
+    lifted.style.transform = `rotateY(${-a}deg) translateZ(${-(a / 180) * 2}px)`;
+    still.style.transform = '';
     // the camera orbits a little mid-fold so the standing page faces you, and recentres when closed
-    const shift = (ui.left.offsetWidth / 2) * (1 - Math.cos(rad)) / 2;
+    const pw = ui.left.offsetWidth, shift = (pw / 2) * (1 - Math.cos(rad)) / 2 + (tri() && state.face !== 3 ? -pw / 2 : 0);   // ch. 12: three pages wide, centred
     ui.book.style.transform = `rotateX(16deg) translateX(${shift}px) rotateY(${24 * Math.sin(rad)}deg)`;
     // tracing paper: the closing page's paper turns see-through, its tiles stay solid
     const veil = a < 110 ? 1 : 1 - 0.62 * Math.min(1, (a - 110) / 70);
-    ui.right.style.backgroundColor = `rgba(247, 244, 238, ${veil.toFixed(3)})`;
-    ui.left.querySelector('.shade').style.opacity = (Math.sin(rad) * 0.55).toFixed(3);
-    ui.right.querySelector('.light').style.opacity = (Math.sin(rad) * 0.12).toFixed(3);
+    lifted.style.backgroundColor = `rgba(247, 244, 238, ${veil.toFixed(3)})`; still.style.backgroundColor = '';
+    ui.left.querySelector('.shade').style.opacity = flap ? '0' : (Math.sin(rad) * 0.55).toFixed(3);
+    lifted.querySelector('.light').style.opacity = (Math.sin(rad) * 0.12).toFixed(3);
+    still.querySelector('.light').style.opacity = '0';
     const pop = Math.max(0, Math.sin(rad)) * (a < 180 ? 1 : 0);
     tabs.forEach((t) => {
       t.style.transform = `rotateY(${-a / 2}deg)`;
@@ -237,7 +304,7 @@
       const [q, r] = key.split(',').map(Number);
       if (!el) {
         el = document.createElement('div'); el.className = 'shadow';
-        el.style.setProperty('--y', r); ui.left.appendChild(el); shadowEls.set(key, el);
+        el.style.setProperty('--y', r); (tri() && state.face === 2 ? ui.right : ui.left).appendChild(el); shadowEls.set(key, el);   // face 2: the right page is the flat page
       }
       el.style.setProperty('--x', q); el.style.setProperty('--squash', squash.toFixed(3));
       el.dataset.src = src;
@@ -250,7 +317,7 @@
     shade = F.shadows(state, angle);
     const { c, r } = state.char;
     const key = c + ',' + r;
-    if (F.crushed(state, state.char, angle)) return fall();
+    if (F.crushed(state, state.char, angle) || F.offBook(state, state.char, angle)) return fall();   // ch. 12: closed with the third page open, you on it
     if (!F.isFloor(F.at(state, c, r))) {
       if (rideSrc == null) rideSrc = before.get(key) ?? shade.get(key) ?? null;
       const to = F.ride(state, state.char, rideSrc, angle);
@@ -268,10 +335,16 @@
     sound.fall();
     charEl.classList.remove('fall'); void charEl.offsetWidth; charEl.classList.add('fall');
     // say why: the glue pulled the stone onto you, a stone came down on you, or the shadow you stood on slid away
-    const cause = F.crushCause(state, state.char, angle), text = t(cause === 'glue' ? 'crushedGlue' : cause ? 'crushed' : 'fell');
+    // ch. 12: 'off' — the book closed with the third page lying open; it swung out past the left page, with you on it
+    const cause = F.crushCause(state, state.char, angle), text = t(cause === 'off' ? 'fellOff' : cause === 'glue' ? 'crushedGlue' : cause ? 'crushed' : 'fell');
     toast(text);
     bus.emit('crush', { cause: cause || 'fell', text });
-    setTimeout(() => { state.char = { ...state.start }; charEl.classList.remove('fall'); placeChar(true); bus.emit('fall'); }, 260);
+    setTimeout(() => {
+      charEl.classList.remove('fall');
+      // a trifold starts again laid out flat (the start square may be under the folded third page, or in another view)
+      if (tri()) { cancelTween(); F.restart(state); angle = 0; mode = 'open'; refreshView(); bus.emit('fall'); return; }
+      state.char = { ...state.start }; placeChar(true); bus.emit('fall');
+    }, 260);
   }
 
   // ---------- fold angle ----------
@@ -283,6 +356,11 @@
     sound.rustle(Math.abs(a - lastA) / dt * 16);
     lastA = a; lastT = now;
     clearTimeout(setAngle.quiet); setAngle.quiet = setTimeout(() => sound.rustle(0), 90);
+    // ch. 12: the third page will not fold down onto a stone under your feet — the fold stops short, with a toast (not a death)
+    if (state && tri() && state.face === 2 && a >= F.FOLD_MIN && F.flapBlock(state)) {
+      a = F.FOLD_MIN - 5;
+      if (!setAngle.blocked) { setAngle.blocked = true; sound.nope(); const text = t('tri.blocked'); toast(text); bus.emit('blocked', { why: 'flap', reason: 'stone', text }); }
+    } else if (a < F.FOLD_MIN - 10) setAngle.blocked = false;
     const prevA = angle;
     angle = a;
     const next = F.modeOf(a);
@@ -300,7 +378,7 @@
     paintTiles(); sound.slide();
     events.forEach((e) => flash(cells[e.cells[1].r][e.cells[1].c]));
     const last = events[events.length - 1];
-    toast(t(last.filled ? 'rolledIn' : 'rolled', { col: t('col', { c: last.cells[1].c + 1 }) }));
+    toast(t(last.filled ? 'rolledIn' : 'rolled', { col: t('col', { c: mapCol(last.cells[1].c, last.cells[1].r) + 1 }) }));
     bus.emit('roll', events);
   }
 
@@ -308,10 +386,17 @@
     mode = next;
     if (next === 'fold') {
       sound.crease();
-      if (state.pages > 2 && !localStorage.getItem('fold.layerRule')) { localStorage.setItem('fold.layerRule', '1'); toast(t('layerRule')); }
+      if (state.pages > 2 && !tri() && !localStorage.getItem('fold.layerRule')) { localStorage.setItem('fold.layerRule', '1'); toast(t('layerRule')); }
       const events = F.stamp(state);
       const was = state.char; state.char = F.carried(events, state.char);   // vol. 3 ch. 10: the crane under your feet flew to its mirror cell, with you (the same stack while closed)
-      if (state.char !== was) { placeChar(true); toast(t('carried', { col: t('col', { c: state.char.c + 1 }) })); }
+      // ch. 12: the third page pressed down onto the right page. The solver (check.js flapOf) reads a folded flap as the folded
+      // leaf at once (face 3): you stand on its top layer, and there is no walking between the right and the third page. Stay in
+      // the flap's view but re-read the figure the same way, so opening the flap again matches the solver exactly.
+      if (tri() && state.face === 2) {
+        const out = F.flapOut(state, state.char, true);
+        if (out) { state.face = 3; state.char = F.flapIn(state, out); state.face = 2; placeChar(true); }
+      }
+      if (state.char !== was) { placeChar(true); toast(t('carried', { col: t('col', { c: mapCol(state.char.c, state.char.r) + 1 }) })); }
       lastStamp = events;
       if (events.length) {
         paintTiles();
@@ -366,13 +451,15 @@
     document.body.classList.remove('coach-tap');
     if (won) return;
     stopWalk();
+    if (tri() && state.face === 2 && mode === 'fold') { sound.nope(); const text = t('tri.walkFolded'); toast(text); bus.emit('blocked', { c, r, why: 'path', reason: 'folded', text }); return; }
+    if (tri() && state.face === 2 && state.char.c < 0) { sound.nope(); const text = t('tri.aside'); toast(text); bus.emit('blocked', { c, r, why: 'path', reason: 'aside', text }); return; }
     const target = { c, r };
     const path = F.findPath(state, target, mode, shade);
     if (!path) {
       sound.nope(); flash(cells[r][c], 'nope');
       const b = F.pathBlock(state, target, mode, shade) || { why: 'gap', c, r };
       const why = mode === 'fold' && b.why === 'stone' ? 'stoneTop' : mode === 'fold' && b.why === 'card' ? 'stoneUnder' : b.why;
-      const text = t('cantReachWhy', { why: t('why.' + why), pos: t('pos', { r: b.r + 1, c: b.c + 1 }) });
+      const text = t('cantReachWhy', { why: t('why.' + why), pos: t('pos', { r: b.r + 1, c: (mode === 'fold' ? b.c : mapCol(b.c, b.r)) + 1 }) });
       toast(text);
       bus.emit('blocked', { c, r, why: 'path', reason: b.why, text });
       return;
@@ -388,6 +475,7 @@
     sound.ensure();
     if (won || demo) return;
     stopWalk();
+    if (tri() && state.face === 2 && (mode === 'fold' || state.char.c < 0)) { sound.nope(); const text = t(mode === 'fold' ? 'tri.walkFolded' : 'tri.aside'); toast(text); bus.emit('blocked', { why: 'step', reason: 'flap', text }); return; }
     const ch = state.char, col = (p) => (mode === 'fold' ? F.proj(p.c) : p.c);
     const to = F.neighbours(state, ch, mode, shade).find((n) => col(n) === col(ch) + dc && n.r === ch.r + dr);
     if (!to) {
@@ -452,7 +540,7 @@
   // ---------- undo, stepped folding (no precision or timing needed) ----------
   let undoStack = [];
   function pushUndo() {
-    undoStack.push({ grid: state.grid.map((row) => row.slice()), char: { ...state.char }, angle, face: state.face });
+    undoStack.push({ grid: state.grid.map((row) => row.slice()), char: { ...state.char }, angle, face: state.face });   // ch. 12: face 2's angle is the third page's
     if (undoStack.length > 200) undoStack.shift();
   }
   function undo() {
@@ -463,7 +551,7 @@
     document.body.dataset.face = state.face;
     mode = F.modeOf(angle); shade = F.shadows(state, angle); rideSrc = null; won = false;
     ui.sheetWin.hidden = true; charEl.classList.remove('joy');
-    paintTiles(); buildTabs(); placeChar(true); applyAngle();
+    if (tri()) refreshView(); else { paintTiles(); buildTabs(); placeChar(true); applyAngle(); }
     bus.emit('undo');
     return true;
   }
@@ -478,6 +566,39 @@
     const tx = lvText(index);
     if (index === 0 && !opts.audio) playDemo(); else toast(tx.hint1 && hintRung++ === 0 ? tx.hint1 : tx.hint);
   }
+
+  // ---------- ch. 12: the second crease ----------
+  // 「第三页」: take hold of the other crease. Only one moves at a time — the third page only while the book lies flat, the
+  // book only while the third page lies flat or folded all the way onto the right page (logic.js flapIn / flapOut).
+  function switchCrease() {
+    sound.ensure();
+    if (won || demo || !tri()) return;
+    stopWalk(); cancelTween();
+    const no = (key) => { sound.nope(); const text = t(key); toast(text); bus.emit('blocked', { why: 'crease', reason: key, text }); };
+    if (state.face !== 2) {
+      if (angle > 3) return no('tri.bookFirst');
+      pushUndo();
+      const folded = state.face === 3;
+      state.char = F.flapIn(state, state.char); state.face = 2; angle = folded ? 180 : 0;
+    } else {
+      const folded = angle >= F.FOLD_MIN;
+      if (!folded && angle > 3) return no('tri.flapFirst');
+      const out = F.flapOut(state, state.char, folded);
+      if (!out) return no('tri.blocked');
+      pushUndo();
+      state.char = out; state.face = folded ? 3 : 0; angle = 0;
+    }
+    mode = F.modeOf(angle);
+    refreshView();
+    toast(t(state.face === 2 ? 'tri.onFlap' : state.face === 3 ? 'tri.onBookFolded' : 'tri.onBookFlat'));
+    bus.emit('crease', { face: state.face });
+    checkWin();
+  }
+  function creaseLabels() {
+    for (const b of [ui.crease, ui.bbCrease]) { b.textContent = t('pre.third'); b.setAttribute('aria-label', t('pre.thirdLabel')); }
+  }
+  ui.crease.onclick = switchCrease; ui.bbCrease.onclick = switchCrease;
+  creaseLabels();
 
   // ---------- onboarding (level 1): a ghost hand plays the level once, ~4 s, any tap skips ----------
   let demo = false, demoTimers = [], swallowClick = false;
@@ -552,7 +673,8 @@
   // chapter headings in the Levels sheet: first level index of each chapter (tools/check.js CHAPTER_START), its volume
   const CHAPTERS = [{ at: 0, vol: 1, ch: 1 }, { at: 5, ch: 2 }, { at: 13, ch: 3 }, { at: 19, ch: 4 }, { at: 25, vol: 2, ch: 5 },
     { at: LEVELS.findIndex((l) => l.chapter === 6), ch: 6 }, { at: LEVELS.findIndex((l) => l.chapter === 7), ch: 7 }, { at: LEVELS.findIndex((l) => l.chapter === 8), ch: 8 },
-    { at: LEVELS.findIndex((l) => l.chapter === 9), vol: 3, ch: 9 }, { at: LEVELS.findIndex((l) => l.chapter === 10), ch: 10 }, { at: LEVELS.findIndex((l) => l.chapter === 11), ch: 11 }];
+    { at: LEVELS.findIndex((l) => l.chapter === 9), vol: 3, ch: 9 }, { at: LEVELS.findIndex((l) => l.chapter === 10), ch: 10 }, { at: LEVELS.findIndex((l) => l.chapter === 11), ch: 11 },
+    { at: LEVELS.findIndex((l) => l.chapter === 12), ch: 12 }];
   function openLevels() {
     ui.levelGrid.innerHTML = '';
     const head = (cls, text) => { const h = document.createElement('h3'); h.className = cls; h.textContent = text; ui.levelGrid.appendChild(h); };
@@ -629,14 +751,14 @@
     get index() { return index; }, get won() { return won; }, get shade() { return shade; }, get demo() { return demo; },
     get lastStamp() { return lastStamp; }, get tabs() { return tabs; },
     cells: () => cells, levels: LEVELS,
-    tap: onTap, step: stepDir, foldBy, foldTo, flip: flipBook, undo, hint, go, layout, endDemo, toast,
+    tap: onTap, step: stepDir, foldBy, foldTo, flip: flipBook, crease: switchCrease, mapCol, undo, hint, go, layout, endDemo, toast,
     reset: () => go(index), canUndo: () => undoStack.length > 0,
   };
 
   // ---------- language: switch in place, keep the level, the angle and the moves ----------
   document.querySelectorAll('[data-lang]').forEach((b) => (b.onclick = () => window.I18N.setLang(b.dataset.lang)));
   window.I18N.onChange(() => {
-    header(); applyAngle();
+    header(); applyAngle(); creaseLabels();
     if (!ui.sheetWin.hidden || won) winTexts();
     if (!ui.sheetLevels.hidden) { const f = ui.levelGrid.contains(document.activeElement); openLevels(); if (f) ui.levelGrid.querySelector('.current')?.focus(); }
     ui.tilt.textContent = t(tiltOn ? 'tiltOn' : 'tilt');

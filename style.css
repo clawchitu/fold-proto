@@ -424,3 +424,35 @@ body.hc[data-face="1"] .page.right::after { display: none; }
 .presets .flip { font-weight: 600; }
 @media (prefers-reduced-motion: reduce) { .page.right.turned { animation: none; } }
 body.hc[data-face="1"] .page.right { filter: none; outline: 3px dashed #000; outline-offset: -6px; }
+
+/* ---------- vol. 3 ch. 12 「三折」: the third page on its own crease (docs/design-ch12.md §1) ---------- */
+/* the third page is a child of the right page: flat, it lifts with it as one rigid leaf; with the book flat (face 2) it
+   turns on its own left edge. Folded onto the right page (face 3) it is hidden and the right page shows the two-layer leaf. */
+body.trifold .page.right { transform-style: preserve-3d; border-radius: 0; }
+.page.third {
+  position: absolute; left: 100%; top: 0;
+  transform-origin: left center;
+  border-radius: 0 16px 16px 0;
+  box-shadow: 0 40px 60px -40px rgba(70, 55, 35, .45), 0 1px 2px rgba(0, 0, 0, .06);
+  background-image: linear-gradient(90deg, rgba(0, 0, 0, .06), transparent 6%);
+  will-change: transform;
+}
+body.trifold[data-face="3"] .page.right {   /* the leaf is two sheets thick now: an edge peeks out */
+  border-radius: 0 16px 16px 0;
+  box-shadow: 3px 3px 0 -1px #e7e0d2, 0 40px 60px -40px rgba(70, 55, 35, .45);
+}
+/* a square of the folded leaf that shows the RIGHT page through a hole in the third page */
+.cell.through::after {
+  content: ""; position: absolute; inset: 9%; border-radius: 6px; pointer-events: none;
+  border: 1.5px dashed rgba(60, 50, 40, .35);
+}
+body.hc .cell.through::after { border: 3px dashed #000; }
+/* face 2: the left page lies aside, out of reach; the right page is the flat page, the third page the lifted one */
+body.trifold[data-face="2"] .page.left { opacity: .45; filter: grayscale(.4); }
+body.trifold[data-face="2"] .page.left .cell { pointer-events: none; }
+body.trifold[data-face="2"] .book[data-mode="fold"] .page.right { pointer-events: auto; }
+body.trifold[data-face="2"] .book[data-mode="fold"] .page.third { pointer-events: none; }
+body.trifold[data-face="2"] .book[data-mode="fold"] .page.right > .cell::before { opacity: 1; }
+body.trifold[data-face="2"] .book[data-mode="fold"] .page.right > .cell .tile { opacity: 1; }
+body.trifold[data-face="2"] .book[data-mode="fold"] .page.third .tile { opacity: .62; }
+.presets .crease.on { background: var(--accent); color: #fff; }
