@@ -119,6 +119,14 @@ const SLIPS = [
       { angle: 0 },                               // open: you are on the right page
       { walk: [5, 1] }, { win: true },            // one step down to her (her stack is blocked by the left stone: only the crane gets you here)
     ] },
+  { id: 'fro', level: '11-1', tile: null,                    // vol. 3 ch. 11 「来回」 (docs/design-ch11.md §5): a posture slip, like ride
+    map: ['.-g--.rS', '----G--.'],
+    beats: [
+      { step: [-1, 0], blocked: 'stone' },        // the loose stone in front of you
+      { angle: 120, rolled: [[6, 0], [5, 0]] },   // lean (physical 60°): one pass — the stone rolls to (5,0), the square the glue (2,0) faces
+      { angle: 0, rolled: [[5, 0], [4, 0]] },     // back flat: a second pass and no press — it drops into the gap; the glue caught nothing
+      { walk: [4, 1] }, { win: true },            // across the bridge, down to her. (Close and open instead: the same two passes, but the press between them glues the stone at (5,0))
+    ] },
   { id: 'wet', level: '7-1', tile: 'I',
     map: ['S--I----', '-G------'],
     beats: [

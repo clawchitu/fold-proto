@@ -676,6 +676,52 @@ const LEVELS = [
       '.--x....-..-',
     ],
   },
+  // ---- vol. 3 「倾」 · Chapter 11 「来回」 (docs/design-vol3.md §1.3, docs/design-ch11.md): no new tile. Passes (the hinge crossing 90°) and presses (a close or a
+  // turn) are bought apart: a lean that comes back is two passes and no press (fro); opening a closed book only to a lean and closing it again is two presses and no pass (hover). Levels 11-1…11-5.
+  {
+    id: 'fro', tier: 'easy', chapter: 11, fros: 1, needs: ['needsRoll', 'needsFro'],   // 11-1 · easy (scores 6: the glue trap is a dead state, 33%) · lean and lay it flat: two passes, no press — the stone rolls to (5,0), the square the glue (2,0) faces, and on into the gap (4,0). Close and open instead and the press between the two passes glues it at its first stop: the gap stays a gap. Hand-drawn (the fro slip)
+    map: [
+      '.-g--.rS',
+      '----G--.',
+    ],
+  },
+  {
+    id: 'still', tier: 'mid', chapter: 11, lamp: 'L', needs: ['needsFold', 'needsLamp', 'needsRoll'],   // 11-2 · the left lamp's shadows do not move: they are cast by left-page stones, which never roll, onto the lifted page, where the loose stones do. Lean to 50° on (5,0): the shadows on the right page are where the drawn board puts them, and the road along them to (6,2) is clear only because the (6,2) stone rolled off it at the same pass; flatten (pass 2), close from (5,2), the stacks lead to her. hunt.js still (seed 1) #1, left-page loose stones drawn as x: len 12, wrong 11, noise 0
+    map: [
+      'x---S.-.',
+      '..-----.',
+      'x.x-..r.',
+      '.-.-G---',
+    ],
+  },
+  {
+    id: 'hover', tier: 'hard', chapter: 11, needs: ['needsFold', 'needsRoll', 'needsCrane', 'needsHover'],   // 11-3 · hard · open a little and close again: two presses, NO pass. Lean (the one pass of the level), walk onto the crane (7,2), close: it carries you to (0,2). Every opening since chapter 9 went flat — here opening flat rolls the loose stones onto the squares you need. Open only to 30°, walk to the crane that flew to (2,3), close again: it carries you to (5,3); open to 55° and step down to her. Two hovers, one pass. hunt.js hover (seed 2) #1, the left-page loose stone drawn as x: len 17, wrong 17, noise 0
+    map: [
+      '----..-r',
+      '---..--.',
+      '----S--h',
+      '.-..xhr.',
+      '-.x-G.--',
+    ],
+  },
+  {
+    id: 'past', tier: 'hard', chapter: 11, fros: 1, needs: ['needsFold', 'needsRoll', 'needsFro'],   // 11-4 · hard · the press is the trap: the right page's glue (7,0)/(7,2) faces left stones, and every close takes them. The stones (6,3)(7,3) must roll before the first press — lean to 55° from (7,2), walk down to (7,3), lay it flat (two passes, nothing pressed), then close once from (6,3) and walk the stacks to (1,2); lean to 80°, and she is two steps away. hunt.js frog (seed 1) #1: len 19, wrong 18, before, made, backs 1, noise 1 (the (1,3) stone)
+    map: [
+      'x..--..g',
+      '.--GxS-.',
+      'x.-----g',
+      '-x-.--rr',
+    ],
+  },
+  {
+    id: 'park', tier: 'final', chapter: 11, needs: ['needsFold', 'needsFlip', 'needsRoll', 'needsFro'],   // 11-5 · final · after the turn the lifted page is the THIRD page: its loose stones roll and the right page's stand still (the back of the leaf never stands up). Stand the book up once at (6,2) (90°: the right page's stones roll one), close from (5,1), walk the stacks to (3,0), turn; open flat, lean to 30° and lay it flat again — two more passes, all of them the third page's — and the road to her (6,2)·T is filled. hunt.js turn (seed 2) #1, left-page loose stones drawn as x: len 20, wrong 11, backs 1, noise 0
+    map: [
+      '.....-.r-..r',
+      '.-x--.-r.--.',
+      'x-----...-G.',
+      'x-.--S.---.-',
+    ],
+  },
 ];
 
 if (typeof module !== 'undefined') module.exports = LEVELS;
