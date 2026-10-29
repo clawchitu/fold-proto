@@ -41,7 +41,9 @@ function levelNumber(i) {
 
 const worldOf = (B, g, face) => ({ grid: B.grids[g], h: B.base.h, w: B.base.w, pages: B.pages, face, start: B.base.start, char: { ...B.base.start }, lamp: B.base.lamp });
 const tile = (t) => (t === 'S' ? '@' : t);
-const pageName = (w) => (w.face ? 'THIRD page' : 'right page');
+const pageName = (w) => (L.trifold(w) ? (w.face === 3 ? 'folded leaf (third page on top, right page through its holes)' : w.face === 2 ? 'third page' : 'right page') : w.face ? 'THIRD page' : 'right page');
+// ch. 12: the MAP column (0–11) behind a visible column — trifold sheets always print map columns
+const mcol = (w, c, r) => (!L.trifold(w) ? c : w.face === 2 ? c + L.N : L.colOf(w, c, r));
 
 function flat(w, title) {
   const rows = [title];
@@ -86,8 +88,8 @@ function leans(w, title) {
 
 function pressEvents(w) {
   const s = { ...w, grid: w.grid.map((r) => r.slice()) };
+  const at = (p) => `col ${mcol(w, p.c, p.r) + 1},row ${p.r + 1}`;   // ch. 12: map columns, read on the board before the press
   const ev = L.stamp(s);
-  const at = (p) => `col ${p.c + 1},row ${p.r + 1}`;
   return ev.map((e) => e.type === 'bleed' ? `the wet ink bleeds one ring: ${e.cells.map(at).join(', ')} become wet ink (walkable; glue under it is spoiled)` : e.type === 'door' ? `the key at ${at(e.cells[0])} opens the door at ${at(e.cells[1])} (both squares become paper / open door)`
     : e.type === 'ink' ? `the ${e.wet ? 'WET ' : ''}ink at ${at(e.cells[0])} prints onto the gap at ${at(e.cells[1])}: that gap becomes ${e.wet ? 'wet ink (walkable, and it will bleed at the next press)' : 'paper (ink)'}`
     : e.type === 'crane' ? (e.inked ? `the crane at ${at(e.cells[0])} faces wet ink: it is SOAKED — it stays where it is as wet ink and never flies again` : e.glued ? `the crane at ${at(e.cells[0])} flies onto the glue at ${at(e.cells[1])} and is STUCK: whoever stood on it is carried there, both squares are plain paper now` : `the crane at ${at(e.cells[0])} flies to ${at(e.cells[1])} on the other page (its old square is paper; whoever stood on it is carried there — same stack while closed, the other page when you open)`)
@@ -98,8 +100,8 @@ function pressEvents(w) {
 function closed(wBefore, wAfter, verb) {
   const rows = [];
   const crush = [];
-  for (let r = 0; r < wBefore.h; r++) for (let c = 0; c < wBefore.w; c++) if (L.isFloor(L.at(wBefore, c, r)) && L.crushed(wBefore, { c, r }, L.FOLD_MIN)) crush.push(`${c + 1},${r + 1}`);
-  rows.push(crush.length ? `${verb} while standing on col,row ${crush.join(' · ')} = crushed, back to the start (a ${pageName(wBefore)} stone comes down on that left-page square; on glue, the stone opposite is pulled up onto you)` : `${verb} crushes you nowhere`);
+  for (let r = 0; r < wBefore.h; r++) for (let c = 0; c < wBefore.w; c++) if (L.isFloor(L.at(wBefore, c, r)) && L.crushed(wBefore, { c, r }, L.FOLD_MIN)) crush.push(`${mcol(wBefore, c, r) + 1},${r + 1}`);
+  rows.push(crush.length ? `${verb} while standing on col,row ${crush.join(' · ')} = crushed, back to the start (a ${pageName(wBefore)} stone comes down on that ${L.trifold(wBefore) && wBefore.face === 2 ? 'right' : 'left'}-page square; on glue, the stone opposite is pulled up onto you)` : `${verb} crushes you nowhere`);
   const ev = pressEvents(wBefore);
   rows.push(ev.length ? `the press does (wherever you stand): ${ev.join('; ')}` : 'the press changes nothing on the board');
   const stay = [];   // cranes that do not fly at this press, and why (ch. 10)
@@ -119,7 +121,87 @@ function closed(wBefore, wAfter, verb) {
   return rows;
 }
 
+// ---------- ch. 12 「三折」: the trifold sheet (docs/design-ch12.md §1) ----------
+// Every view of a two-crease letter a player reaches in the first seconds: the book with the third page flat (one rigid
+// leaf), the third page on its own crease with the book flat, the third page folded down, and the book closed on it.
+// Columns are MAP columns throughout: 1–4 left | 5–8 right | 9–12 third page.
+function triPrint(w, title) {
+  const rows = [title], T = (c, r) => tile(L.at(w, c, r));
+  if (w.face === 0) {
+    rows.push('        1 2 3 4 | 5 6 7 8 ‖ 9 10 11 12   (| the book\'s crease · ‖ the third page\'s own crease)');
+    for (let r = 0; r < w.h; r++) { let line = `row ${r + 1}   `; for (let c = 0; c < 12; c++) line += T(c, r) + (c >= 8 ? '  ' : ' ') + (c === 3 ? '| ' : c === 7 ? '‖ ' : ''); rows.push(line); }
+  } else if (w.face === 2) {
+    rows.push('        5 6 7 8 ‖ 9 10 11 12   (book flat; right page = the flat page, third page = the lifted page; the left page lies aside, out of reach)');
+    for (let r = 0; r < w.h; r++) { let line = `row ${r + 1}   `; for (let c = 0; c < 8; c++) line += T(c, r) + (c >= 4 ? '  ' : ' ') + (c === 3 ? '‖ ' : ''); rows.push(line); }
+  } else {
+    rows.push('        1 2 3 4 | 5 6 7 8   (third page folded onto the right page: cols 5–8 are the two-layer leaf as seen from above)');
+    for (let r = 0; r < w.h; r++) { let line = `row ${r + 1}   `; for (let c = 0; c < 8; c++) line += T(c, r) + ' ' + (c === 3 ? '| ' : ''); rows.push(line); }
+    rows.push('layers of cols 5–8 (Tn = the third page\'s col n on top · Rn = the right page\'s col n through a HOLE in the third page · X = a stone in either layer):');
+    for (let r = 0; r < w.h; r++) { let line = `row ${r + 1}   `; for (let c = 4; c < 8; c++) { const m = L.colOf(w, c, r); line += (L.isBlock(L.at(w, c, r)) ? 'X' : m >= 8 ? 'T' : 'R') + String(m + 1).padEnd(3); } rows.push(line); }
+  }
+  return rows;
+}
+function triLeans(w, title) {   // shadows on the flat page (right-bank lamp) at each lean
+  const rows = [title], flatCols = w.face === 2 ? [0, 1, 2, 3] : [0, 1, 2, 3];
+  rows.push('         ' + LEANS.map((a) => `${String(a).padStart(3)}°     `).join(''));
+  for (let r = 0; r < w.h; r++) rows.push(`row ${r + 1}    ` + LEANS.map((a) => { const sh = L.shadows(w, 180 - a); return flatCols.map((c) => { const t = L.at(w, c, r), k = c + ',' + r; return t === 'x' || t === 'r' ? t : sh.has(k) ? (L.isFloor(t) ? '▒' : '░') : tile(t); }).join('') + '      '; }).join(''));
+  rows.push(`(cols ${w.face === 2 ? '5–8, the right page' : '1–4, the left page'}; ░ shadow over a gap = walkable, carries you when the hinge moves · ▒ shadow over paper = just paper)`);
+  return rows;
+}
+function triSheet(lv) {
+  const B = C.grids(lv), t = text(lv.id), i = LEVELS.indexOf(lv), out = [];
+  const W = (g, face) => worldOf(B, g, face);
+  const loose = lv.map.join('').includes('r'), sig = (g) => B.grids[g].flat().join('');
+  out.push(`LEVEL ${i >= 0 ? levelNumber(i) : '?'} · ${lv.id} · 「${t.zh.name || ''}」 / ${t.en.name || ''} · tier ${lv.tier || '?'}`);
+  out.push(`line shown under the title: 「${t.zh.line || ''}」 / “${t.en.line || ''}”`);
+  out.push(`board ${B.base.h} rows × 12 columns: a TRIFOLD letter — left page | right page | third page, the third page on its OWN crease at the right page's outer edge.`);
+  out.push('legend: @ you (start, paper)  . paper  - gap  x stone  r LOOSE stone  h PAPER CRANE  k key  D locked door  i ink  I WET ink  g glue  G her (the letter)');
+  out.push('');
+  out.push(...triPrint(W(0, 0), '== VIEW 1 · as the level opens: everything flat (book 180°, third page 180°) =='));
+  out.push('');
+  // A · the book with the third page flat: one rigid leaf
+  let gA = 0;
+  if (loose) { gA = B.roll(0, 0, null); if (gA !== 0) { out.push(...triPrint(W(gA, 0), '== VIEW A1 · lifting the BOOK past upright with the third page flat (one stiff leaf: right + third page lift together; every loose stone on it rolls one square towards the BOOK\'s crease, across the flat second crease) ==')); out.push(''); } }
+  out.push(...triLeans(W(gA, 0), '== VIEW A2 · leaning the BOOK, third page flat: right- AND third-page stones shade the left page =='));
+  out.push('');
+  const w0 = W(gA, 0), off = [];
+  for (let r = 0; r < w0.h; r++) for (let c = 8; c < 12; c++) if (L.isFloor(L.at(w0, c, r))) off.push(`${c + 1},${r + 1}`);
+  out.push('== VIEW A3 · CLOSING the book with the third page flat: the third page swings out past the left page and lies on the table ==');
+  if (off.length) out.push(`standing on the third page (any of col,row ${off.slice(0, 6).join(' · ')}${off.length > 6 ? ' …' : ''}) when the book closes = off the book: back to the start`);
+  const gA1 = B.press(gA, 0);
+  out.push(...closed(w0, W(gA1, 0), 'closing'));
+  out.push('');
+  // F · the third page on its own crease, the book flat
+  let gF = 0;
+  if (loose) { gF = B.roll(0, 2, null); if (gF !== 0) { out.push(...triPrint(W(gF, 2), '== VIEW F1 · lifting the THIRD PAGE past upright (book flat): its loose stones roll one square towards ITS crease (cols 8|9) ==')); out.push(''); } }
+  out.push(...triLeans(W(gF, 2), '== VIEW F2 · leaning the THIRD PAGE (book flat): its stones shade the RIGHT page =='));
+  out.push('');
+  const wF = W(gF, 2), squeeze = [];
+  for (let r = 0; r < wF.h; r++) for (let c = 4; c < 8; c++) if (L.isFloor(L.at(wF, c, r)) && L.flapBlock(wF, { c, r })) squeeze.push(`${c + 5},${r + 1}`);
+  out.push('== VIEW F3 · FOLDING the third page down onto the right page (book flat) — this is a press: right page against third page ==');
+  if (squeeze.length) out.push(`standing on the third page at col,row ${squeeze.join(' · ')} the fold is REFUSED (a right-page stone is right under you) — not a death, it just will not go down`);
+  const gF1 = B.press(gF, 2);
+  out.push(...closed(wF, W(gF1, 2), 'folding the third page').slice(0, 3));
+  out.push('');
+  const wFold = W(gF1, 3);
+  out.push(...triPrint(wFold, '== VIEW F4 · the third page lies folded on the right page; book flat (third col n lies on right col 17 − n; a stone in either layer is a stone; a hole in the third page shows the right page) =='));
+  out.push('');
+  // B · the book closed with the third page folded
+  let gB = gF1;
+  if (loose) { const n = B.roll(gF1, 3, null); if (n !== gF1) { gB = n; out.push(...triPrint(W(gB, 3), '== VIEW B1 · lifting the BOOK past upright with the third page folded on: the folded leaf\'s loose stones roll towards the BOOK\'s crease — on the third page that is AWAY from its own crease ==')); out.push(''); } }
+  out.push(...triLeans(W(gB, 3), '== VIEW B2 · leaning the BOOK with the third page folded: the folded leaf\'s stones shade the left page =='));
+  out.push('');
+  const gB1 = B.press(gB, 3);
+  out.push('== VIEW B3 · CLOSING the book on the folded third page: the left page meets the folded leaf (left col q meets third col q + 8 where the third page has paper — two mirrors bring a column home — or right col 8 − q through its holes) ==');
+  out.push(...closed(W(gB, 3), W(gB1, 3), 'closing'));
+  out.push('');
+  if (sig(gB1) !== sig(gB)) { out.push(...triPrint(W(B.roll(gB1, 3, null), 3), '== VIEW B4 · opened flat again after that close (third page still folded) ==')); out.push(''); }
+  if (sig(gA1) !== sig(gA)) { out.push(...triPrint(W(B.roll(gA1, 0, null), 0), '== VIEW A4 · opened flat again after closing with the third page flat ==')); out.push(''); }
+  return out.join('\n');
+}
+
 function sheet(lv) {
+  if (lv.trifold) return triSheet(lv);   // ch. 12
   const B = C.grids(lv);
   const t = text(lv.id);
   const i = LEVELS.indexOf(lv);
@@ -243,12 +325,14 @@ RULES (everything you know)
 - LOOSE STONE (r, chapter 9 「滚」): a stone that is not glued down. It blocks, shades and crushes like a stone. Every time the lifted (right) page passes upright — the hinge crosses 90° in either direction: leaning from flat is one pass, leaning back flat is another, closing from flat is one, opening flat after a close is one more; opening only partway (to a lean) after a close is none — every loose stone on the right page rolls ONE square towards the hinge (col 8 → 7 → 6 → 5; at col 5 it stops). Onto paper it rolls (its old square is paper). Into a gap it DROPS and fills it: that gap is paper from then on and the stone is gone (a bridge). Against anything else — a stone, a loose stone that cannot move, a door, ink, glue, a key, her square, the start square, or YOU standing on the square in front of it — it stays. The stone nearest the hinge rolls first, so a line of loose stones rolls together. Stones on the flat left page never roll. The roll happens BEFORE anything else in the same hinge move: before the shadows at the new angle are cast, before the press (so a close presses the board AFTER the roll: crushes, stacks and glue are judged on the rolled board), and the shadow a loose stone casts moves with it. Glue that pulls a loose stone holds it: it becomes a fixed stone.
 - PAPER CRANE (h, chapter 10 「鹤」): a square of paper folded into a crane — floor you can stand on. At EVERY press (a close, and a turn of the closed book) each crane flies to its MIRROR square on the facing page (col c → col 9−c, same row), and whoever stands on it flies with it: closed you are in the same stack, but when the book opens you are on the OTHER page. Its old square is paper. Landing on paper or on a gap it lands (a gap it sits in is floor as long as it stays — and paper once it leaves). Landing on WET INK it is soaked: it stays where it is as wet ink, never flies again, and bleeds like any wet ink from then on. Landing on GLUE it sticks: it carries you one last time and both squares are plain paper (the glue is used up). Landing on anything else — a stone, a loose stone, a door, a gate, a key, dry ink, her square, the start, another crane — it does NOT fly and stays. ORDER within one press: the roll of the sweep (a loose stone can roll onto the landing first) → the bleed (wet ink can fill the landing first) → keys / ink / glue → the cranes. Next press it flies back (its old square is paper, so the landing is free): the crane goes back and forth, whether you want it to or not. A crane under a stone's mirror is paper, not a stone's back: standing on it on the left page when the book closes, the stone comes down on you.
 - THREE-PAGE letters only: the third page is the back of the right leaf. With the book CLOSED and you standing on the LEFT page you may TURN the book over: the third page now faces the left page (columns 5–8 show the third page). Turning is a press too (keys/ink/glue between left and third page act; a third-page stone over your square crushes you — then the whole level restarts). Turn again to come back to the right page (another press). The letter may lie on the third page.
+- TRIFOLD letters only (chapter 12 「三折」): 12 columns — left page 1–4 | right page 5–8 | third page 9–12 — and TWO creases: the book's (4|5) and the third page's own (8|9). ONE crease moves at a time: the third page only while the book lies flat (180°); the book only while the third page lies flat or is folded all the way down. You can never cross the second crease on foot. (a) Book moving, third page FLAT: right + third page lift together as one stiff leaf (their loose stones roll towards the book's crease, across the flat second crease; their stones shade the left page); closed, the third page sticks out past the left page onto the table — standing on it then = off the book, back to the start. (b) Third page moving, book flat: an ordinary book of its own — right page flat, third page lifted; its loose stones roll towards cols 8|9, its stones shade the right page, and folding it down is a PRESS (right against third: glue, ink, keys, cranes; third col n meets right col 17 − n). You are frozen on the left page meanwhile. If you stand on the third page right over a right-page stone, the fold is refused (no death). After the fold you stand on the TOP layer of where you stood. (c) Book moving, third page FOLDED: the right leaf has two layers — each square is the third page's (col 17 − c) unless that is a HOLE, then the right page shows through; a stone in either layer is a stone. Its loose stones roll towards the book's crease — on the third page that is away from its own crease. Closed, left col q meets third col q + 8 (two mirrors = the same column) or, through a hole, right col 8 − q.
 - Undo exists in the game, but THIS test is one shot.
 
 ACTIONS (write the route in this grammar, one per line; coordinates are col,row as printed, 1-based; angles are physical):
   fold <angle>        move the hinge to this angle (0 = closed, 180 = flat). The move passes through every 5° in between (rides happen).
   walk <col>,<row>    walk to that square on your current page (the game finds the path if one exists). When closed, <col> is the STACK column 1–4.
   flip                turn the closed book over (closed, standing on the left page).
+  flap <angle>        (trifold only) move the THIRD page's own crease to this angle (180 = flat, 0 = folded onto the right page); only while the book lies flat. Columns in walk are always map columns 1–12.
 `;
 
 function prompt(lv) {
