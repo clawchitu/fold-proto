@@ -61,8 +61,8 @@ function sweep(B, s, a, opts = {}) {
 // book lies flat: from face 0 (flap flat) or face 3 (flap folded) at a = 0, or from face 2 (the flap mid-way, s.a = its
 // angle). The sweep runs in the flap's view (face 2: right page flat, third page lifted — rolls, shadows, the press of
 // right against third, cranes). Reaching flat or folded leaves the flap's view: canonical states are face 0 / face 3 at
-// a = 0, so a flat book has one representation per flap state. undefined = not allowed here; null = fell / crushed /
-// squeezed (stood on the third page over a right-page stone as it folded).
+// a = 0, so a flat book has one representation per flap state. undefined = not allowed here (incl. folding the flap while
+// you stand on it over a right-page stone: L.flapBlock, a refused fold); null = fell / crushed.
 const isTri = (B) => B.base.w === 3 * L.N;
 function flapOf(B, s, b, opts = {}) {
   if (!isTri(B) || opts.noFlap) return undefined;
@@ -70,11 +70,12 @@ function flapOf(B, s, b, opts = {}) {
   if (b0 == null || b === b0) return undefined;
   let from = s;
   if (s.face !== 2) from = { ...s, ...L.flapIn(worldOf(B, s), { c: s.c, r: s.r }), face: 2, a: b0 };
+  if (b >= L.FOLD_MIN && L.flapBlock(worldOf(B, from))) return undefined;   // standing over a right-page stone: the fold is refused, not fatal
   const n = sweep(B, from, b, opts);
   if (!n) return null;
   if (b > 0 && b < L.FOLD_MIN) return n;
   const out = L.flapOut(worldOf(B, n), { c: n.c, r: n.r }, b >= L.FOLD_MIN);
-  return out ? { c: out.c, r: out.r, a: 0, face: b >= L.FOLD_MIN ? 3 : 0, g: n.g } : null;
+  return out ? { c: out.c, r: out.r, a: 0, face: b >= L.FOLD_MIN ? 3 : 0, g: n.g } : undefined;
 }
 // Every flap move from s that is not already a move() (move() turns the flap when s is in its view): [state | null].
 function flaps(B, s, angles = ANGLES, opts = {}) {
@@ -280,6 +281,7 @@ function analyse(level) {
     for (const a of ANGLES) {
       if (a === s.a) continue;
       const n = move(B, s, a);
+      if (n === undefined) continue;   // trifold: a refused flap fold
       if (!n) { kills++; if (L.isFloor(L.at(w, s.c, s.r))) traps.add(k); continue; }   // a kill from solid paper = a crush
       out.push(n);
     }

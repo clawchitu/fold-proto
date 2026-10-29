@@ -249,5 +249,9 @@ console.log('to-and-fro tests passed');
   // with the flap folded and the book lifted, a third-page loose stone rolls AWAY from its own crease (column 9 → 10)
   const g = L.create({ trifold: true, map: ['S.......-r..'] }); g.face = 3;
   const ev = L.roll(g); assert.strictEqual(ev.length, 1); assert.strictEqual(g.grid[0][10], 'r'); assert.strictEqual(g.grid[0][9], '.');
+  // lead's call (10/29): folding the flap while you stand on it over a right-page stone is REFUSED (flapBlock), not a death
+  const q = L.create({ trifold: true, map: ['S......x.G..'] }); q.face = 2; q.char = { c: 4, r: 0 };   // third-page col 8 over right col 7
+  assert.strictEqual(L.flapBlock(q), 'stone'); q.char = { c: 5, r: 0 }; assert.strictEqual(L.flapBlock(q), null);
+  assert.ok(C.solve({ trifold: true, map: ['S..-...x.G..', '......-.....'] }), 'the refused fold is not a kill: the solver steps off first');
 }
 console.log('trifold tests passed');

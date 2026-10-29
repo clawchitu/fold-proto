@@ -22,6 +22,8 @@
 //       --need lamp (the lamp back on the right bank breaks the level), --need gate (the gate laid down as paper breaks it)
 //       vol. 3 ch. 9 (docs/design-ch9.md): tile r = loose stone (--tiles '.-xr'), --need roll (gluing the loose stones down as
 //       stones breaks the level), --rolls N (the solution's hinge moves roll a stone at least N times), --fills N (… drop one into a gap N times)
+//       vol. 3 ch. 12 (docs/design-ch12.md): --trifold (12-column boards, the third page on its own crease at the right page's
+//       outer edge; search / show / polish), --need trifold (unsolvable without the second crease)
 //
 // What the search optimises (fitness(), §3 of the postmortem):
 //   long minimal solutions (par, steps), many plausible-but-wrong hinge moves at each decision point (wrong),
@@ -90,11 +92,12 @@ function flapOf(B, s, b, opts = {}) {
   if (b0 == null || b === b0) return undefined;
   let from = s;
   if (s.face !== 2) from = { ...s, ...L.flapIn(wof(B, s), { c: s.c, r: s.r }), face: 2, a: b0 };
+  if (b >= L.FOLD_MIN && L.flapBlock(wof(B, from), { c: from.c, r: from.r })) return undefined;   // a refused fold (logic.js flapBlock)
   const n = sweep(B, from, b, opts);
   if (!n) return null;
   if (b > 0 && b < L.FOLD_MIN) return n;
   const out = L.flapOut(wof(B, n), { c: n.c, r: n.r }, b >= L.FOLD_MIN);
-  return out ? { c: out.c, r: out.r, a: 0, face: b >= L.FOLD_MIN ? 3 : 0, g: n.g } : null;
+  return out ? { c: out.c, r: out.r, a: 0, face: b >= L.FOLD_MIN ? 3 : 0, g: n.g } : undefined;
 }
 // Turning the closed book over: next state, null when it crushes, undefined when not allowed here.
 function flipOf(B, s) {
@@ -120,6 +123,7 @@ function explore(B, angles = ANGLES, from = B.start, opts = {}) {
     for (const a of angles) {
       if (a === s.a) continue;
       const n = move(B, s, a, opts);
+      if (n === undefined) continue;   // trifold: a refused flap fold
       if (!n) { kill(); continue; }
       const nk = key(n);
       out.push([nk, 1]);
@@ -416,7 +420,7 @@ function fitness(level, opts, m) {
   m = m || measure(level);
   if (!m.solvable) return -1000 + (m.states || 0) * 0.05;
   const needOne = (n) => n === 'glue' ? m.glueFires || m.needsGlue : n === 'shade' ? m.needsShade : n === 'ride' ? m.ride : n === 'made' ? m.made : n === 'roll' ? m.needsRoll : n === 'crane' ? m.needsCrane
-    : n === 'pop' ? m.needsPop : n === 'key' ? m.needsKey : n === 'ink' ? m.needsInk : n === 'wet' ? m.needsWet : n === 'lamp' ? m.needsLamp : n === 'gate' ? m.needsGate : n === 'fold' ? m.needsFold : n === 'flip' ? m.needsFlip : true;
+    : n === 'pop' ? m.needsPop : n === 'key' ? m.needsKey : n === 'ink' ? m.needsInk : n === 'wet' ? m.needsWet : n === 'lamp' ? m.needsLamp : n === 'gate' ? m.needsGate : n === 'fold' ? m.needsFold : n === 'flip' ? m.needsFlip : n === 'trifold' ? m.needsTrifold : true;
   const need = String(opts.need).split('+').every(needOne);
   // vol. 1 constraints (postmortem §6): --nodead no dead state anywhere; --noride the minimal solution never rides a shadow
   // (3-3 comes before the ride is taught); --minlen reject short boards early
@@ -446,13 +450,13 @@ function fitness(level, opts, m) {
 function rng(seed) { let t = seed >>> 0; return () => { t += 0x6d2b79f5; let r = Math.imul(t ^ (t >>> 15), 1 | t); r ^= r + Math.imul(r ^ (r >>> 7), 61 | r); return ((r ^ (r >>> 14)) >>> 0) / 4294967296; }; }
 
 function randomBoard(R, rows, tiles, opts) {
-  const g = [], W = L.N * ((opts && opts.pages) || 2);
+  const g = [], W = L.N * (opts && opts.trifold ? 3 : (opts && opts.pages) || 2);   // ch. 12: --trifold = 12 columns on two creases
   for (let r = 0; r < rows; r++) { g.push([]); for (let c = 0; c < W; c++) g[r].push(R() < 0.4 ? '-' : R() < 0.75 ? '.' : tiles[Math.floor(R() * tiles.length)]); }
   fixPairs(g, R); if (opts && opts.leftx) leftOnly(g);
   // the start is on the first spread (left or right page); the goal may be on the third page
   const place = (t, w) => { for (;;) { const c = Math.floor(R() * w), r = Math.floor(R() * rows); if (!'SGp'.includes(g[r][c])) { g[r][c] = t; return; } } };
   place('S', 2 * L.N); place('G', W);
-  return { map: g.map((r) => r.join('')) };
+  return { map: g.map((r) => r.join('')), ...(opts && opts.trifold ? { trifold: true } : {}) };
 }
 function fixPairs(g, R) {   // pop-up tabs only as pairs across the crease: left column 3 with column 4 (and column 8, the third page's crease column)
   const W = g[0].length, creases = [L.N, ...(W > 2 * L.N ? [2 * L.N] : [])];
@@ -484,19 +488,19 @@ function mutate(level, R, tiles, opts) {
   fixPairs(g, R); if (opts && opts.leftx) leftOnly(g);
   const flat = g.flat();
   if (flat.filter((t) => t === 'S').length !== 1 || flat.filter((t) => t === 'G').length !== 1) return mutate(level, R, tiles, opts);
-  return { map: g.map((r) => r.join('')) };
+  return { map: g.map((r) => r.join('')), ...(level.trifold ? { trifold: true } : {}) };
 }
 
 function search(opts) {
   const R = rng(opts.seed);
   const tiles = opts.tiles.split('').filter((t) => !'SG'.includes(t));
   const archive = new Map();
-  const seedLevel = opts.from ? (String(opts.from).includes(',') ? { map: String(opts.from).split(',') } : LEVELS.find((l) => l.id === opts.from)) : null;
+  const seedLevel = opts.from ? (String(opts.from).includes(',') ? { map: String(opts.from).split(','), ...(opts.trifold ? { trifold: true } : {}) } : LEVELS.find((l) => l.id === opts.from)) : null;
   if (opts.from && !seedLevel) throw new Error('no level ' + opts.from);
   let evals = 0;
   const t0 = Date.now();
   for (let rs = 0; rs < opts.restarts; rs++) {
-    let cur = seedLevel ? { map: [...seedLevel.map] } : randomBoard(R, opts.rows, tiles, opts);
+    let cur = seedLevel ? { map: [...seedLevel.map], ...(seedLevel.trifold ? { trifold: true } : {}) } : randomBoard(R, opts.rows, tiles, opts);
     let curF = fitness(cur, opts); evals++;
     let T = 6;
     for (let it = 0; it < opts.iters; it++) {
@@ -529,7 +533,8 @@ function search(opts) {
 // Greedily turns irrelevant paper into void and noise elements into paper while the fitness does not drop
 // (so traps that make dead basins stay; clutter that only makes the board busier goes).
 function polish(level, opts) {
-  let cur = { map: [...level.map] }, m = measure(cur), f = fitness(cur, opts, m);
+  const tri = level.trifold ? { trifold: true } : {};
+  let cur = { map: [...level.map], ...tri }, m = measure(cur), f = fitness(cur, opts, m);
   const sol = m.solution;
   for (let pass = 0; pass < 3; pass++) {
     let changed = false;
@@ -539,10 +544,10 @@ function polish(level, opts) {
       if ('-SGp'.includes(t)) continue;
       const g = cur.map.map((x) => x.split(''));
       g[r][c] = ELEMENTS.includes(t) ? '.' : '-';
-      const cand = { map: g.map((x) => x.join('')) }, cm = measure(cand);
+      const cand = { map: g.map((x) => x.join('')), ...tri }, cm = measure(cand);
       if (!cm.solvable || cm.solution !== sol) {
         if (!ELEMENTS.includes(t) || !cm.solvable) continue;
-        g[r][c] = '-'; const cand2 = { map: g.map((x) => x.join('')) }, cm2 = measure(cand2);
+        g[r][c] = '-'; const cand2 = { map: g.map((x) => x.join('')), ...tri }, cm2 = measure(cand2);
         if (!cm2.solvable || cm2.solution !== sol) continue;
         const f2 = fitness(cand2, opts, cm2); if (f2 + 0.01 < f) continue;
         cur = cand2; m = cm2; f = f2; changed = true; continue;
@@ -602,7 +607,7 @@ if (require.main === module) {
     console.log(fmt(lv, f, f, null));
     console.log(JSON.stringify({ ...f, solution: undefined, decoys: undefined, stoneRoles: undefined }, null, 0));
   } else if (o.cmd === 'polish') {
-    const lv = o.arg.includes(',') ? { map: o.arg.split(',') } : LEVELS.find((l) => l.id === o.arg);
+    const lv = o.arg.includes(',') ? { map: o.arg.split(','), ...(o.trifold ? { trifold: true } : {}) } : LEVELS.find((l) => l.id === o.arg);
     const p = polish(lv, o), f = full(p.level, false);
     console.log(fmt(p.level, f, f, p.f));
   } else if (o.cmd === 'search') {

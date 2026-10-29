@@ -139,7 +139,39 @@ const T = {
     seed: ['S.g.-.r.', '.x--..-.', '..-..r..', '-.-x...G'],
     pred: (m, X) => { // a lean that comes back is the solution's way past a glue: the same two passes bought with a close and an opening let the glue take the stone at its first stop
       return [(m.fros || 0) >= 1, m.needsFro, m.needsRoll, m.needsGlue || /g/.test(X.B.base.grid.map((r) => r.join('')).join(''))]; } },
+  // ---- vol. 3 ch. 12 「三折」 (docs/design-ch12.md): the third page on its own crease. Predicates read MAP columns (mc / pg below) ----
+  home: { rows: 3, trifold: true, lamp: null, tiles: '.-x', par: 2, closes: 1, minpar: 2, need: 'trifold', elements: 4, minlen: 6, phases: 0, backs: 0,
+    seed: ['S..-..-.-...', '.-.-.x-.-G-.', '...-....-...'],
+    pred: (m, X) => { // the letter is on the third page; the solution folds the flap, closes the book, and walks a stack from the left page straight onto the third page (two mirrors: the same column)
+      const st = X.states, gC = X.B.base.grid.findIndex((row) => row.includes('G')) >= 0 && X.B.base.grid.some((row) => row.indexOf('G') >= 8); let home = false;
+      for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (p.face === 3 && s.face === 3 && p.a === s.a && G_posture(s.a) === 'fold' && pg(X, p) === 0 && pg(X, s) === 2) home = true; }
+      return [gC, home, m.needsTrifold]; } },
+  hole: { rows: 4, trifold: true, lamp: null, tiles: '.-x', par: 3, closes: 1, minpar: 2, need: 'trifold', elements: 6, minlen: 9, phases: 0, backs: 0,
+    seed: ['S-..-..G..-.', '.-.x--..-..-', '..-.-.-.-.-.', '.-..-.-..-..'],
+    pred: (m, X) => { // the solution stands, closed with the flap folded, on a right-page square seen THROUGH a hole of the third page — filling that hole with paper breaks the level
+      const st = X.states; let through = false, needed = false; const cells = new Set();
+      for (const s of st) { if (s.face !== 3 || s.c < 4) continue; const c = mc(X, s); if (c < 8) { through = true; cells.add(c + ',' + s.r); } }
+      for (const k of cells) { const [c, r] = k.split(',').map(Number); const v = X.B.base.grid.map((row) => row.join('')); const T = 15 - c; if (v[r][T] !== '-') continue; v[r] = v[r].slice(0, T) + '.' + v[r].slice(T + 1); if (!G.measure({ map: v, trifold: true }).solvable) needed = true; }
+      return [through, needed, m.needsTrifold]; } },
+  away: { rows: 4, trifold: true, lamp: null, tiles: '.-xr', par: 4, closes: 2, minpar: 3, need: 'trifold+roll', elements: 8, minlen: 13, phases: 0, backs: 0,
+    seed: ['S..-.--.-.r.', '.x.-..-..-..', '...-.-..r-.-', '.-.-....-.G.'],
+    pred: (m, X) => { // with the flap folded and the book lifted, a third-page loose stone rolls AWAY from its own crease (map column up): the solution has such a roll, and needs the rolls
+      const st = X.states; let away = false;
+      for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (p.face !== 3 || s.face !== 3 || p.a === s.a || !L.passes(p.a, s.a)) continue;
+        const g0 = X.B.G[p.g], g1 = X.B.G[X.B.roll(p.g, 3, L.isRight(p.c) ? { c: p.c, r: p.r } : null)];
+        for (let r = 0; r < X.B.h; r++) for (let c = 8; c < 11; c++) if (g0[r][c] === 'r' && g1[r][c] !== 'r' && g1[r][c + 1] === 'r') away = true; }
+      return [away, m.needsRoll, m.needsTrifold]; } },
+  crane2: { rows: 4, trifold: true, lamp: null, tiles: '.-xh', par: 4, closes: 2, minpar: 3, need: 'trifold+crane', elements: 7, minlen: 12, phases: 0, backs: 0,
+    seed: ['S.h.-..-.-..', '.-.-.x.-.-..', '..-..-..-.G.', '.x--.-.-.-..'],
+    pred: (m, X) => { // a crane carries you twice — once at a press of the book, once at the press of the flap onto the right page — and the second carry ends on the third page
+      const st = X.states; let book = false, flap = false;
+      for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (pg(X, p) === pg(X, s) || !C.pressed(p, s)) continue;
+        if (s.face === 3 && p.face !== 3) { if (pg(X, s) === 2) flap = true; } else if (pg(X, s) !== pg(X, p)) book = true; }
+      return [book, flap, m.needsCrane, m.needsTrifold]; } },
 };
+// ch. 12: the MAP column / page (0 left, 1 right, 2 third) of a state on a trifold board — face 2 shifts one page, face 3 reads the top layer
+const mc = (X, s) => (s.face === 2 ? s.c + 4 : L.colOf(X.B.world(s.g, s.face), s.c, s.r));
+const pg = (X, s) => Math.floor(mc(X, s) / 4);
 // ch. 11: the leans that come back on a path — pairs [i, j] of consecutive hinge moves that both pass upright, no press between, neither end closed
 function frosOf(st) { const h = []; for (let i = 1; i < st.length; i++) if (st[i].face === st[i - 1].face && st[i].a !== st[i - 1].a) h.push(i);
   const out = []; for (let k = 0; k + 1 < h.length; k++) { const i = h[k], j = h[k + 1]; if (!L.passes(st[i - 1].a, st[i].a) || !L.passes(st[j - 1].a, st[j].a)) continue;
@@ -150,7 +182,7 @@ function hoversOf(st) { const out = []; for (let i = 1; i < st.length; i++) { if
 const G_posture = C.posture;
 const t = T[name]; if (!t) throw new Error('name');
 const opts = { ...t, iters: 1e9, restarts: 1, seed: seedN, nodead: false, noride: false, leftx: false, maxvoid: 0.62, maxlen: 0, matched: false, goalT: false, minflips: 0, configs: 0, switches: 0, mincloses: 0, fros: t.fros || 0 };
-const mk = (map) => (t.lamp ? { map, lamp: t.lamp } : { map });
+const mk = (map) => ({ map, ...(t.lamp ? { lamp: t.lamp } : {}), ...(t.trifold ? { trifold: true } : {}) });   // ch. 12: trifold boards
 function detail(level) { const B = G.prep(level); const g = G.explore(B); const bp = G.bestPath(g); if (!bp) return null; return { B, states: bp.path.map((k) => g.nodes.get(k)) }; }
 function score(level) {
   const m = G.measure(level); if (!m.solvable) return { f: -1000 + (m.states || 0) * 0.05, m };

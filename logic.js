@@ -409,12 +409,21 @@
     return { c: fig.c - N, r: fig.r };
   }
   // flapOut: the flap reached flat (b = 0 → face 0) or folded (b = 180 → face 3). null when the folded leaf has a stone under
-  // your feet (you stood on the third page over a right-page stone: v1 calls that a squeeze, docs/design-ch12.md §1).
+  // your feet (you stood on the third page over a right-page stone) — the fold is refused before it gets there (flapBlock).
   function flapOut(s, fig, folded) {
     const c = fig.c + N;
     if (!folded) return { c, r: fig.r };
     const v = c < 2 * N ? c : 4 * N - 1 - c;
     return isFloor(at({ ...s, face: 3 }, v, fig.r)) ? { c: v, r: fig.r } : null;
+  }
+
+  // The flap cannot fold down onto a stone you stand over (vol. 3 ch. 12, lead's call 10/29: a blocked fold with a toast, not
+  // a death — deaths must be readable). In the flap's view (face 2) you stand on the lifted third page and the right page's
+  // square under you is a stone (or a loose stone, a door): 'stone'. Glue under your feet is not a block — the glue pulls
+  // the stone up (crushCause 'glue'), as on any page. null when the flap may fold.
+  function flapBlock(s, fig = s.char) {
+    if (!trifold(s) || s.face !== 2 || fig.c < N || at(s, fig.c, fig.r) === 'g') return null;
+    return isBlock(at(s, mirror(fig.c), fig.r)) ? 'stone' : null;
   }
 
   function isWin(s, mode) {
@@ -424,7 +433,7 @@
   }
 
   const api = { N, FOLD_MIN, POP_MIN, POP_MAX, SHADE_MIN, STAND, mirror, proj, isRight, modeOf, isFloor, isBlock,
-    isOpaque, standing, passes, trifold, vw, offBook, flapIn, flapOut, shadowColumn, shadowColumnL, lampOf, lit, shadows, crushed, crushCause, cellBlock, stepBlock, pathBlock, ride, create, restart, at, colOf, neighbours, findPath, stamp,
+    isOpaque, standing, passes, trifold, vw, offBook, flapIn, flapOut, flapBlock, shadowColumn, shadowColumnL, lampOf, lit, shadows, crushed, crushCause, cellBlock, stepBlock, pathBlock, ride, create, restart, at, colOf, neighbours, findPath, stamp,
     bleed, roll, fly, carried, flipBlock, flip, isWin };
   if (typeof module !== 'undefined') module.exports = api; else root.FoldLogic = api;
 })(this);
