@@ -223,3 +223,31 @@ console.log('loose stone tests passed');
   assert.strictEqual(sweep(mk(['....-.rS']), 0, 90).length + sweep(mk(['....-.rS']), 0, 85).length, 1, 'standing (90°) is a pass; 85° is not');
 }
 console.log('to-and-fro tests passed');
+
+// Trifold (vol. 3 ch. 12 「三折」, docs/design-ch12.md §1): the views of the two-crease book.
+{
+  const C = require('./check.js');
+  const s = L.create({ trifold: true, map: ['S..r.--.-G-x'] });
+  assert.strictEqual(s.w, 12); assert.strictEqual(L.flipBlock(s, 180), 'single', 'a trifold cannot be turned over');
+  assert.strictEqual(L.at(s, 9, 0), 'G', 'face 0 shows all three pages');
+  s.face = 2; assert.strictEqual(L.at(s, 0, 0), '.', 'face 2: visible 0 is the right page'); assert.strictEqual(L.at(s, 5, 0), 'G');
+  s.face = 3;
+  assert.strictEqual(L.at(s, 6, 0), 'G', 'face 3: third-page column 9 lies over right-page column 6');
+  assert.strictEqual(L.at(s, 7, 0), '.', 'through the hole at third-page column 8 you see right-page column 7');
+  assert.strictEqual(L.at(s, 5, 0), '-', 'a gap over a gap is a gap');
+  assert.strictEqual(L.at(s, 4, 0), 'x', 'a stone in either layer is a stone');
+  // two mirrors bring a column home: left column 1 meets third-page column 9 when the folded book closes
+  assert.strictEqual(L.at(s, L.mirror(1), 0), 'G');
+  // the flap view is an ordinary book: crossing the second crease while flat is refused; standing on it when the book closes is off the book
+  const f = L.create({ trifold: true, map: ['S.......G...'] });
+  assert.strictEqual(L.stepBlock(f, { c: 7, r: 0 }, 1, 0, 'open').why, 'crease');
+  assert.strictEqual(L.crushCause(f, { c: 9, r: 0 }, 180), 'off');
+  // solver: the letter on the third page, home column 1 — fold the flap, close the book, walk the stack
+  const r = C.solve({ trifold: true, map: ['S---.--.-G--'] });
+  assert.ok(r && r.cost === 2 && r.steps.some((x) => x.startsWith('flap180')), 'flap, then close');
+  assert.ok(!C.solve({ trifold: true, map: ['S---.--.-G--'] }, C.ANGLES, null, { noFlap: true }), 'needs the second crease');
+  // with the flap folded and the book lifted, a third-page loose stone rolls AWAY from its own crease (column 9 → 10)
+  const g = L.create({ trifold: true, map: ['S.......-r..'] }); g.face = 3;
+  const ev = L.roll(g); assert.strictEqual(ev.length, 1); assert.strictEqual(g.grid[0][10], 'r'); assert.strictEqual(g.grid[0][9], '.');
+}
+console.log('trifold tests passed');

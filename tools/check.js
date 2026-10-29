@@ -24,13 +24,17 @@ const WET_CHAPTER = 7;   // final 2 → 3 (Chitu 10/25, difficulty-v3.md §6: th
 const CHAPTER_PAR_MAX = 24;
 const CHAPTER_START = [0, 5, 13, 19, 25];   // first level index of chapters 1–5 (levels.js comments); later levels may carry `chapter`
 const chapterOf = (lv, i) => lv.chapter || CHAPTER_START.filter((s) => s <= i).length;
-const MECHANICS = ['needsFold', 'needsPop', 'needsShade', 'needsRide', 'needsKey', 'needsInk', 'needsGlue', 'needsFlip', 'needsWet', 'needsLamp', 'needsGate', 'needsRoll', 'needsCrane', 'needsFro', 'needsHover'];
+const MECHANICS = ['needsFold', 'needsPop', 'needsShade', 'needsRide', 'needsKey', 'needsInk', 'needsGlue', 'needsFlip', 'needsWet', 'needsLamp', 'needsGate', 'needsRoll', 'needsCrane', 'needsFro', 'needsHover', 'needsTrifold'];
 
 // One hinge move: the state after turning the hinge from s.a to a, or null if the figure falls or is crushed on the way.
 // The angle walks in 5° steps; a figure on a shadow rides it. Each time the lifted page passes upright (vol. 3: the
 // hinge crosses 90°) the loose stones roll — the grid changes mid-sweep, and the rest of the sweep (shadows, the crush
 // when the book closes) is judged on the rolled board. Reaching a close presses the pages (stamp) after the sweep.
 function move(B, s, a, opts = {}) {
+  if (s.face === 2) return flapOf(B, s, a, opts);   // trifold (ch. 12): in the flap's view the hinge being turned is the flap's
+  return sweep(B, s, a, opts);
+}
+function sweep(B, s, a, opts = {}) {
   let cur = { c: s.c, r: s.r }, src = null, g = s.g;
   let w = worldOf(B, s);
   const step = a > s.a ? 5 : -5;
@@ -51,6 +55,33 @@ function move(B, s, a, opts = {}) {
   }
   if (a >= L.FOLD_MIN) { const g0 = g; g = B.press(g0, s.face); cur = B.carry(g0, s.face, cur); }   // vol. 3 ch. 10: the crane you stand on carries you across
   return { c: cur.c, r: cur.r, a, face: s.face, g };
+}
+
+// Trifold (vol. 3 ch. 12 「三折」, docs/design-ch12.md §1): turning the SECOND crease (the flap) to b. Allowed only while the
+// book lies flat: from face 0 (flap flat) or face 3 (flap folded) at a = 0, or from face 2 (the flap mid-way, s.a = its
+// angle). The sweep runs in the flap's view (face 2: right page flat, third page lifted — rolls, shadows, the press of
+// right against third, cranes). Reaching flat or folded leaves the flap's view: canonical states are face 0 / face 3 at
+// a = 0, so a flat book has one representation per flap state. undefined = not allowed here; null = fell / crushed /
+// squeezed (stood on the third page over a right-page stone as it folded).
+const isTri = (B) => B.base.w === 3 * L.N;
+function flapOf(B, s, b, opts = {}) {
+  if (!isTri(B) || opts.noFlap) return undefined;
+  const b0 = s.face === 2 ? s.a : s.a !== 0 ? null : s.face === 3 ? 180 : 0;
+  if (b0 == null || b === b0) return undefined;
+  let from = s;
+  if (s.face !== 2) from = { ...s, ...L.flapIn(worldOf(B, s), { c: s.c, r: s.r }), face: 2, a: b0 };
+  const n = sweep(B, from, b, opts);
+  if (!n) return null;
+  if (b > 0 && b < L.FOLD_MIN) return n;
+  const out = L.flapOut(worldOf(B, n), { c: n.c, r: n.r }, b >= L.FOLD_MIN);
+  return out ? { c: out.c, r: out.r, a: 0, face: b >= L.FOLD_MIN ? 3 : 0, g: n.g } : null;
+}
+// Every flap move from s that is not already a move() (move() turns the flap when s is in its view): [state | null].
+function flaps(B, s, angles = ANGLES, opts = {}) {
+  if (!isTri(B) || s.face === 2 || s.a !== 0 || opts.noFlap) return [];
+  const out = [];
+  for (const b of angles) { const n = flapOf(B, s, b, opts); if (n !== undefined) out.push(n); }
+  return out;
 }
 
 // The board's grids, as a chain of presses. A state carries `g`, an index into `grids`; press(g, face) is the grid after
@@ -94,11 +125,16 @@ function grids(level) {
   return { base, grids: table, press, roll, carry, pages: base.pages };
 }
 const keyOf = (s) => [s.c, s.r, s.a, s.face, s.g].join();
+// a press on the way from p to s: the book closing, a turn of the book, or (trifold) the flap folding onto the right page
+const pressed = (p, s) => (p.face === s.face ? L.modeOf(s.a) === 'fold' && L.modeOf(p.a) !== 'fold' : s.face === 1 || p.face === 1 || (s.face === 3 && p.face !== 3));
 const worldOf = (B, s) => ({ grid: B.grids[s.g], h: B.base.h, w: B.base.w, pages: B.pages, face: s.face, char: { c: s.c, r: s.r }, start: B.base.start, lamp: B.base.lamp });
 const startOf = (B) => ({ c: B.base.char.c, r: B.base.char.r, a: 0, face: 0, g: 0 });
 // the goal in visible columns, with the face it lives on (null = left page)
 function goalOf(base) {
-  for (let r = 0; r < base.h; r++) for (let c = 0; c < base.grid[r].length; c++) if (base.grid[r][c] === 'G') return c < 2 * L.N ? { c, r, face: c < L.N ? null : 0 } : { c: c - L.N, r, face: 1 };
+  for (let r = 0; r < base.h; r++) for (let c = 0; c < base.grid[r].length; c++) if (base.grid[r][c] === 'G') {
+    if (base.w === 3 * L.N) return { c: c < 2 * L.N ? c : c - 2 * L.N, r, face: null };   // trifold: a third-page letter reads as its home column (two mirrors)
+    return c < 2 * L.N ? { c, r, face: c < L.N ? null : 0 } : { c: c - L.N, r, face: 1 };
+  }
   return null;
 }
 // Turning the closed book over (logic.js flip): the state after it, null when it crushes you (a stone on the new facing
@@ -112,7 +148,13 @@ function flipOf(B, s) {
   return { c: to.c, r: to.r, a: s.a, face: s.face ^ 1, g: B.press(s.g, s.face ^ 1) };
 }
 // What one node on a path reads as: the posture, '·T' when the third page faces, or 'flip' for the turn itself.
-const stepLabel = (s, prev) => (prev && prev.a === s.a && prev.face !== s.face ? 'flip' : `${L.modeOf(s.a)}${s.a}${s.face ? '·T' : ''}`);
+// Trifold: 'flap<b>' for the flap's crease at b (180 = folded onto the right page); '·F' marks the book moving with the flap folded.
+const stepLabel = (s, prev) => {
+  const tri = s.face >= 2 || (prev && prev.face >= 2) || (prev && prev.face !== s.face && s.face + prev.face === 3);
+  if (tri && (s.face === 2 || (prev && prev.face !== s.face))) return `flap${s.face === 2 ? s.a : s.face === 3 ? 180 : 0}`;
+  if (prev && prev.a === s.a && prev.face !== s.face) return 'flip';
+  return `${L.modeOf(s.a)}${s.a}${s.face === 1 ? '·T' : s.face === 3 ? '·F' : ''}`;
+};
 
 // 0-1 BFS from `from` (default: the level start): angle changes and page turns cost 1, steps cost 0.
 // A `from` state's g indexes a grid table, so pass that table as opts.B when starting mid-game.
@@ -143,6 +185,7 @@ function solve(level, angles = ANGLES, from = null, opts = {}) {
       if (n) next.push([n, 1]);
     }
     if (!opts.noFlip) { const f = flipOf(B, s); if (f) next.push([f, 1]); }
+    for (const f of flaps(B, s, angles, opts)) if (f) next.push([f, 1]);   // trifold: the second crease
     const sh = L.shadows(world, s.a);
     for (const n of L.neighbours(world, world.char, mode, sh)) next.push([{ ...s, c: n.c, r: n.r }, 0]);
     for (const [n, w] of next) {
@@ -185,6 +228,7 @@ function greedy(level) {
     for (const n of L.neighbours(w, w.char, mode, L.shadows(w, s.a))) push({ ...s, c: n.c, r: n.r }, hc);
     for (const a of ANGLES) { if (a === s.a) continue; const n = move(B, s, a); if (n) push(n, hc + 1); }
     const f = flipOf(B, s); if (f) push(f, hc + 1);
+    for (const n of flaps(B, s)) if (n) push(n, hc + 1);
   }
   return visited.size;
 }
@@ -241,6 +285,7 @@ function analyse(level) {
     }
     const f = flipOf(B, s);
     if (f === null) { kills++; traps.add(k); } else if (f) out.push(f);   // turning the book onto a stone is a crush from paper
+    for (const n of flaps(B, s)) { if (n) out.push(n); else { kills++; if (L.isFloor(L.at(w, s.c, s.r))) traps.add(k); } }   // trifold: the flap
     for (const n of L.neighbours(w, w.char, mode, L.shadows(w, s.a))) out.push({ ...s, c: n.c, r: n.r });
     for (const n of out) {
       const nk = keyOf(n);
@@ -290,6 +335,11 @@ function analyse(level) {
     const flips = new Map();
     for (const x of cl) { const f = flipOf(B, x); if (f) flips.set(keyOf(f), f); }
     for (const n of flips.values()) rec(n, depth - 1, [...labels, 'flip']);
+    if (s.face !== 2) for (const b of ANGLES) {   // trifold: each flap posture from a flat book is one idea
+      const nexts = new Map();
+      for (const x of cl) { const n = flapOf(B, x, b); if (n) nexts.set(keyOf(n), n); }
+      for (const n of nexts.values()) rec(n, depth - 1, [...labels, 'flap' + posture(b)]);
+    }
   })(start, Math.min(best.cost, 3), []);   // the posture-sequence enumeration is exponential in par; past 3 report forks as 1 (postmortem §6)
   const dead = deadC.size, forks = best.cost > 3 ? 1 : seqs.size;
   const explore = new Set([...nodes.values()].map(collapse)).size;   // how much board × posture there is to wander
@@ -329,7 +379,7 @@ function analyse(level) {
   const made = best.path.some((s) => {
     if (s.g === 0 || posture(s.a) !== 'lean' || L.isFloor(L.at(world(s), s.c, s.r))) return false;   // either page (ch. 8: a glued stone's shadow on the lifted page)
     const src = L.shadows(world(s), s.a).get(s.c + ',' + s.r);
-    return src != null && !L.isOpaque(B.base.grid[s.r][L.colOf(s, src)]);   // a loose stone that rolled casts a made shadow too
+    return src != null && !L.isOpaque(B.base.grid[s.r][L.colOf(world(s), src, s.r)]);   // a loose stone that rolled casts a made shadow too
   });
   const structure = best.cost + (forks === 1 ? 1 : 0) + (best.walk >= 8 ? 1 : 0) + (trap ? 1 : 0) + (window <= 2 ? 1 : 0) + (combo >= 3 ? 1 : 0);
   const insight = 2 * (misdirect ? 1 : 0) + 2 * (deadEnds >= 1 ? 1 : 0) + (dead >= 12 ? 1 : 0) + 2 * (before ? 1 : 0) + 2 * (made ? 1 : 0)
@@ -365,7 +415,8 @@ function report(lv, withDifficulty = true) {
     out.needsGlue = !without('g');                                   // unsolvable with the glue wiped off
     const st = L.create(lv); out.glueFires = L.stamp(st).some((e) => e.type === 'glue');   // a stone really changes page
   }
-  if (lv.map[0].length > 2 * L.N) out.needsFlip = !solve(lv, ANGLES, null, { noFlip: true });   // unsolvable without turning the page
+  if (lv.trifold) out.needsTrifold = !solve(lv, ANGLES, null, { noFlap: true });   // vol. 3 ch. 12: unsolvable without turning the second crease
+  else if (lv.map[0].length > 2 * L.N) out.needsFlip = !solve(lv, ANGLES, null, { noFlip: true });   // unsolvable without turning the page
   out.stepped15 = !!solve(lv, STEPPED);
   if (withDifficulty && full) {
     const d = analyse(lv);
@@ -375,7 +426,7 @@ function report(lv, withDifficulty = true) {
   return out;
 }
 
-module.exports = { solve, analyse, report, greedy, move, grids, goalOf, hOf, posture, flipOf, startOf, worldOf, ANGLES, STEPPED, SHADE, TIERS };
+module.exports = { solve, analyse, report, greedy, move, sweep, flapOf, flaps, pressed, stepLabel, isTri, grids, goalOf, hOf, posture, flipOf, startOf, worldOf, ANGLES, STEPPED, SHADE, TIERS };
 if (require.main !== module) return;
 require('./test.js');   // logic.js unit tests (crush causes, block reasons); throws on failure
 const GEN = require('./gen.js');   // metric v3 (difficulty-postmortem.md §3): solution length, decoys, wrong turns. Loaded here to avoid a require cycle.
@@ -416,7 +467,8 @@ LEVELS.forEach((lv, i) => {
     ('needsCrane' in r ? `  needsCrane=${r.needsCrane}` : '') +
     ('needsFro' in r ? `  needsFro=${r.needsFro}` : '') +
     ('needsHover' in r ? `  needsHover=${r.needsHover}` : '') +
-    ('needsFlip' in r ? `  needsFlip=${r.needsFlip}` : ''));
+    ('needsFlip' in r ? `  needsFlip=${r.needsFlip}` : '') +
+    ('needsTrifold' in r ? `  needsTrifold=${r.needsTrifold}` : ''));
   if (!full) { fail('UNSOLVABLE'); return; }
   console.log('   ' + full.steps.join(' → '));
   const d = lv.optional ? { score: 99, tier: 'final', structure: '-', insight: '-', par: full.cost, walk: full.walk, forks: '-', window: '-', combo: '-', trap: false, greedy: '-', misdirect: false, undo: '-', away: '-', dead: '-', deadEnds: '-', before: false, made: false } : analyse(lv);   // v2 analyse is exponential in par; 暗信 levels are gated by v3 only
@@ -431,6 +483,7 @@ LEVELS.forEach((lv, i) => {
   const parMax = lv.optional ? PAR_MAX.dark : (PAR_MAX_CH[chapterOf(lv, i)] || {})[lv.tier] || PAR_MAX[lv.tier] || 3, closesMax = lv.optional ? CLOSES_MAX.dark : lv.tier === 'final' ? CLOSES_MAX.final : chapterOf(lv, i) === WET_CHAPTER ? CLOSES_MAX.wet : CLOSES_MAX.main;
   if (full.cost > parMax) fail(`OVER PAR: ${full.cost} posture changes (max ${parMax} for ${lv.optional ? '暗信' : lv.tier})`);
   if (closes > closesMax) fail(`OVER PAR: ${closes} full closes (max ${closesMax})`);
+  if (lv.trifold) { const flapCloses = full.steps.filter((x, i, arr) => x === 'flap180' && arr[i - 1] !== 'flap180').length; if (flapCloses + closes > closesMax + 1) fail(`OVER PAR: ${closes} closes + ${flapCloses} flap folds (max ${closesMax + 1} presses: ch. 12 gives the flap one press of its own)`); }
   if (!lv.optional) { const ch = chapterOf(lv, i); chapterPar[ch] = (chapterPar[ch] || 0) + full.cost; }
   // difficulty: v2 score is a floor for every tier and a ceiling only for teach–mid (postmortem §1.6: the score
   // over-rates "one new fact" levels, so it may not promote a level; it may still keep a teaching level gentle)

@@ -46,7 +46,7 @@ function prep(level) {
   const memo = [];
   const world = (g, face) => ({ grid: G[g], h: base.h, w: base.w, pages, face, start: base.start, lamp: base.lamp });
   const shadowsAt = (g, face, a) => {
-    const row = memo[g] || (memo[g] = [new Map(), new Map()]);
+    const row = memo[g] || (memo[g] = [new Map(), new Map(), new Map(), new Map()]);   // faces 0–1 (ch. 6), 2–3 (trifold, ch. 12)
     let m = row[face].get(a);
     if (!m) { m = L.shadows(world(g, face), a); row[face].set(a, m); }
     return m;
@@ -57,11 +57,15 @@ function prep(level) {
     start: base.start ? C.startOf({ base }) : null };
 }
 const wof = (B, s) => B.world(s.g, s.face);
-const act = (c, face) => (face && c >= L.N ? c + L.N : c);   // grid column behind a visible column
+const act = (c, face) => (face === 2 ? c + L.N : face === 1 && c >= L.N ? c + L.N : c);   // grid column behind a visible column (trifold face 3: see L.colOf)
 
 // One hinge move from s.a to a1 in 5° steps, riding shadows; loose stones roll each time the lifted page passes upright
 // (the grid changes mid-sweep); a close presses after the sweep. The next state, or null (fell / crushed).
 function move(B, s, a1, opts = {}) {
+  if (s.face === 2) return flapOf(B, s, a1, opts);   // trifold (ch. 12): the flap's own crease (check.js flapOf)
+  return sweep(B, s, a1, opts);
+}
+function sweep(B, s, a1, opts = {}) {
   let cur = { c: s.c, r: s.r }, src = null, g = s.g;
   let w = wof(B, s);
   const step = a1 > s.a ? 5 : -5;
@@ -78,9 +82,23 @@ function move(B, s, a1, opts = {}) {
   if (a1 >= L.FOLD_MIN) { const g0 = g; g = B.press(g0, s.face); cur = B.carry(g0, s.face, cur); }   // ch. 10: the crane carries you
   return { c: cur.c, r: cur.r, a: a1, face: s.face, g };
 }
+// Trifold (ch. 12, docs/design-ch12.md §1): the second crease to b — only while the book lies flat (check.js flapOf).
+const isTri = (B) => B.w === 3 * L.N;
+function flapOf(B, s, b, opts = {}) {
+  if (!isTri(B) || opts.noFlap) return undefined;
+  const b0 = s.face === 2 ? s.a : s.a !== 0 ? null : s.face === 3 ? 180 : 0;
+  if (b0 == null || b === b0) return undefined;
+  let from = s;
+  if (s.face !== 2) from = { ...s, ...L.flapIn(wof(B, s), { c: s.c, r: s.r }), face: 2, a: b0 };
+  const n = sweep(B, from, b, opts);
+  if (!n) return null;
+  if (b > 0 && b < L.FOLD_MIN) return n;
+  const out = L.flapOut(wof(B, n), { c: n.c, r: n.r }, b >= L.FOLD_MIN);
+  return out ? { c: out.c, r: out.r, a: 0, face: b >= L.FOLD_MIN ? 3 : 0, g: n.g } : null;
+}
 // Turning the closed book over: next state, null when it crushes, undefined when not allowed here.
 function flipOf(B, s) {
-  if (B.pages < 3 || s.a < L.FOLD_MIN || L.isRight(s.c)) return undefined;
+  if (B.pages < 3 || isTri(B) || s.a < L.FOLD_MIN || L.isRight(s.c)) return undefined;
   const w = { ...wof(B, s), char: { c: s.c, r: s.r } };
   if (L.crushed({ ...w, face: s.face ^ 1 }, w.char, s.a)) return null;
   const to = B.carry(s.g, s.face ^ 1, { c: s.c, r: s.r });
@@ -111,6 +129,12 @@ function explore(B, angles = ANGLES, from = B.start, opts = {}) {
       const f = flipOf(B, s);
       if (f === null) kill();
       else if (f) { const nk = key(f); out.push([nk, 1]); if (!nodes.has(nk)) { nodes.set(nk, f); queue.push(f); } }
+    }
+    if (isTri(B) && s.face !== 2 && s.a === 0) for (const b of angles) {   // trifold: the flap, from a flat book
+      const f = flapOf(B, s, b, opts);
+      if (f === undefined) continue;
+      if (f === null) { kill(); continue; }
+      const nk = key(f); out.push([nk, 1]); if (!nodes.has(nk)) { nodes.set(nk, f); queue.push(f); }
     }
     for (const nb of L.neighbours(w, w.char, mode, B.shadowsAt(s.g, s.face, s.a))) {
       const n = { c: nb.c, r: nb.r, a: s.a, face: s.face, g: s.g }, nk = key(n);
@@ -197,10 +221,11 @@ function measure(level) {
   out.par = bp.par; out.steps = bp.steps; out.len = bp.par + bp.steps;
   const states = bp.path.map((k) => g.nodes.get(k));
   out.closes = states.filter((s, i) => i > 0 && posture(s.a) === 'fold' && posture(states[i - 1].a) !== 'fold').length;
-  out.flips = states.filter((s, i) => i > 0 && s.face !== states[i - 1].face).length;
+  out.flips = states.filter((s, i) => i > 0 && s.face !== states[i - 1].face && (s.face === 1 || states[i - 1].face === 1)).length;
+  out.flapFolds = states.filter((s, i) => i > 0 && s.face === 3 && states[i - 1].face !== 3).length;   // trifold: presses of the flap onto the right page
   const hinge = (p, s) => p.a !== s.a || p.face !== s.face;
   out.solution = states.filter((s, i) => i === 0 || hinge(s, states[i - 1]) || i === states.length - 1 || hinge(states[i + 1], s))
-    .map((s, i, arr) => `${i > 0 && arr[i - 1].a === s.a && arr[i - 1].face !== s.face ? 'flip' : posture(s.a) + s.a + (s.face ? '·T' : '')}@${s.c},${s.r}`).filter((x, i, arr) => x !== arr[i - 1]).join(' → ');
+    .map((s, i, arr) => `${C.stepLabel(s, arr[i - 1]).replace(/^(open|pop|fold)(\d+)/, (m, md, a) => posture(+a) + a)}@${s.c},${s.r}`).filter((x, i, arr) => x !== arr[i - 1]).join(' → ');
   const { d } = distToWin(g);
   // dead states (collapsed), dead basins ≥ 3
   const aliveC = new Set(), deadC = new Set();
@@ -252,12 +277,13 @@ function measure(level) {
   out.made = states.some((s) => {
     if (s.g === 0 || posture(s.a) !== 'lean' || L.isFloor(L.at(wof(B, s), s.c, s.r))) return false;   // either page: under the left-bank lamp a glued stone makes a shadow on the lifted page (ch. 8)
     const src = B.shadowsAt(s.g, s.face, s.a).get(s.c + ',' + s.r);
-    return src != null && !L.isOpaque(B.base.grid[s.r][act(src, s.face)]);   // a rolled loose stone's shadow is made too
+    return src != null && !L.isOpaque(B.base.grid[s.r][L.colOf(wof(B, s), src, s.r)]);   // a rolled loose stone's shadow is made too
   });
   out.ride = states.some((s, i) => i > 0 && s.a !== states[i - 1].a && !L.isFloor(L.at(wof(B, s), s.c, s.r)) && L.at(wof(B, s), s.c, s.r) !== 'A');
   out.glueFires = B.G.length > 1 && B.G.slice(1).some((grid) => grid.some((row, r) => row.some((t, c) => t === 'x' && B.base.grid[r][c] !== 'x')));
   out.needsGlue = all.includes('g') && !solvableFrom(prep({ ...level, map: level.map.map((r) => r.split('g').join('.')) }), B.start);
-  out.needsFlip = pages > 2 && !solvableFrom(B, B.start, ANGLES, { noFlip: true });
+  out.needsTrifold = isTri(B) && !solvableFrom(B, B.start, ANGLES, { noFlap: true });   // ch. 12: unsolvable without the second crease
+  out.needsFlip = pages > 2 && !isTri(B) && !solvableFrom(B, B.start, ANGLES, { noFlip: true });
   out.stepped15 = solvableFrom(B, B.start, STEPPED);
   out.needsPop = !solvableFrom(B, B.start, ANGLES.filter((a) => a < L.POP_MIN || a > L.POP_MAX));
   out.needsFold = !solvableFrom(B, B.start, ANGLES.filter((a) => a < L.FOLD_MIN));
@@ -309,7 +335,7 @@ function measure(level) {
   //             stack / crush maps must be held at once.
   //   backs   – closes made standing on the facing page directly over a left-page stone (a stone's back): the stack is
   //             marked blocked on every map, yet you are inside it. The rule consequence that stopped the owner (暗一, 暗三).
-  const presses = states.map((s, i) => i > 0 && ((posture(s.a) === 'fold' && posture(states[i - 1].a) !== 'fold') || s.face !== states[i - 1].face) ? i : -1).filter((i) => i > 0);
+  const presses = states.map((s, i) => i > 0 && C.pressed(states[i - 1], s) ? i : -1).filter((i) => i > 0);   // closes, turns, trifold flap folds
   const gridSig = (g) => B.G[g].flat().join('');   // grid 1 may equal grid 0 in content (check.js keeps "has been closed" apart)
   // a press changed the grid: judged against the board after the roll of the same sweep (ch. 9), so a roll alone is not a phase
   const rolledBefore = (i) => { const p = states[i - 1], s = states[i]; return s.face === p.face && p.a !== s.a && L.passes(p.a, s.a) ? B.roll(p.g, p.face, { c: p.c, r: p.r }) : p.g; };
@@ -328,7 +354,7 @@ function roles(level, m) {
   const base = m || measure(level);
   if (!base.solvable) return { noise: 0, blockers: 0, loadBearing: 0, irrelevant: 0, reuse: 0, decoys: [] };
   const rows = level.map.map((r) => r.split(''));
-  const variant = (edits) => { const g = rows.map((r) => [...r]); for (const [c, r, t] of edits) g[r][c] = t; return { map: g.map((r) => r.join('')) }; };
+  const variant = (edits) => { const g = rows.map((r) => [...r]); for (const [c, r, t] of edits) g[r][c] = t; return { map: g.map((r) => r.join('')), ...(level.trifold ? { trifold: true } : {}) }; };
   const same = (v) => { const x = measure(v); return x.solvable ? (x.par === base.par ? (x.steps === base.steps ? 'same' : x.steps < base.steps ? 'shorter' : 'longer') : x.par < base.par ? 'shorter' : 'longer') : 'broken'; };
   let noise = 0, blockers = 0, loadBearing = 0; const decoys = [];
   const seenP = new Set();
@@ -536,7 +562,7 @@ function fmt(level, m, r, F) {
   lines.push(`  { id: 'TODO', tier: 'TODO', ${level.lamp || GEN_DEFAULTS.lamp ? `lamp: '${level.lamp || GEN_DEFAULTS.lamp}', ` : ''}map: [`);
   for (const row of level.map) lines.push(`      '${row}',`);
   lines.push('  ] },');
-  lines.push(`  // par ${m.par} steps ${m.steps} len ${m.len} closes ${m.closes}${m.flips ? ' flips ' + m.flips : ''} | wrong ${m.wrong} (first ${m.firstWrong}) narrow ${m.narrow}/${m.par} fatal ${m.fatal} | dead ${m.dead} (${m.deadFrac}) basins ${m.deadEnds} | before ${+m.before} made ${+m.made} ride ${+m.ride} pageSwitch ${m.pageSwitches} | v3 phases ${m.phases} configs ${m.configs} backs ${m.backs} switches ${m.stackSwitches} | elements ${m.elements} voids ${m.voids} needs ${['Fold','Pop','Shade','Key','Ink','Glue','Flip','Wet','Lamp','Gate','Roll','Crane'].filter((k) => m['needs' + k]).join('+') || '-'}${m.ride ? '+ride' : ''}${m.rolls ? ' | rolls ' + m.rolls + ' fills ' + m.fills : ''}${m.carries ? ' | carries ' + m.carries : ''}${m.passes ? ' | passes ' + m.passes + ' fros ' + m.fros : ''}` +
+  lines.push(`  // par ${m.par} steps ${m.steps} len ${m.len} closes ${m.closes}${m.flips ? ' flips ' + m.flips : ''} | wrong ${m.wrong} (first ${m.firstWrong}) narrow ${m.narrow}/${m.par} fatal ${m.fatal} | dead ${m.dead} (${m.deadFrac}) basins ${m.deadEnds} | before ${+m.before} made ${+m.made} ride ${+m.ride} pageSwitch ${m.pageSwitches} | v3 phases ${m.phases} configs ${m.configs} backs ${m.backs} switches ${m.stackSwitches} | elements ${m.elements} voids ${m.voids} needs ${['Fold','Pop','Shade','Key','Ink','Glue','Flip','Wet','Lamp','Gate','Roll','Crane','Trifold'].filter((k) => m['needs' + k]).join('+') || '-'}${m.ride ? '+ride' : ''}${m.rolls ? ' | rolls ' + m.rolls + ' fills ' + m.fills : ''}${m.carries ? ' | carries ' + m.carries : ''}${m.passes ? ' | passes ' + m.passes + ' fros ' + m.fros : ''}` +
     (r ? ` | noise ${r.noise} blockers ${r.blockers} load ${r.loadBearing} irrelevant ${r.irrelevant} reuse ${r.reuse}` : '') + (F != null ? ` | F ${F.toFixed(1)}` : ''));
   lines.push(`  // ${m.solution}`);
   if (r && r.decoys && r.decoys.length) lines.push(`  // decoys: ${r.decoys.join(' ')}`);
@@ -571,7 +597,7 @@ if (require.main === module) {
   if (o.lamp) GEN_DEFAULTS.lamp = String(o.lamp);
   if (o.cmd === 'stats') stats();
   else if (o.cmd === 'show') {
-    const lv = o.arg.includes(',') ? { map: o.arg.split(',') } : LEVELS.find((l) => l.id === o.arg);
+    const lv = o.arg.includes(',') ? { map: o.arg.split(','), ...(o.trifold ? { trifold: true } : {}) } : LEVELS.find((l) => l.id === o.arg);   // ch. 12: --trifold
     const f = full(lv, !!o.v2);
     console.log(fmt(lv, f, f, null));
     console.log(JSON.stringify({ ...f, solution: undefined, decoys: undefined, stoneRoles: undefined }, null, 0));

@@ -26,6 +26,18 @@
 // opening it again shows the left page with the third page facing it instead (s.face = 1); turn it over again and the
 // right page is back. Whichever page faces the left page is read through columns N..2N-1 (at / put), so every rule
 // below — stacks, stamps, shadows, crushing — applies to the facing page without knowing which face it is.
+//
+// Trifold (vol. 3 ch. 12 「三折」, docs/design-ch12.md §1): level.trifold = true binds the third page to the right page's
+// OUTER edge instead (a second crease between columns 7 and 8; s.w = 12 marks it). Two creases, one moving at a time — the
+// book only while the flap is flat or folded onto the right page, the flap only while the book lies flat. s.face says
+// which two sheets are the flat page and the lifted page, and at / put read them through the same visible columns:
+//   face 0  the book, flap flat: left | right + third as ONE rigid leaf (visible 0–11; the third page's loose stones roll
+//           to crease 1 too, across the flat second crease; closed, the third page sticks out past the left page's edge)
+//   face 2  the flap, book flat: right | third — an ordinary book whose flat page is the right page (visible c = column c + 4;
+//           the left page lies at visible −4..−1, out of reach); third-page column c meets right-page column 15 − c
+//   face 3  the book, flap folded onto the right page: left | a two-layer leaf. Each square of it reads the third page's
+//           square over it (column 15 − c) unless that is a gap — then the right page shows through; a stone in either
+//           layer is a stone. Left column q meets third-page column q + 8: two mirrors bring a column home.
 (function (root) {
   const N = 4;
   const FOLD_MIN = 155;              // folded: stacked tiles connect
@@ -34,6 +46,8 @@
   const STAND = 90;                  // the lifted page is upright or past it: loose stones roll when the hinge crosses this
 
   const mirror = (c) => 2 * N - 1 - c;
+  const trifold = (s) => s.w === 3 * N;                          // vol. 3 ch. 12: the third page hangs off the right page's outer edge
+  const vw = (s) => (trifold(s) && !s.face ? 3 * N : 2 * N);   // visible columns: face 0 of a trifold shows all three pages
   const proj = (c) => (c < N ? c : mirror(c));
   const isRight = (c) => c >= N;
 
@@ -65,7 +79,7 @@
     if (!lit(a)) return out;
     const lamp = lampOf(s);
     for (let r = 0; r < s.h; r++) {
-      if (lamp.includes('R')) for (let c = N; c < 2 * N; c++) {
+      if (lamp.includes('R')) for (let c = N; c < vw(s); c++) {
         if (!isOpaque(at(s, c, r))) continue;
         const q = shadowColumn(c, a);
         if (q >= 0 && !out.has(q + ',' + r)) out.set(q + ',' + r, c);
@@ -85,7 +99,7 @@
     let start = null;
     grid.forEach((row, r) => row.forEach((t, c) => { if (t === 'S') start = { c, r }; }));
     // pages: 2 (left | right) or 3 (left | right | third, the back of the right leaf). The start is on the first spread.
-    return { grid, h: grid.length, w: 2 * N, pages: grid[0].length / N, face: 0, char: { ...start }, start, init: level.map, lamp: level.lamp || 'R' };
+    return { grid, h: grid.length, w: level.trifold ? 3 * N : 2 * N, pages: grid[0].length / N, face: 0, char: { ...start }, start, init: level.map, lamp: level.lamp || 'R' };
   }
 
   // Back to how the level began: the grids as drawn, the right page facing the left page again, the figure on the start.
@@ -95,10 +109,17 @@
     s.grid = s.init.map((row) => row.split('')); s.face = 0; s.char = { ...s.start };
   }
 
-  // The grid column behind a visible column: the facing page's columns N..2N-1 read from the third page when turned.
-  const colOf = (s, c) => (s.face && c >= N ? c + N : c);
-  const at = (s, c, r) => (r >= 0 && r < s.h && c >= 0 && c < s.w ? s.grid[r][colOf(s, c)] : '-');
-  const put = (s, c, r, t) => { s.grid[r][colOf(s, c)] = t; };
+  // The grid column behind a visible column: the facing page's columns N..2N-1 read from the third page when turned;
+  // trifold face 2 is shifted one page (right | third); trifold face 3 reads the top layer of the folded leaf (row r).
+  function colOf(s, c, r) {
+    if (s.face === 2) return c + N;
+    if (c < N || !s.face) return c;
+    if (s.face === 1) return c + N;
+    const T = 4 * N - 1 - c, top = s.grid[r][T];   // face 3: the third page folded over the right page
+    return isBlock(top) || (!isBlock(s.grid[r][c]) && top !== '-') ? T : c;
+  }
+  const at = (s, c, r) => (r >= 0 && r < s.h && c >= 0 && c < vw(s) ? s.grid[r][colOf(s, c, r)] : '-');
+  const put = (s, c, r, t) => { s.grid[r][colOf(s, c, r)] = t; };
 
   // Walkable stacked position (q in 0..N-1) when folded.
   function foldOpen(s, q, r) {
@@ -124,7 +145,8 @@
     const out = [];
     for (const [dc, dr] of DIRS) {
       const nc = c + dc, nr = r + dr;
-      if (nc < 0 || nc >= s.w || nr < 0 || nr >= s.h) continue;
+      if (nc < 0 || nc >= vw(s) || nr < 0 || nr >= s.h) continue;
+      if ((c === 2 * N - 1 && nc === 2 * N) || (c === 2 * N && nc === 2 * N - 1)) continue;   // trifold face 0: the second crease
       const crosses = (c === N - 1 && nc === N) || (c === N && nc === N - 1);
       if (crosses) {
         if (mode === 'pop' && at(s, c, r) === 'p' && at(s, nc, nr) === 'p') out.push({ c: nc, r: nr });
@@ -145,12 +167,15 @@
 
   // Why the book crushed you (for the on-screen / spoken reason): 'glue' when you stood on glue and it pulled the
   // stone below up onto your square, 'stone' when a right-page stone came down on you, null when you are safe.
-  const crushCause = (s, from, a) => (!crushed(s, from, a) ? null : isRight(from.c) ? 'glue' : 'stone');
+  const crushCause = (s, from, a) => (offBook(s, from, a) ? 'off' : !crushed(s, from, a) ? null : isRight(from.c) ? 'glue' : 'stone');
+  // Trifold face 0 (vol. 3 ch. 12): the book closes with the flap open — the third page swings past the left page's outer
+  // edge and lies face down on the table. Whoever stands on it goes with it: off the book.
+  const offBook = (s, from, a) => a >= FOLD_MIN && trifold(s) && !s.face && from.c >= 2 * N;
 
   // Why a cell cannot be entered, in the given mode (c is the actual column; folded, its stack is used):
   // 'edge' | 'stone' | 'card' (a paper card lying on a stone: folded, the stack is blocked) | 'door' | 'gap' | null.
   function cellBlock(s, c, r, mode, sh) {
-    if (r < 0 || r >= s.h || c < 0 || c >= s.w) return 'edge';
+    if (r < 0 || r >= s.h || c < 0 || c >= vw(s) || (mode === 'fold' && c >= 2 * N)) return 'edge';
     if (mode === 'fold') {
       const q = proj(c), L = at(s, q, r), R = at(s, mirror(q), r);
       if (foldOpen(s, q, r)) return null;
@@ -172,8 +197,8 @@
     const col = (p) => (mode === 'fold' ? proj(p.c) : p.c);
     if (neighbours(s, from, mode, sh).some((n) => col(n) === col(from) + dc && n.r === from.r + dr)) return null;
     const c = col(from) + dc, r = from.r + dr;
-    if (r < 0 || r >= s.h || c < 0 || c >= (mode === 'fold' ? N : s.w)) return { why: 'edge', c, r };
-    if (mode !== 'fold' && ((from.c === N - 1 && dc === 1) || (from.c === N && dc === -1))) return { why: 'crease', c, r };
+    if (r < 0 || r >= s.h || c < 0 || c >= (mode === 'fold' ? N : vw(s))) return { why: 'edge', c, r };
+    if (mode !== 'fold' && ((from.c === N - 1 && dc === 1) || (from.c === N && dc === -1) || (from.c === 2 * N - 1 && dc === 1) || (from.c === 2 * N && dc === -1))) return { why: 'crease', c, r };
     return { why: cellBlock(s, c, r, mode, sh) || 'gap', c, r };
   }
 
@@ -204,7 +229,8 @@
   // Returns the cell the character ends up on, or null when it falls (or is crushed).
   // On an angle gate the character stays while the lean lasts and falls when it ends (the flap lies down).
   function ride(s, from, src, a) {
-    if (crushed(s, from, a)) return null;
+    if (from.c < 0) return from;   // trifold face 2: on the left page, beside the flap's book — nothing there moves
+    if (crushed(s, from, a) || offBook(s, from, a)) return null;
     const t = at(s, from.c, from.r);
     if (isFloor(t)) return from;
     if (t === 'A') return lit(a) ? from : null;
@@ -260,11 +286,11 @@
   // meant to cross on a shadow may be paper by the time you get there (a shadow over paper carries no one).
   function bleed(s) {
     const wet = [];
-    for (let r = 0; r < s.h; r++) for (let c = 0; c < s.w; c++) if (at(s, c, r) === 'I') wet.push([c, r]);
+    for (let r = 0; r < s.h; r++) for (let c = 0; c < 2 * N; c++) if (at(s, c, r) === 'I') wet.push([c, r]);
     const cells = [], seen = new Set();
     for (const [c, r] of wet) for (const [dc, dr] of DIRS) {
       const nc = c + dc, nr = r + dr, k = nc + ',' + nr;
-      if (nc < 0 || nc >= s.w || nr < 0 || nr >= s.h || isRight(nc) !== isRight(c) || seen.has(k)) continue;
+      if (nc < 0 || nc >= 2 * N || nr < 0 || nr >= s.h || isRight(nc) !== isRight(c) || seen.has(k)) continue;
       const t = at(s, nc, nr);
       if (t === '-' || t === 'g') { seen.add(k); put(s, nc, nr, 'I'); cells.push({ c: nc, r: nr, was: t }); }
     }
@@ -312,7 +338,7 @@
   // whoever stood on cells[0] (see carried()).
   function fly(s) {
     const events = [], cranes = [];
-    for (let r = 0; r < s.h; r++) for (let c = 0; c < s.w; c++) if (at(s, c, r) === 'h') cranes.push({ c, r });
+    for (let r = 0; r < s.h; r++) for (let c = 0; c < 2 * N; c++) if (at(s, c, r) === 'h') cranes.push({ c, r });   // only the two pressed pages
     for (const { c, r } of cranes) {
       const m = mirror(c), t = at(s, m, r);
       if (t === '-' || t === '.') { put(s, m, r, 'h'); put(s, c, r, '.'); events.push({ type: 'crane', cells: [{ c, r }, { c: m, r }], to: { c: m, r } }); }
@@ -339,7 +365,7 @@
   // nearest the crease first; `fig` is the figure's cell (default s.char), the one thing on the page that can hold a stone.
   function roll(s, fig = s.char) {
     const events = [];
-    for (let r = 0; r < s.h; r++) for (let c = N + 1; c < 2 * N; c++) {
+    for (let r = 0; r < s.h; r++) for (let c = N + 1; c < vw(s); c++) {   // trifold face 0: the third page rolls with the right page
       if (at(s, c, r) !== 'r') continue;
       if (fig && fig.c === c - 1 && fig.r === r) continue;
       const ahead = at(s, c - 1, r);
@@ -356,7 +382,7 @@
   // that stays — the left page. The leaf under your feet cannot be turned. Why not, or null when allowed:
   // 'single' (this book has no third page) | 'open' (the book is not closed) | 'leaf' (you stand on the right leaf).
   function flipBlock(s, a) {
-    if (s.pages < 3) return 'single';
+    if (s.pages < 3 || trifold(s)) return 'single';
     if (a < FOLD_MIN) return 'open';
     if (isRight(s.char.c)) return 'leaf';
     return null;
@@ -375,6 +401,22 @@
     return { events, crush };
   }
 
+  // Trifold (vol. 3 ch. 12): taking hold of the other crease re-reads the same figure in the other view.
+  // flapIn: the book lies flat (face 0, or face 3 with the flap folded) → the flap's view (face 2). On the folded leaf you
+  // stand on its top layer — the third page where it has paper, the right page through its holes.
+  function flapIn(s, fig) {
+    if (s.face === 3 && fig.c >= N) return { c: colOf(s, fig.c, fig.r) - N, r: fig.r };
+    return { c: fig.c - N, r: fig.r };
+  }
+  // flapOut: the flap reached flat (b = 0 → face 0) or folded (b = 180 → face 3). null when the folded leaf has a stone under
+  // your feet (you stood on the third page over a right-page stone: v1 calls that a squeeze, docs/design-ch12.md §1).
+  function flapOut(s, fig, folded) {
+    const c = fig.c + N;
+    if (!folded) return { c, r: fig.r };
+    const v = c < 2 * N ? c : 4 * N - 1 - c;
+    return isFloor(at({ ...s, face: 3 }, v, fig.r)) ? { c: v, r: fig.r } : null;
+  }
+
   function isWin(s, mode) {
     const { c, r } = s.char;
     if (at(s, c, r) === 'G') return true;
@@ -382,7 +424,7 @@
   }
 
   const api = { N, FOLD_MIN, POP_MIN, POP_MAX, SHADE_MIN, STAND, mirror, proj, isRight, modeOf, isFloor, isBlock,
-    isOpaque, standing, passes, shadowColumn, shadowColumnL, lampOf, lit, shadows, crushed, crushCause, cellBlock, stepBlock, pathBlock, ride, create, restart, at, colOf, neighbours, findPath, stamp,
+    isOpaque, standing, passes, trifold, vw, offBook, flapIn, flapOut, shadowColumn, shadowColumnL, lampOf, lit, shadows, crushed, crushCause, cellBlock, stepBlock, pathBlock, ride, create, restart, at, colOf, neighbours, findPath, stamp,
     bleed, roll, fly, carried, flipBlock, flip, isWin };
   if (typeof module !== 'undefined') module.exports = api; else root.FoldLogic = api;
 })(this);
