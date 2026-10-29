@@ -99,6 +99,9 @@
       'kind.h': '纸鹤', 'noun.h': '纸鹤', carried: '鹤带你飞到了{col}', craneFlew: '鹤飞到了{col}', craneStuck: '落点被占了，鹤飞不动', craneSoaked: '鹤染了墨，不飞了', craneGlued: '鹤粘在胶上了',
       'letter.10.title': '右岸来信', 'letter.10.body': '石头太重了，我折了只鹤。\n每合一次书，它就飞到你那页同样的位置——\n同样的位置，在你那页是反过来的。\n站在它上面。', 'letter.10.sign': '——右岸', 'letter.10.end': '卷三《倾》第二章完。\n下一章，什么都没发生的时候。',
       'slip.crane.title': '纸鹤', 'slip.crane.body': '一格折成鹤的纸，能站。书每合上一次——翻也算——它就飞到对页同一行的镜像格，站在它上面的人跟着飞。落点上有东西，它就不飞。', 'slip.crane.pic': '图：站上鹤，合上，你在对页；落点有石头，它留在原地。',
+      'chHead.11': '十一 · 来回', 'ch.11.line': '立起来，又放下。什么都没发生的时候，其实什么都发生了。', 'paper.ch11': '硬卡纸。立起来过，看不出来。',
+      'letter.11.title': '左岸来信', 'letter.11.body': '立起来，又放下。\n你以为什么都没发生——\n石头已经在河里了，影子已经换了列。\n来回几次，我数着。', 'letter.11.sign': '——左岸', 'letter.11.end': '卷三《倾》第三章完。\n下一章，信要折两次。',
+      'slip.fro.title': '来回', 'slip.fro.body': '斜起，再放平：书经过立起两次，没合上。每颗松石滚了两格，可是没有压——胶没粘，墨没印，鹤没飞。合上再打开也是两次过立，中间却多了一次压。', 'slip.fro.pic': '图：斜起，石头滚一格；放平，它掉进缺口；对面的胶什么也没粘到。',
       'letter.6.title': '右岸来信', 'letter.6.body': '你翻过来了。\n我在这一页等了很久，久到字都写到了背面。\n不要紧——合上的时候，\n哪一面对着你，由你定。', 'letter.6.sign': '——右岸', 'letter.6.end': '卷二《翻页》第二章完。\n背面还有字。',
     },
 
@@ -188,6 +191,9 @@
       'kind.h': 'paper crane', 'noun.h': 'paper crane', carried: 'the crane carried you to {col}', craneFlew: 'the crane flew to {col}', craneStuck: 'its landing is taken: the crane cannot fly', craneSoaked: 'the crane is soaked with ink and will not fly', craneGlued: 'the crane is stuck on the glue',
       'letter.10.title': 'A Letter from the Right Bank', 'letter.10.body': 'The stones were too heavy, so I folded a crane.\nEach time the book closes it flies to the same square on your page —\nthe same square, which on your page is the other way round.\nStand on it.', 'letter.10.sign': '— the Right Bank', 'letter.10.end': 'End of Book Three, chapter two.\nNext, when nothing happens.',
       'slip.crane.title': 'Paper Crane', 'slip.crane.body': 'A square of paper folded into a crane; you can stand on it. Each time the book closes — a turn counts too — it flies to the mirror square on the facing page, and whoever stands on it flies with it. If something sits on its landing, it does not fly.', 'slip.crane.pic': 'Picture: stand on the crane, close, and you are on the other page; with a stone on its landing it stays.',
+      'chHead.11': '11 · To and Fro', 'ch.11.line': 'Stand it up, lay it down. When nothing happened, everything did.', 'paper.ch11': 'Card. It has stood up before; you cannot tell.',
+      'letter.11.title': 'A Letter from the Left Bank', 'letter.11.body': 'Stood it up, laid it down.\nYou think nothing happened —\nthe stone is in the river already, the shadow has changed its column.\nTo and fro, a few times. I counted.', 'letter.11.sign': '— the Left Bank', 'letter.11.end': 'End of Book Three, chapter three.\nNext, a letter folded twice.',
+      'slip.fro.title': 'To and Fro', 'slip.fro.body': 'Lean, then lay it flat: the page passed upright twice and the book never closed. Every loose stone rolled two squares — but nothing was pressed: no glue took, no ink printed, no crane flew. Close and open again is the same two passes with a press in between.', 'slip.fro.pic': 'Picture: lean, the stone rolls one; flatten, it drops into the gap; the glue across from it took nothing.',
       'letter.6.title': 'A Letter from the Right Bank', 'letter.6.body': 'You turned the page.\nI waited on this one so long the writing ran onto the back.\nNever mind — when the book is shut,\nwhich face is towards you is yours to choose.', 'letter.6.sign': '— the Right Bank', 'letter.6.end': 'End of Book Two, chapter two.\nThere is more on the back.',
     },
 
@@ -277,6 +283,9 @@
       'kind.h': '紙の鶴', 'noun.h': '紙の鶴', carried: '鶴がきみを{col}へ運んだ', craneFlew: '鶴が{col}へ飛んだ', craneStuck: '降り場がふさがっている：鶴は飛べない', craneSoaked: '鶴は墨に染みて、もう飛ばない', craneGlued: '鶴は糊に貼りついた',
       'letter.10.title': '右岸からの手紙', 'letter.10.body': '石は重すぎたから、鶴を折った。\n本を閉じるたび、きみの頁の同じ場所へ飛ぶ——\n同じ場所は、きみの頁では裏返し。\nその上に立って。', 'letter.10.sign': '——右岸より', 'letter.10.end': '第三巻『傾』第二章 了。\n次の章、何も起きなかったとき。',
       'slip.crane.title': '紙の鶴', 'slip.crane.body': '鶴に折った一枡の紙。立てる。本を閉じるたび——翻すのも数える——向かいの頁の同じ行の鏡の枡へ飛び、上に立つ人も一緒に飛ぶ。降り場に何かあれば飛ばない。', 'slip.crane.pic': '図：鶴に乗って閉じれば向こうの頁。降り場に石があれば、その場に残る。',
+      'chHead.11': '十一 · 往き来', 'ch.11.line': '立てて、また寝かせる。何も起きなかったとき、実はすべてが起きていた。', 'paper.ch11': '厚紙。立てたことがある。見ても分からない。',
+      'letter.11.title': '左岸からの手紙', 'letter.11.body': '立てて、また寝かせた。\n何も起きなかったと思うだろう——\n石はもう川の中、影はもう列を変えた。\n何度か往き来した。数えていた。', 'letter.11.sign': '——左岸より', 'letter.11.end': '第三巻『傾』第三章 了。\n次の章、手紙は二度折る。',
+      'slip.fro.title': '往き来', 'slip.fro.body': '傾けて、また平らに：頁は二度立ち上がり、本は閉じていない。転がる石はみな二枡転がった——でも圧はない：糊は貼らず、墨は刷らず、鶴は飛ばない。閉じて開くのも二度の立ち上がりだが、間に一度の圧がある。', 'slip.fro.pic': '図：傾けると石が一枡転がる。平らにすると隙間へ落ちる。向かいの糊は何も貼れなかった。',
       'letter.6.title': '右岸からの手紙', 'letter.6.body': 'めくってくれたね。\nこの頁で長く待ちすぎて、字が裏まで続いた。\nかまわない——閉じたとき、\nどちらの面がきみに向くかは、きみが決める。', 'letter.6.sign': '——右岸より', 'letter.6.end': '第二巻『頁をめくる』第二章 了。\n裏にも、まだ字がある。',
     },
 
@@ -366,6 +375,9 @@
       'kind.h': '종이학', 'noun.h': '종이학', carried: '학이 너를 {col:으로} 데려갔어요', craneFlew: '학이 {col:으로} 날아갔어요', craneStuck: '내려앉을 자리가 막혀서 학이 못 날아요', craneSoaked: '학이 먹에 물들어 더는 못 날아요', craneGlued: '학이 풀에 붙었어요',
       'letter.10.title': '오른쪽 강가에서 온 편지', 'letter.10.body': '돌이 너무 무거워서, 학을 접었어.\n책을 닫을 때마다 네 면의 같은 자리로 날아가——\n같은 자리는, 네 면에선 거꾸로야.\n그 위에 올라서.', 'letter.10.sign': '— 오른쪽 강가에서', 'letter.10.end': '제3권 《기울다》 2장 끝.\n다음 장, 아무 일도 없었을 때.',
       'slip.crane.title': '종이학', 'slip.crane.body': '학으로 접은 종이 한 칸. 올라설 수 있어요. 책을 닫을 때마다——넘기는 것도 쳐요——맞은편 면 같은 줄의 거울 칸으로 날아가고, 위에 선 사람도 함께 날아요. 내려앉을 자리에 뭔가 있으면 날지 않아요.', 'slip.crane.pic': '그림: 학 위에서 닫으면 맞은편 면. 자리에 돌이 있으면 그대로 있어요.',
+      'chHead.11': '11장 · 오가기', 'ch.11.line': '세웠다가, 다시 눕혀요. 아무 일도 없었을 때, 사실은 다 일어났어요.', 'paper.ch11': '두꺼운 종이. 세운 적이 있어요. 봐서는 몰라요.',
+      'letter.11.title': '왼쪽 강가에서 온 편지', 'letter.11.body': '세웠다가, 다시 눕혔어.\n아무 일도 없었다고 생각하겠지——\n돌은 벌써 강에 있고, 그림자는 벌써 줄을 바꿨어.\n몇 번을 오갔는지, 세고 있었어.', 'letter.11.sign': '— 왼쪽 강가에서', 'letter.11.end': '제3권 《기울다》 3장 끝.\n다음 장, 편지는 두 번 접어요.',
+      'slip.fro.title': '오가기', 'slip.fro.body': '기울였다가 다시 눕혀요: 면이 두 번 곧추섰고 책은 닫히지 않았어요. 구르는 돌은 모두 두 칸 굴렀지만 누른 적은 없어요——풀은 안 붙고, 먹은 안 찍히고, 학은 안 날아요. 닫았다 여는 것도 두 번 곧추서지만, 사이에 한 번 눌러요.', 'slip.fro.pic': '그림: 기울이면 돌이 한 칸 굴러요. 눕히면 틈에 빠져요. 맞은편 풀은 아무것도 못 붙였어요.',
       'letter.6.title': '오른쪽 강가에서 온 편지', 'letter.6.body': '네가 페이지를 넘겼구나.\n이 페이지에서 너무 오래 기다려 글이 뒷면까지 이어졌다.\n괜찮아. 책을 닫았을 때\n어느 면이 너를 향할지는 네가 정하니까.', 'letter.6.sign': '— 오른쪽 강가에서', 'letter.6.end': '제2권 《페이지를 넘기다》 제2장 끝.\n뒷면에 글이 더 있다.',
     },
   };

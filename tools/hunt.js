@@ -92,7 +92,7 @@ const T = {
         for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nc = c + dc, nr = r + dr; if (nc < 0 || nc >= 8 || nr < 0 || nr >= b.length || L.isRight(nc) !== L.isRight(c)) continue;
           if (b[nr][nc] === '-' && g2[nr][nc] === 'I' && X.states.some((s) => s.c === nc && s.r === nr && X.B.G[s.g][nr][nc] === 'I')) road = true; } }
       return [soaked, road, m.needsWet, m.needsCrane, m.closes >= 2, m.phases >= 2]; } },
-  ferry: { rows: 5, pages: 2, lamp: null, tiles: '.-xrh', par: 4, closes: 2, minpar: 3, need: 'roll+crane', elements: 8, minlen: 15, phases: 0, backs: 0, carries: 2,
+  ferry: { rows: 5, pages: 2, lamp: null, tiles: '.-xrh', par: 5, closes: 2, minpar: 4, need: 'roll+crane', elements: 8, minlen: 15, phases: 0, backs: 0, carries: 2,
     seed: ['S.h.....', '-.--.r-.', '.G-..r..', 'x---.-..', '..-..-r.'],
     pred: (m, X) => { // the crane flies back and forth at every close: the solution rides it OVER and BACK (carried twice), and between the two it stands on the right page holding a loose stone through a pass (9-4) — you crossed only to hold the stone
       let held = false; const st = X.states; for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (p.face !== s.face || p.a === s.a || !L.passes(p.a, s.a) || !L.isRight(p.c)) continue;
@@ -103,10 +103,38 @@ const T = {
     pred: (m, X) => { // the turn is a press too: a flip in the solution carries the figure, standing on a left-page crane, to the THIRD page
       const st = X.states; let flipCarry = false; for (let i = 1; i < st.length; i++) if (st[i].face !== st[i - 1].face && L.isRight(st[i].c) !== L.isRight(st[i - 1].c)) flipCarry = true;
       return [flipCarry, m.needsFlip, m.needsCrane, m.closes >= 1]; } },
+  // ---- vol. 3 ch. 11 「来回」 (docs/design-ch11.md): a lean that comes back rolled everything twice and pressed nothing ----
+  still: { rows: 4, pages: 2, lamp: 'L', tiles: '.-xr', par: 3, closes: 1, minpar: 2, need: 'roll+lamp', elements: 7, minlen: 11, phases: 0, backs: 0, fros: 1,
+    seed: ['x---S.r-', '.---.-.G', '-x--..r.', '----.---'],
+    pred: (m, X) => { // between the two passes of a lean that comes back, the figure stands on the LIFTED page on a left-lamp shadow — floor the rolls do not move (the stone that casts it is on the flat page)
+      let onL = false; for (const s of X.states) { if (G_posture(s.a) !== 'lean' || !L.isRight(s.c) || L.isFloor(L.at(X.B.world(s.g, s.face), s.c, s.r))) continue;
+        const src = X.B.shadowsAt(s.g, s.face, s.a).get(s.c + ',' + s.r); if (src != null && src !== 'A' && !L.isRight(src)) onL = true; }
+      return [(m.fros || 0) >= 1, onL, m.needsLamp, m.needsRoll, m.needsFro]; } },
+  stay: { rows: 4, pages: 2, lamp: null, tiles: '.-xrh', par: 3, closes: 1, minpar: 3, need: 'roll+crane', elements: 8, minlen: 11, phases: 0, backs: 0, fros: 1, carries: 1,
+    seed: ['S.h.....', '-.--..r-', '..--.-.G', 'x---..r.'],
+    pred: (m, X) => { // the crane carries you over (one close); on the far page you buy two more passes WITHOUT closing (a second close would fly the crane — and you with it if you stood on it)
+      const st = X.states; let carryAt = -1; for (let i = 1; i < st.length; i++) if (G_posture(st[i].a) === 'fold' && G_posture(st[i - 1].a) !== 'fold' && L.isRight(st[i].c) !== L.isRight(st[i - 1].c)) { carryAt = i; break; }
+      const fr = frosOf(st); return [carryAt > 0, fr.some(([i]) => i > carryAt), m.needsCrane, m.needsRoll, m.needsFro, m.closes <= 1]; } },
+  gatefro: { rows: 5, pages: 2, lamp: null, tiles: '.-xrA', par: 5, closes: 2, minpar: 4, need: 'roll+gate', elements: 9, minlen: 15, phases: 0, backs: 0, fros: 1,
+    seed: ['S.-..A.r', '.x--.-..', '--.-..r.', '.--x.-.G', '-.-.----'],
+    pred: (m, X) => { // the gate stands only while the lean lasts and a loose stone never rolls INTO it: between the two passes of a lean that comes back the figure walks through the gate; somewhere on the way a loose stone is stopped by a gate
+      const st = X.states; let through = false, stopped = false; for (const s of st) { const w = X.B.world(s.g, s.face); if (G_posture(s.a) === 'lean' && L.at(w, s.c, s.r) === 'A') through = true;
+        for (let r = 0; r < X.B.h; r++) for (let c = 5; c < 8; c++) if (L.at(w, c, r) === 'r' && L.at(w, c - 1, r) === 'A') stopped = true; }
+      return [(m.fros || 0) >= 1, through, stopped, m.needsGate, m.needsRoll, m.needsFro]; } },
+  turn: { rows: 4, pages: 3, lamp: null, tiles: '.-xr', par: 6, closes: 3, minpar: 5, need: 'roll+flip', elements: 10, minlen: 18, phases: 0, backs: 0, fros: 1,
+    seed: ['S..-...r-.r-', '.x-..-..-.-.', '---.-..-..-G', '.-.--..r--.-'],
+    pred: (m, X) => { // after the turn the lifted page is the THIRD page: a pass on the turned book rolls its stones while a loose stone on the right page (the back of the leaf) stays where you left it
+      const st = X.states; let third = false; for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (p.face !== 1 || s.face !== 1 || p.a === s.a || !L.passes(p.a, s.a)) continue;
+        if (X.B.roll(p.g, 1, { c: p.c, r: p.r }) === p.g) continue; const g = X.B.G[p.g]; for (let r = 0; r < X.B.h; r++) for (let c = 4; c < 8; c++) if (g[r][c] === 'r') third = true; }
+      return [third, (m.fros || 0) >= 1, m.needsFlip, m.needsRoll, m.needsFro]; } },
 };
+// ch. 11: the leans that come back on a path — pairs [i, j] of consecutive hinge moves that both pass upright, no press between, neither end closed
+function frosOf(st) { const h = []; for (let i = 1; i < st.length; i++) if (st[i].face === st[i - 1].face && st[i].a !== st[i - 1].a) h.push(i);
+  const out = []; for (let k = 0; k + 1 < h.length; k++) { const i = h[k], j = h[k + 1]; if (!L.passes(st[i - 1].a, st[i].a) || !L.passes(st[j - 1].a, st[j].a)) continue;
+    if ([st[i - 1], st[i], st[j]].some((s) => G_posture(s.a) === 'fold') || st.slice(i, j).some((s, x, arr) => x > 0 && s.face !== arr[x - 1].face)) continue; out.push([i, j]); k++; } return out; }
 const G_posture = C.posture;
 const t = T[name]; if (!t) throw new Error('name');
-const opts = { ...t, iters: 1e9, restarts: 1, seed: seedN, nodead: false, noride: false, leftx: false, maxvoid: 0.62, maxlen: 0, matched: false, goalT: false, minflips: 0, configs: 0, switches: 0, mincloses: 0 };
+const opts = { ...t, iters: 1e9, restarts: 1, seed: seedN, nodead: false, noride: false, leftx: false, maxvoid: 0.62, maxlen: 0, matched: false, goalT: false, minflips: 0, configs: 0, switches: 0, mincloses: 0, fros: t.fros || 0 };
 const mk = (map) => (t.lamp ? { map, lamp: t.lamp } : { map });
 function detail(level) { const B = G.prep(level); const g = G.explore(B); const bp = G.bestPath(g); if (!bp) return null; return { B, states: bp.path.map((k) => g.nodes.get(k)) }; }
 function score(level) {

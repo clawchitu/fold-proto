@@ -61,12 +61,13 @@ const act = (c, face) => (face && c >= L.N ? c + L.N : c);   // grid column behi
 
 // One hinge move from s.a to a1 in 5° steps, riding shadows; loose stones roll each time the lifted page passes upright
 // (the grid changes mid-sweep); a close presses after the sweep. The next state, or null (fell / crushed).
-function move(B, s, a1) {
+function move(B, s, a1, opts = {}) {
   let cur = { c: s.c, r: s.r }, src = null, g = s.g;
   let w = wof(B, s);
   const step = a1 > s.a ? 5 : -5;
+  const rolls = !opts.noFro || a1 >= L.FOLD_MIN || s.a >= L.FOLD_MIN;   // ch. 11: opts.noFro = passes count only with a press (check.js move)
   for (let a = s.a + step; step > 0 ? a <= a1 : a >= a1; a += step) {
-    if (L.passes(a - step, a)) { g = B.roll(g, s.face, cur); w = B.world(g, s.face); src = null; }
+    if (rolls && L.passes(a - step, a)) { g = B.roll(g, s.face, cur); w = B.world(g, s.face); src = null; }
     const onShadow = !L.isFloor(L.at(w, cur.c, cur.r));
     if (onShadow) { if (src == null) src = B.shadowsAt(g, s.face, a - step).get(cur.c + ',' + cur.r) ?? null; } else src = null;
     const to = L.ride({ ...w, char: cur }, cur, src, a);
@@ -99,7 +100,7 @@ function explore(B, angles = ANGLES, from = B.start, opts = {}) {
     const kill = () => { const kk = kills.get(k) || { n: 0, paper: 0 }; kk.n++; if (L.isFloor(L.at(w, s.c, s.r))) kk.paper++; kills.set(k, kk); };
     for (const a of angles) {
       if (a === s.a) continue;
-      const n = move(B, s, a);
+      const n = move(B, s, a, opts);
       if (!n) { kill(); continue; }
       const nk = key(n);
       out.push([nk, 1]);
@@ -265,6 +266,7 @@ function measure(level) {
   out.needsWet = all.includes('I') && !solvableFrom(prep({ ...level, map: level.map.map((r) => r.split('I').join('.')) }), B.start);   // ch. 7: the wet ink dried into paper
   const lamp = (level.lamp || GEN_DEFAULTS.lamp || 'R');
   out.needsLamp = lamp !== 'R' && !solvableFrom(prep({ ...level, lamp: 'R' }), B.start);   // ch. 8: the lamp back on the right bank
+  if (all.includes('r')) { const bf = bestPath(explore(B, ANGLES, B.start, { noFro: true })); out.needsFro = !bf || bf.par > bp.par; }   // ch. 11: unsolvable, or dearer, when only a press buys a pass
   out.needsGate = all.includes('A') && !solvableFrom(prep({ ...level, map: level.map.map((r) => r.split('A').join('.')) }), B.start);   // ch. 8: the gate laid down as paper
   out.needsRoll = all.includes('r') && !solvableFrom(prep({ ...level, map: level.map.map((r) => r.split('r').join('x')) }), B.start);   // ch. 9: the loose stones glued down
   out.needsCrane = all.includes('h') && !solvableFrom(prep({ ...level, map: level.map.map((r) => r.split('h').join('.')) }), B.start);   // ch. 10: the cranes unfolded into paper
@@ -281,8 +283,23 @@ function measure(level) {
     out.rolls++;
     if ([...gridSigOf(p.g)].some((t, k) => t === '-' && gridSigOf(g1)[k] === '.')) out.fills++;
   }
+  // ch. 11 「来回」 (docs/design-ch11.md): passes are a resource spent apart from closes.
+  //   passes – hinge moves in the solution that take the lifted page through upright (every one rolls the loose stones)
+  //   fros   – a lean that comes back: two consecutive hinge moves that both pass upright with NO press between them and
+  //            neither end closed (lean → flat, or flat → lean → flat). Looks like nothing happened; rolled everything twice.
+  const hingeIx = []; for (let i = 1; i < states.length; i++) if (states[i].face === states[i - 1].face && states[i].a !== states[i - 1].a) hingeIx.push(i);
+  const isPass = (i) => L.passes(states[i - 1].a, states[i].a);
+  out.passes = hingeIx.filter(isPass).length;
+  out.fros = 0;
+  for (let k = 0; k + 1 < hingeIx.length; k++) {
+    const i = hingeIx[k], j = hingeIx[k + 1];
+    if (!isPass(i) || !isPass(j)) continue;
+    if (posture(states[i - 1].a) === 'fold' || posture(states[i].a) === 'fold' || posture(states[j].a) === 'fold') continue;
+    if (states.slice(i, j).some((s, x, arr) => x > 0 && s.face !== arr[x - 1].face)) continue;   // a turn between them is a press
+    out.fros++; k++;   // the pair is spent
+  }
   // which page switches: the solution lands on the other page after an open (land() chose the far page)
-  out.pageSwitches = states.filter((s, i) => i > 0 && L.isRight(s.c) !== L.isRight(states[i - 1].c) && posture(states[i - 1].a) !== 'fold' && posture(s.a) !== 'fold').length;
+  out.pageSwitches =states.filter((s, i) => i > 0 && L.isRight(s.c) !== L.isRight(states[i - 1].c) && posture(states[i - 1].a) !== 'fold' && posture(s.a) !== 'fold').length;
   // v3 (docs/difficulty-v3.md §3.2): what one glance at the board cannot settle.
   //   phases  – presses (closes, turns) in the solution that CHANGE the grid: each is a board the player must imagine,
   //             not read. Two-page letters can never exceed 1 (a press is idempotent after the first), three-page ones can.
@@ -379,7 +396,7 @@ function fitness(level, opts, m) {
     || (opts.goalT && m.goalFace !== 1) || (opts.minflips && (m.flips || 0) < opts.minflips);
   // v3 floors (difficulty-v3.md): --phases N grid-changing presses, --backs N closes from a stone's back, --configs N closed configurations
   const v3 = (opts.phases && m.phases < opts.phases) || (opts.backs && m.backs < opts.backs) || (opts.configs && m.configs < opts.configs) || (opts.switches && m.stackSwitches < opts.switches) || (opts.mincloses && m.closes < opts.mincloses)
-    || (opts.rolls && (m.rolls || 0) < opts.rolls) || (opts.fills && (m.fills || 0) < opts.fills) || (opts.carries && (m.carries || 0) < opts.carries);
+    || (opts.rolls && (m.rolls || 0) < opts.rolls) || (opts.fills && (m.fills || 0) < opts.fills) || (opts.carries && (m.carries || 0) < opts.carries) || (opts.fros && (m.fros || 0) < opts.fros);   // ch. 11: --fros N leans that come back without a press
   if (m.par > opts.par || m.closes > opts.closes || !m.stepped15 || !need || m.par < opts.minpar || vol1 || v3) return -500 + m.par * 10 + Math.min(m.steps, 10) + 5 * (m.phases || 0) + 5 * (m.backs || 0);
   let f = 12 * m.par + 2 * Math.min(m.steps, 14) - 1.5 * Math.max(0, m.steps - 16);
   f += 8 * Math.min(m.phases, 3) + 8 * Math.min(m.backs, 2) + 3 * Math.min(m.configs, 3) + 4 * Math.min(m.stackSwitches, 4);   // v3: imagined boards, stone's backs, held configurations
@@ -387,6 +404,7 @@ function fitness(level, opts, m) {
   f += 6 * Math.min(m.deadEnds, 2) + 6 * (m.deadFrac >= 0.15 && m.deadFrac <= 0.7 ? 1 : 0);
   f += 8 * (m.before ? 1 : 0) + 6 * (m.made ? 1 : 0) + 3 * (m.ride ? 1 : 0) + 3 * Math.min(m.fatal, 2) + 3 * Math.min(m.pageSwitches, 2);
   f += 4 * Math.min(m.rolls || 0, 3) + 3 * Math.min(m.fills || 0, 2);   // ch. 9: rolls the player must count, stones that became bridges
+  f += 5 * Math.min(m.fros || 0, 2);   // ch. 11: a lean that comes back is the cheapest way to buy two passes — and looks like nothing
   f += 4 * m.narrow;
   f -= 3 * Math.max(0, m.elements - opts.elements) + 0.6 * m.elements + 0.3 * Math.max(0, m.paper - 12);
   if (opts.maxvoid) f -= 60 * Math.max(0, m.voids / (m.rows * m.cols) - opts.maxvoid);   // a board that is mostly gap reads in a glance (§1.1)
@@ -516,7 +534,7 @@ function fmt(level, m, r, F) {
   lines.push(`  { id: 'TODO', tier: 'TODO', ${level.lamp || GEN_DEFAULTS.lamp ? `lamp: '${level.lamp || GEN_DEFAULTS.lamp}', ` : ''}map: [`);
   for (const row of level.map) lines.push(`      '${row}',`);
   lines.push('  ] },');
-  lines.push(`  // par ${m.par} steps ${m.steps} len ${m.len} closes ${m.closes}${m.flips ? ' flips ' + m.flips : ''} | wrong ${m.wrong} (first ${m.firstWrong}) narrow ${m.narrow}/${m.par} fatal ${m.fatal} | dead ${m.dead} (${m.deadFrac}) basins ${m.deadEnds} | before ${+m.before} made ${+m.made} ride ${+m.ride} pageSwitch ${m.pageSwitches} | v3 phases ${m.phases} configs ${m.configs} backs ${m.backs} switches ${m.stackSwitches} | elements ${m.elements} voids ${m.voids} needs ${['Fold','Pop','Shade','Key','Ink','Glue','Flip','Wet','Lamp','Gate','Roll','Crane'].filter((k) => m['needs' + k]).join('+') || '-'}${m.ride ? '+ride' : ''}${m.rolls ? ' | rolls ' + m.rolls + ' fills ' + m.fills : ''}${m.carries ? ' | carries ' + m.carries : ''}` +
+  lines.push(`  // par ${m.par} steps ${m.steps} len ${m.len} closes ${m.closes}${m.flips ? ' flips ' + m.flips : ''} | wrong ${m.wrong} (first ${m.firstWrong}) narrow ${m.narrow}/${m.par} fatal ${m.fatal} | dead ${m.dead} (${m.deadFrac}) basins ${m.deadEnds} | before ${+m.before} made ${+m.made} ride ${+m.ride} pageSwitch ${m.pageSwitches} | v3 phases ${m.phases} configs ${m.configs} backs ${m.backs} switches ${m.stackSwitches} | elements ${m.elements} voids ${m.voids} needs ${['Fold','Pop','Shade','Key','Ink','Glue','Flip','Wet','Lamp','Gate','Roll','Crane'].filter((k) => m['needs' + k]).join('+') || '-'}${m.ride ? '+ride' : ''}${m.rolls ? ' | rolls ' + m.rolls + ' fills ' + m.fills : ''}${m.carries ? ' | carries ' + m.carries : ''}${m.passes ? ' | passes ' + m.passes + ' fros ' + m.fros : ''}` +
     (r ? ` | noise ${r.noise} blockers ${r.blockers} load ${r.loadBearing} irrelevant ${r.irrelevant} reuse ${r.reuse}` : '') + (F != null ? ` | F ${F.toFixed(1)}` : ''));
   lines.push(`  // ${m.solution}`);
   if (r && r.decoys && r.decoys.length) lines.push(`  // decoys: ${r.decoys.join(' ')}`);
@@ -537,7 +555,7 @@ function stats() {
 }
 
 function args() {
-  const a = process.argv.slice(2), o = { cmd: a[0] || 'stats', rows: 5, iters: 4000, restarts: 12, seed: 1, par: 4, closes: 2, minpar: 2, tiles: '.-xg', need: 'glue', from: null, top: 8, elements: 9, nodead: false, noride: false, leftx: false, maxvoid: 0, minlen: 0, maxlen: 0, matched: false, pages: 2, goalT: false, minflips: 0, phases: 0, backs: 0, configs: 0, switches: 0, mincloses: 0, lamp: null, rolls: 0, fills: 0, carries: 0 };
+  const a = process.argv.slice(2), o = { cmd: a[0] || 'stats', rows: 5, iters: 4000, restarts: 12, seed: 1, par: 4, closes: 2, minpar: 2, tiles: '.-xg', need: 'glue', from: null, top: 8, elements: 9, nodead: false, noride: false, leftx: false, maxvoid: 0, minlen: 0, maxlen: 0, matched: false, pages: 2, goalT: false, minflips: 0, phases: 0, backs: 0, configs: 0, switches: 0, mincloses: 0, lamp: null, rolls: 0, fills: 0, carries: 0, fros: 0 };
   for (let i = 1; i < a.length; i++) {
     if (a[i].startsWith('--') && !a[i].includes(',')) { const k = a[i].slice(2); const v = a[i + 1]; const isFlag = v === undefined || (v.startsWith('--') && !v.includes(','));   // a map row may begin with '--' (gaps): a comma marks it as a value
       o[k] = isFlag ? true : isNaN(+v) ? v : +v; if (!isFlag) i++; }

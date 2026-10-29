@@ -18,23 +18,27 @@ const TIERS = { teach: [0, 2], easy: [0, 6], mid: [0, 99], hard: [5, 99], final:
 // chapter, not every level. teach–mid ≤ 3 changes; hard / final ≤ 4; optional 「暗信」 challenge levels ≤ 6.
 // Full closes ≤ 2 on the main path, ≤ 3 in 「暗信」. A chapter's main path may not exceed 24 changes in total.
 const PAR_MAX = { teach: 3, easy: 3, mid: 3, hard: 4, final: 5, dark: 6 };   // final 4 → 5 (Chitu 10/25, difficulty-v3.md §6: the 暗信 at par 5–6 are the only levels that resisted the owner)
+const PAR_MAX_CH = { 11: { hard: 5, final: 6 } };   // ch. 11 「来回」 (design-vol3.md §1.3): a lean that comes back costs 2 changes and no close — hard 4 → 5, final 5 → 6 in this chapter only
 const CLOSES_MAX = { main: 2, final: 3, dark: 3, wet: 3 };   // wet: chapter 7 「墨晕」 main path — closes are the chapter's resource (difficulty-v3.md §4.2, roadmap §4 #4)
 const WET_CHAPTER = 7;   // final 2 → 3 (Chitu 10/25, difficulty-v3.md §6: the third close after a closed walk is what held 暗三)
 const CHAPTER_PAR_MAX = 24;
 const CHAPTER_START = [0, 5, 13, 19, 25];   // first level index of chapters 1–5 (levels.js comments); later levels may carry `chapter`
 const chapterOf = (lv, i) => lv.chapter || CHAPTER_START.filter((s) => s <= i).length;
-const MECHANICS = ['needsFold', 'needsPop', 'needsShade', 'needsRide', 'needsKey', 'needsInk', 'needsGlue', 'needsFlip', 'needsWet', 'needsLamp', 'needsGate', 'needsRoll', 'needsCrane'];
+const MECHANICS = ['needsFold', 'needsPop', 'needsShade', 'needsRide', 'needsKey', 'needsInk', 'needsGlue', 'needsFlip', 'needsWet', 'needsLamp', 'needsGate', 'needsRoll', 'needsCrane', 'needsFro'];
 
 // One hinge move: the state after turning the hinge from s.a to a, or null if the figure falls or is crushed on the way.
 // The angle walks in 5° steps; a figure on a shadow rides it. Each time the lifted page passes upright (vol. 3: the
 // hinge crosses 90°) the loose stones roll — the grid changes mid-sweep, and the rest of the sweep (shadows, the crush
 // when the book closes) is judged on the rolled board. Reaching a close presses the pages (stamp) after the sweep.
-function move(B, s, a) {
+function move(B, s, a, opts = {}) {
   let cur = { c: s.c, r: s.r }, src = null, g = s.g;
   let w = worldOf(B, s);
   const step = a > s.a ? 5 : -5;
+  // ch. 11 「来回」: opts.noFro is the ch. 9/10 player's model — passes count only on the sweep of a close or of the opening after one.
+  // A level that needs a lean that comes back (two passes, no press) is unsolvable, or dearer, in that model (needsFro).
+  const rolls = !opts.noFro || a >= L.FOLD_MIN || s.a >= L.FOLD_MIN;
   for (let x = s.a + step; step > 0 ? x <= a : x >= a; x += step) {
-    if (L.passes(x - step, x)) { g = B.roll(g, s.face, cur); w = worldOf(B, { ...s, g }); src = null; }
+    if (rolls && L.passes(x - step, x)) { g = B.roll(g, s.face, cur); w = worldOf(B, { ...s, g }); src = null; }
     w.char = cur;
     const onShadow = !L.isFloor(L.at(w, cur.c, cur.r));   // a shadow on either page (ch. 8 lamp), or an open angle gate
     if (onShadow) { if (src == null) src = L.shadows(w, x - step).get(cur.c + ',' + cur.r) ?? null; } else src = null;
@@ -132,7 +136,7 @@ function solve(level, angles = ANGLES, from = null, opts = {}) {
     const next = [];
     for (const a of angles) {
       if (a === s.a) continue;
-      const n = move(B, s, a);
+      const n = move(B, s, a, opts);
       if (n) next.push([n, 1]);
     }
     if (!opts.noFlip) { const f = flipOf(B, s); if (f) next.push([f, 1]); }
@@ -345,6 +349,7 @@ function report(lv, withDifficulty = true) {
   const out = { solvable: !!full, changes: full ? full.cost : null, needsFold: !noFold, needsPop: !noPop };
   if (/[xr]/.test(all) && (lv.map.some((row) => /[xr]/.test(row.slice(L.N))) || all.includes('g') || (lv.lamp || '').includes('L'))) { out.needsShade = !noShade; out.needsRide = !oneShade; }
   if (all.includes('r')) out.needsRoll = !without('r', 'x');            // vol. 3 ch. 9: unsolvable with the loose stones glued down
+  if (all.includes('r')) { const nf = solve(lv, ANGLES, null, { noFro: true }); out.needsFro = !nf || (full && nf.cost > full.cost); }   // vol. 3 ch. 11: unsolvable, or dearer, when a lean that comes back rolls nothing (passes only with a press)
   if (all.includes('h')) out.needsCrane = !without('h');                // vol. 3 ch. 10: unsolvable with the cranes unfolded into plain paper
   if (lv.lamp && lv.lamp !== 'R') out.needsLamp = !solve({ ...lv, lamp: 'R' });   // ch. 8: unsolvable with the lamp back on the right bank
   if (all.includes('A')) out.needsGate = !without('A');                          // ch. 8: unsolvable with the angle gate laid down as paper
@@ -405,6 +410,7 @@ LEVELS.forEach((lv, i) => {
     ('needsGate' in r ? `  needsGate=${r.needsGate}` : '') +
     ('needsRoll' in r ? `  needsRoll=${r.needsRoll}` : '') +
     ('needsCrane' in r ? `  needsCrane=${r.needsCrane}` : '') +
+    ('needsFro' in r ? `  needsFro=${r.needsFro}` : '') +
     ('needsFlip' in r ? `  needsFlip=${r.needsFlip}` : ''));
   if (!full) { fail('UNSOLVABLE'); return; }
   console.log('   ' + full.steps.join(' → '));
@@ -417,7 +423,7 @@ LEVELS.forEach((lv, i) => {
   // fatigue budget (plan.md §12.3, tiered by difficulty-postmortem.md §1.4): posture changes and full closes per tier
   const shut = (x) => x.startsWith('fold') || x.startsWith('flip');   // a page turn happens inside one close
   const closes = full.steps.filter((x, i, arr) => x.startsWith('fold') && (i === 0 || !shut(arr[i - 1]))).length;
-  const parMax = lv.optional ? PAR_MAX.dark : PAR_MAX[lv.tier] || 3, closesMax = lv.optional ? CLOSES_MAX.dark : lv.tier === 'final' ? CLOSES_MAX.final : chapterOf(lv, i) === WET_CHAPTER ? CLOSES_MAX.wet : CLOSES_MAX.main;
+  const parMax = lv.optional ? PAR_MAX.dark : (PAR_MAX_CH[chapterOf(lv, i)] || {})[lv.tier] || PAR_MAX[lv.tier] || 3, closesMax = lv.optional ? CLOSES_MAX.dark : lv.tier === 'final' ? CLOSES_MAX.final : chapterOf(lv, i) === WET_CHAPTER ? CLOSES_MAX.wet : CLOSES_MAX.main;
   if (full.cost > parMax) fail(`OVER PAR: ${full.cost} posture changes (max ${parMax} for ${lv.optional ? '暗信' : lv.tier})`);
   if (closes > closesMax) fail(`OVER PAR: ${closes} full closes (max ${closesMax})`);
   if (!lv.optional) { const ch = chapterOf(lv, i); chapterPar[ch] = (chapterPar[ch] || 0) + full.cost; }
@@ -430,10 +436,11 @@ LEVELS.forEach((lv, i) => {
   const m = GEN.full(lv, false);
   const gate = lv.optional ? GATES.dark : GATES[lv.tier] || {}, tierName = lv.optional ? '暗信' : lv.tier;
   const idle = (m.voids + m.irrelevant) / (m.rows * m.cols);
-  console.log(`   v3 len=${m.len} (par ${m.par} + steps ${m.steps}) wrong=${m.wrong} first=${m.firstWrong} narrow=${m.narrow}/${m.par} dead=${Math.round(m.deadFrac * 100)}% basins=${m.deadEnds} noise=${m.noise} blockers=${m.blockers} irrelevant=${m.irrelevant} idle=${Math.round(idle * 100)}% reuse=${m.reuse} | phases=${m.phases} configs=${m.configs} backs=${m.backs}`);
+  console.log(`   v3 len=${m.len} (par ${m.par} + steps ${m.steps}) wrong=${m.wrong} first=${m.firstWrong} narrow=${m.narrow}/${m.par} dead=${Math.round(m.deadFrac * 100)}% basins=${m.deadEnds} noise=${m.noise} blockers=${m.blockers} irrelevant=${m.irrelevant} idle=${Math.round(idle * 100)}% reuse=${m.reuse} | phases=${m.phases} configs=${m.configs} backs=${m.backs}${m.passes ? ` passes=${m.passes} fros=${m.fros}` : ''}`);
   // difficulty-v3.md batch 1: a reworked level declares the grid-changing presses (phases) and stone's-back closes (backs) it must keep
   if (lv.phases != null && m.phases < lv.phases) fail(`PHASES: ${m.phases} grid-changing presses in the solution, declared ≥ ${lv.phases}`);
   if (lv.backs != null && m.backs < lv.backs) fail(`BACKS: ${m.backs} closes from a stone's back, declared ≥ ${lv.backs}`);
+  if (lv.fros != null && (m.fros || 0) < lv.fros) fail(`FROS: ${m.fros || 0} leans that come back without a press in the solution, declared ≥ ${lv.fros}`);   // ch. 11
   if (gate.lenMin && m.len < gate.lenMin) fail(`TOO SHORT: minimal solution is ${m.len} actions, ${tierName} needs ≥ ${gate.lenMin}`);
   if (gate.lenMax && m.len > gate.lenMax) fail(`TOO LONG for a teaching level: minimal solution is ${m.len} actions, max ${gate.lenMax}`);
   if (gate.wrongMin && m.wrong < gate.wrongMin) fail(`TOO READABLE: ${m.wrong} wrong turns over the solution, ${tierName} needs ≥ ${gate.wrongMin}`);

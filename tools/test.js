@@ -205,3 +205,21 @@ console.log('loose stone tests passed');
   assert.strictEqual(v.grid[0].join(''), 'S.....h..h..', 'the left crane landed in the third page\'s gap; the right page\'s crane stayed');
   assert.deepStrictEqual(v.char, { c: 5, r: 0 }, 'carried to the third page (visible column 6)');
 }
+
+// vol. 3 ch. 11 「来回」 (docs/design-ch11.md): a lean that comes back is two passes and no press. Every loose stone rolls twice;
+// the glue facing the stone's first stop never fires, because nothing was pressed. The same two passes bought with a close
+// (close from flat, open again) press in between: the glue takes the stone at its first stop and the gap is never filled.
+{
+  const L = require('../logic.js');
+  const mk = (map) => L.create({ map });
+  const fro = mk(['..g.-.rS', '-x--G--.']);
+  const sweep = (s, a0, a1) => { const ev = []; const step = a1 > a0 ? 5 : -5; for (let a = a0 + step; step > 0 ? a <= a1 : a >= a1; a += step) if (L.passes(a - step, a)) ev.push(...L.roll(s)); return ev; };
+  assert.strictEqual(sweep(fro, 0, 130).length, 1, 'lean: one pass, the stone rolls once');
+  assert.strictEqual(sweep(fro, 130, 0).length, 1, 'back flat: a second pass, it rolls again');
+  assert.strictEqual(fro.grid[0].join(''), '..g....S', 'the stone dropped into the gap: paper now, the glue untouched');
+  const press = mk(['..g.-.rS', '-x--G--.']);
+  sweep(press, 0, 180); L.stamp(press); sweep(press, 180, 0);
+  assert.strictEqual(press.grid[0].join(''), '..x.-..S', 'close + open: the same two passes, but the press between them let the glue take the stone at its first stop');
+  assert.strictEqual(sweep(mk(['....-.rS']), 0, 90).length + sweep(mk(['....-.rS']), 0, 85).length, 1, 'standing (90°) is a pass; 85° is not');
+}
+console.log('to-and-fro tests passed');
