@@ -127,11 +127,26 @@ const T = {
       const st = X.states; let third = false; for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (p.face !== 1 || s.face !== 1 || p.a === s.a || !L.passes(p.a, s.a)) continue;
         if (X.B.roll(p.g, 1, { c: p.c, r: p.r }) === p.g) continue; const g = X.B.G[p.g]; for (let r = 0; r < X.B.h; r++) for (let c = 4; c < 8; c++) if (g[r][c] === 'r') third = true; }
       return [third, (m.fros || 0) >= 1, m.needsFlip, m.needsRoll, m.needsFro]; } },
+  hover: { rows: 5, pages: 2, lamp: null, tiles: '.-xrh', par: 5, closes: 2, minpar: 4, need: 'roll+crane', elements: 9, minlen: 15, phases: 0, backs: 0, carries: 2,
+    seed: ['S.h.-..r', '.x--.-..', '..-..r..', '-.-x....', '---.-..G'],
+    pred: (m, X) => { // two presses with NO pass between (closed → a lean → closed again): the crane carries you over and back while the loose stones keep still — open flat between the closes (the chapter 9/10 habit) and they roll twice
+      return [hoversOf(X.states).length >= 1, m.needsHover, (m.carries || 0) >= 2, m.needsCrane, m.needsRoll]; } },
+  inkhover: { rows: 5, pages: 2, lamp: null, tiles: '.-xrI', par: 5, closes: 2, minpar: 4, need: 'roll+wet', elements: 9, minlen: 15, phases: 2, backs: 0,
+    seed: ['S.-I-..r', '.x--.-..', '..-..r..', '-.-x....', '---.-..G'],
+    pred: (m, X) => { // two presses, one pass: the wet ink bleeds twice while the loose stones roll once
+      return [hoversOf(X.states).length >= 1, m.needsHover, m.needsWet, m.needsRoll, m.phases >= 2]; } },
+  frog: { rows: 4, pages: 2, lamp: null, tiles: '.-xrg', par: 4, closes: 1, minpar: 3, need: 'roll+glue', elements: 8, minlen: 12, phases: 0, backs: 0, fros: 1,
+    seed: ['S.g.-.r.', '.x--..-.', '..-..r..', '-.-x...G'],
+    pred: (m, X) => { // a lean that comes back is the solution's way past a glue: the same two passes bought with a close and an opening let the glue take the stone at its first stop
+      return [(m.fros || 0) >= 1, m.needsFro, m.needsRoll, m.needsGlue || /g/.test(X.B.base.grid.map((r) => r.join('')).join(''))]; } },
 };
 // ch. 11: the leans that come back on a path — pairs [i, j] of consecutive hinge moves that both pass upright, no press between, neither end closed
 function frosOf(st) { const h = []; for (let i = 1; i < st.length; i++) if (st[i].face === st[i - 1].face && st[i].a !== st[i - 1].a) h.push(i);
   const out = []; for (let k = 0; k + 1 < h.length; k++) { const i = h[k], j = h[k + 1]; if (!L.passes(st[i - 1].a, st[i].a) || !L.passes(st[j - 1].a, st[j].a)) continue;
     if ([st[i - 1], st[i], st[j]].some((s) => G_posture(s.a) === 'fold') || st.slice(i, j).some((s, x, arr) => x > 0 && s.face !== arr[x - 1].face)) continue; out.push([i, j]); k++; } return out; }
+// ch. 11: re-closes from a lean — [i, j]: st[i] opens a closed book only to a lean (no pass), st[j] closes it again, every state between on the standing side
+function hoversOf(st) { const out = []; for (let i = 1; i < st.length; i++) { if (st[i].face !== st[i - 1].face || G_posture(st[i - 1].a) !== 'fold' || G_posture(st[i].a) === 'fold' || !L.standing(st[i].a)) continue;
+    for (let j = i + 1; j < st.length; j++) { if (st[j].face !== st[i].face || !L.standing(st[j].a)) break; if (G_posture(st[j].a) === 'fold') { out.push([i, j]); break; } } } return out; }
 const G_posture = C.posture;
 const t = T[name]; if (!t) throw new Error('name');
 const opts = { ...t, iters: 1e9, restarts: 1, seed: seedN, nodead: false, noride: false, leftx: false, maxvoid: 0.62, maxlen: 0, matched: false, goalT: false, minflips: 0, configs: 0, switches: 0, mincloses: 0, fros: t.fros || 0 };

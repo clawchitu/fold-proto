@@ -24,7 +24,7 @@ const WET_CHAPTER = 7;   // final 2 → 3 (Chitu 10/25, difficulty-v3.md §6: th
 const CHAPTER_PAR_MAX = 24;
 const CHAPTER_START = [0, 5, 13, 19, 25];   // first level index of chapters 1–5 (levels.js comments); later levels may carry `chapter`
 const chapterOf = (lv, i) => lv.chapter || CHAPTER_START.filter((s) => s <= i).length;
-const MECHANICS = ['needsFold', 'needsPop', 'needsShade', 'needsRide', 'needsKey', 'needsInk', 'needsGlue', 'needsFlip', 'needsWet', 'needsLamp', 'needsGate', 'needsRoll', 'needsCrane', 'needsFro'];
+const MECHANICS = ['needsFold', 'needsPop', 'needsShade', 'needsRide', 'needsKey', 'needsInk', 'needsGlue', 'needsFlip', 'needsWet', 'needsLamp', 'needsGate', 'needsRoll', 'needsCrane', 'needsFro', 'needsHover'];
 
 // One hinge move: the state after turning the hinge from s.a to a, or null if the figure falls or is crushed on the way.
 // The angle walks in 5° steps; a figure on a shadow rides it. Each time the lifted page passes upright (vol. 3: the
@@ -37,8 +37,11 @@ function move(B, s, a, opts = {}) {
   // ch. 11 「来回」: opts.noFro is the ch. 9/10 player's model — passes count only on the sweep of a close or of the opening after one.
   // A level that needs a lean that comes back (two passes, no press) is unsolvable, or dearer, in that model (needsFro).
   const rolls = !opts.noFro || a >= L.FOLD_MIN || s.a >= L.FOLD_MIN;
+  // ch. 11 「来回」: opts.openPass is the other half of that model — every opening of a closed book rolls, as if it always
+  // went flat. A level that needs a re-close from a lean (two presses, no pass between: needsHover) is unsolvable, or dearer, in it.
+  const forced = opts.openPass && s.a >= L.FOLD_MIN && a < L.FOLD_MIN && !L.passes(s.a, a);
   for (let x = s.a + step; step > 0 ? x <= a : x >= a; x += step) {
-    if (rolls && L.passes(x - step, x)) { g = B.roll(g, s.face, cur); w = worldOf(B, { ...s, g }); src = null; }
+    if ((rolls && L.passes(x - step, x)) || (forced && x === s.a + step)) { g = B.roll(g, s.face, cur); w = worldOf(B, { ...s, g }); src = null; }
     w.char = cur;
     const onShadow = !L.isFloor(L.at(w, cur.c, cur.r));   // a shadow on either page (ch. 8 lamp), or an open angle gate
     if (onShadow) { if (src == null) src = L.shadows(w, x - step).get(cur.c + ',' + cur.r) ?? null; } else src = null;
@@ -350,6 +353,7 @@ function report(lv, withDifficulty = true) {
   if (/[xr]/.test(all) && (lv.map.some((row) => /[xr]/.test(row.slice(L.N))) || all.includes('g') || (lv.lamp || '').includes('L'))) { out.needsShade = !noShade; out.needsRide = !oneShade; }
   if (all.includes('r')) out.needsRoll = !without('r', 'x');            // vol. 3 ch. 9: unsolvable with the loose stones glued down
   if (all.includes('r')) { const nf = solve(lv, ANGLES, null, { noFro: true }); out.needsFro = !nf || (full && nf.cost > full.cost); }   // vol. 3 ch. 11: unsolvable, or dearer, when a lean that comes back rolls nothing (passes only with a press)
+  if (all.includes('r')) { const nh = solve(lv, ANGLES, null, { openPass: true }); out.needsHover = !nh || (full && nh.cost > full.cost); }   // vol. 3 ch. 11: unsolvable, or dearer, when every opening rolls (no re-close from a lean)
   if (all.includes('h')) out.needsCrane = !without('h');                // vol. 3 ch. 10: unsolvable with the cranes unfolded into plain paper
   if (lv.lamp && lv.lamp !== 'R') out.needsLamp = !solve({ ...lv, lamp: 'R' });   // ch. 8: unsolvable with the lamp back on the right bank
   if (all.includes('A')) out.needsGate = !without('A');                          // ch. 8: unsolvable with the angle gate laid down as paper
@@ -411,6 +415,7 @@ LEVELS.forEach((lv, i) => {
     ('needsRoll' in r ? `  needsRoll=${r.needsRoll}` : '') +
     ('needsCrane' in r ? `  needsCrane=${r.needsCrane}` : '') +
     ('needsFro' in r ? `  needsFro=${r.needsFro}` : '') +
+    ('needsHover' in r ? `  needsHover=${r.needsHover}` : '') +
     ('needsFlip' in r ? `  needsFlip=${r.needsFlip}` : ''));
   if (!full) { fail('UNSOLVABLE'); return; }
   console.log('   ' + full.steps.join(' → '));

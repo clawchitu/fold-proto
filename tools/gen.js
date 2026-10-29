@@ -66,8 +66,9 @@ function move(B, s, a1, opts = {}) {
   let w = wof(B, s);
   const step = a1 > s.a ? 5 : -5;
   const rolls = !opts.noFro || a1 >= L.FOLD_MIN || s.a >= L.FOLD_MIN;   // ch. 11: opts.noFro = passes count only with a press (check.js move)
+  const forced = opts.openPass && s.a >= L.FOLD_MIN && a1 < L.FOLD_MIN && !L.passes(s.a, a1);   // ch. 11: opts.openPass = every opening rolls
   for (let a = s.a + step; step > 0 ? a <= a1 : a >= a1; a += step) {
-    if (rolls && L.passes(a - step, a)) { g = B.roll(g, s.face, cur); w = B.world(g, s.face); src = null; }
+    if ((rolls && L.passes(a - step, a)) || (forced && a === s.a + step)) { g = B.roll(g, s.face, cur); w = B.world(g, s.face); src = null; }
     const onShadow = !L.isFloor(L.at(w, cur.c, cur.r));
     if (onShadow) { if (src == null) src = B.shadowsAt(g, s.face, a - step).get(cur.c + ',' + cur.r) ?? null; } else src = null;
     const to = L.ride({ ...w, char: cur }, cur, src, a);
@@ -267,6 +268,7 @@ function measure(level) {
   const lamp = (level.lamp || GEN_DEFAULTS.lamp || 'R');
   out.needsLamp = lamp !== 'R' && !solvableFrom(prep({ ...level, lamp: 'R' }), B.start);   // ch. 8: the lamp back on the right bank
   if (all.includes('r')) { const bf = bestPath(explore(B, ANGLES, B.start, { noFro: true })); out.needsFro = !bf || bf.par > bp.par; }   // ch. 11: unsolvable, or dearer, when only a press buys a pass
+  if (all.includes('r')) { const bh = bestPath(explore(B, ANGLES, B.start, { openPass: true })); out.needsHover = !bh || bh.par > bp.par; }   // ch. 11: unsolvable, or dearer, when every opening rolls
   out.needsGate = all.includes('A') && !solvableFrom(prep({ ...level, map: level.map.map((r) => r.split('A').join('.')) }), B.start);   // ch. 8: the gate laid down as paper
   out.needsRoll = all.includes('r') && !solvableFrom(prep({ ...level, map: level.map.map((r) => r.split('r').join('x')) }), B.start);   // ch. 9: the loose stones glued down
   out.needsCrane = all.includes('h') && !solvableFrom(prep({ ...level, map: level.map.map((r) => r.split('h').join('.')) }), B.start);   // ch. 10: the cranes unfolded into paper
