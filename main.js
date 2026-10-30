@@ -590,7 +590,8 @@
       const folded = angle >= F.FOLD_MIN;
       if (!folded && angle > 3) return no('tri.flapFirst');
       const out = F.flapOut(state, state.char, folded);
-      if (!out || F.flapBlock(state)) return no(F.flapBlock(state) === 'cover' ? 'tri.covered' : 'tri.blocked');
+      const why = folded ? F.flapBlock(state) : null; // laid flat: switching back to the book needs no flap check (native 0.1(26))
+      if (!out || why) return no(why === 'cover' ? 'tri.covered' : 'tri.blocked');
       pushUndo();
       state.char = out; state.face = folded ? 3 : 0; angle = 0;
     }
