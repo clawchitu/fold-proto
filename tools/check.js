@@ -70,9 +70,10 @@ function flapOf(B, s, b, opts = {}) {
   if (b0 == null || b === b0) return undefined;
   let from = s;
   if (s.face !== 2) from = { ...s, ...L.flapIn(worldOf(B, s), { c: s.c, r: s.r }), face: 2, a: b0 };
-  if (b >= L.FOLD_MIN && L.flapBlock(worldOf(B, from))) return undefined;   // standing over a right-page stone: the fold is refused, not fatal
+  if (b >= L.FOLD_MIN && L.flapBlock(worldOf(B, from))) return undefined;   // over a right-page stone / under third-page paper: the fold is refused, not fatal
   const n = sweep(B, from, b, opts);
   if (!n) return null;
+  if (b >= L.FOLD_MIN && L.flapBlock(worldOf(B, n), { c: n.c, r: n.r })) return undefined;   // judged again on the rolled board (a stone that rolled off the square over you leaves paper there)
   if (b > 0 && b < L.FOLD_MIN) return n;
   const out = L.flapOut(worldOf(B, n), { c: n.c, r: n.r }, b >= L.FOLD_MIN);
   return out ? { c: out.c, r: out.r, a: 0, face: b >= L.FOLD_MIN ? 3 : 0, g: n.g } : undefined;

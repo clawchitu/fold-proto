@@ -417,12 +417,20 @@
     return isFloor(at({ ...s, face: 3 }, v, fig.r)) ? { c: v, r: fig.r } : null;
   }
 
-  // The flap cannot fold down onto a stone you stand over (vol. 3 ch. 12, lead's call 10/29: a blocked fold with a toast, not
-  // a death — deaths must be readable). In the flap's view (face 2) you stand on the lifted third page and the right page's
-  // square under you is a stone (or a loose stone, a door): 'stone'. Glue under your feet is not a block — the glue pulls
-  // the stone up (crushCause 'glue'), as on any page. null when the flap may fold.
+  // The flap never folds down onto you (vol. 3 ch. 12, lead's call 10/29: a blocked fold with a toast, not a death — deaths
+  // must be readable; creative review 10/29: the third page is not an elevator). In the flap's view (face 2):
+  //   'stone'  you stand on the lifted third page and the right page's square under you is a stone (a loose stone, a door).
+  //            Glue under your feet is not a block — the glue pulls the stone up (crushCause 'glue'), as on any page.
+  //   'cover'  you stand on the flat right page and the third page's square coming down over you is PAPER (any floor): it
+  //            would lie on you, so it stops short. A HOLE comes down around you (you stay on the right page, seen through
+  //            it); a STONE comes down on you (crushCause 'stone', as at every press). So from the right page the third page
+  //            is reached only through its holes — on foot across the folded leaf, or on a crane that flies up into one.
+  // null when the flap may fold.
   function flapBlock(s, fig = s.char) {
-    if (!trifold(s) || s.face !== 2 || fig.c < N || at(s, fig.c, fig.r) === 'g') return null;
+    if (!trifold(s) || s.face !== 2) return null;
+    if (fig.c < 0) return null;                                        // on the left page, aside: nothing comes down on you
+    if (fig.c < N) return isFloor(at(s, mirror(fig.c), fig.r)) ? 'cover' : null;
+    if (at(s, fig.c, fig.r) === 'g') return null;
     return isBlock(at(s, mirror(fig.c), fig.r)) ? 'stone' : null;
   }
 

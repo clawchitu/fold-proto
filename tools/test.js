@@ -253,5 +253,16 @@ console.log('to-and-fro tests passed');
   const q = L.create({ trifold: true, map: ['S......x.G..'] }); q.face = 2; q.char = { c: 4, r: 0 };   // third-page col 8 over right col 7
   assert.strictEqual(L.flapBlock(q), 'stone'); q.char = { c: 5, r: 0 }; assert.strictEqual(L.flapBlock(q), null);
   assert.ok(C.solve({ trifold: true, map: ['S..-...x.G..', '......-.....'] }), 'the refused fold is not a kill: the solver steps off first');
+  // creative review (10/29): the third page never folds down ONTO you — under its paper the fold is refused ('cover'); under a hole
+  // you stay on the right page, seen through it; a crane under a hole flies up into it with you (the only one-press way up)
+  const u = L.create({ trifold: true, map: ['S.....h.G-..', '......-.-..x'] }); u.face = 2; u.char = { c: 3, r: 0 };   // right col 7 under third col 8 ('G': paper)
+  assert.strictEqual(L.flapBlock(u), 'cover'); u.char = { c: 2, r: 0 }; assert.strictEqual(L.flapBlock(u), null, 'right col 6 under the hole at third col 9');
+  u.char = { c: 0, r: 1 }; assert.strictEqual(L.flapBlock(u), null, 'under a stone the fold is not refused (it crushes, as every press does)');
+  assert.strictEqual(C.flapOf(C.grids({ trifold: true, map: ['S.....h.G-..', '......-.-..x'] }), { c: 4, r: 1, a: 0, face: 0, g: 0 }, 180), null, 'a third-page stone comes down on you: a death');
+  assert.strictEqual(C.flapOf(C.grids({ trifold: true, map: ['S.....h.G-..', '......-.-..x'] }), { c: 7, r: 0, a: 0, face: 0, g: 0 }, 180), undefined, 'under paper: refused');
+  const lvUp = { trifold: true, map: ['S.....h.G-..', '......-.-..x'] }, Bup = C.grids(lvUp), up = C.flapOf(Bup, { c: 6, r: 0, a: 0, face: 0, g: 0 }, 180);
+  const wUp = { ...L.create(lvUp), grid: Bup.grids[up.g], face: 3 };
+  assert.ok(up.face === 3 && L.colOf(wUp, up.c, 0) === 9 && L.at(wUp, up.c, 0) === 'h', 'on a crane under the hole you fly up onto the third page');
+  assert.ok(C.flaps(C.grids({ trifold: true, map: ['....S...G...'] }), { c: 4, r: 0, a: 0, face: 0, g: 0 }).every((n) => n && n.face !== 3), 'on the right page under a third page without holes, folding it all the way is never a move (leaning it is)');
 }
 console.log('trifold tests passed');

@@ -357,9 +357,10 @@
     lastA = a; lastT = now;
     clearTimeout(setAngle.quiet); setAngle.quiet = setTimeout(() => sound.rustle(0), 90);
     // ch. 12: the third page will not fold down onto a stone under your feet — the fold stops short, with a toast (not a death)
-    if (state && tri() && state.face === 2 && a >= F.FOLD_MIN && F.flapBlock(state)) {
+    const refused = state && tri() && state.face === 2 && a >= F.FOLD_MIN && F.flapBlock(state);   // 'stone' | 'cover' (its paper would lie on you)
+    if (refused) {
       a = F.FOLD_MIN - 5;
-      if (!setAngle.blocked) { setAngle.blocked = true; sound.nope(); const text = t('tri.blocked'); toast(text); bus.emit('blocked', { why: 'flap', reason: 'stone', text }); }
+      if (!setAngle.blocked) { setAngle.blocked = true; sound.nope(); const text = t(refused === 'cover' ? 'tri.covered' : 'tri.blocked'); toast(text); bus.emit('blocked', { why: 'flap', reason: refused, text }); }
     } else if (a < F.FOLD_MIN - 10) setAngle.blocked = false;
     const prevA = angle;
     angle = a;
@@ -584,7 +585,7 @@
       const folded = angle >= F.FOLD_MIN;
       if (!folded && angle > 3) return no('tri.flapFirst');
       const out = F.flapOut(state, state.char, folded);
-      if (!out) return no('tri.blocked');
+      if (!out || F.flapBlock(state)) return no(F.flapBlock(state) === 'cover' ? 'tri.covered' : 'tri.blocked');
       pushUndo();
       state.char = out; state.face = folded ? 3 : 0; angle = 0;
     }

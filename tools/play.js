@@ -107,7 +107,8 @@ function die(why) {
 function setAngle(target, isFlap) {
   target = Math.max(0, Math.min(180, Math.round(target / 5) * 5));
   let a1 = 180 - target;
-  if (isFlap && a1 >= L.FOLD_MIN && L.flapBlock(s)) { a1 = L.FOLD_MIN - 5; say(`the third page will not fold down: you stand on it right over the stone at map col ${mapCol(L.mirror(s.char.c), s.char.r) + 1}, row ${s.char.r + 1} on the right page (it stops at ${180 - a1}°). Step off it first.`); }
+  const refuse = () => { const why = L.flapBlock(s); if (!why) return false; a1 = L.FOLD_MIN - 5; say(why === 'cover' ? `the third page will not fold down: its paper at map col ${L.mirror(s.char.c) + L.N + 1}, row ${s.char.r + 1} would lie on you (it stops at ${180 - a1}°). Stand under one of its holes, or step off the right page.` : `the third page will not fold down: you stand on it right over the stone at map col ${mapCol(L.mirror(s.char.c), s.char.r) + 1}, row ${s.char.r + 1} on the right page (it stops at ${180 - a1}°). Step off it first.`); return true; };
+  if (isFlap && a1 >= L.FOLD_MIN) refuse();
   if (isFlap && a1 >= L.FOLD_MIN) a1 = 180;
   const a0 = fold(), step = a1 > a0 ? 5 : -5;
   const set = (a) => { if (s.face === 2) flapA = 180 - a; else angle = 180 - a; };
@@ -116,6 +117,7 @@ function setAngle(target, isFlap) {
     if (L.passes(a - step, a)) { const mc = (c, r) => (TRI ? mapCol(c, r) : c); const pre = L.roll({ ...s, grid: s.grid.map((x) => x.slice()) }).map((e) => [mc(e.cells[0].c, e.cells[0].r), mc(e.cells[1].c, e.cells[1].r)]); L.roll(s).forEach((e, i) => say(`the lifted page passed upright: the loose stone at col ${pre[i][0] + 1}, row ${e.cells[0].r + 1} rolled to col ${pre[i][1] + 1}` + (e.filled ? ' and dropped into the gap there: that square is paper now (the stone is gone)' : ''))); }
     const onShadow = !L.isFloor(L.at(s, s.char.c, s.char.r));
     if (onShadow) { if (src == null) src = L.shadows(s, a - step).get(s.char.c + ',' + s.char.r) ?? null; } else src = null;
+    if (isFlap && a >= L.FOLD_MIN && refuse()) { set(a - step); say(`third page at ${flapA}°`); return; }   // judged again on the rolled board
     const cause = L.crushCause(s, s.char, a);
     const to = L.ride(s, s.char, src, a);
     set(a);
