@@ -143,6 +143,7 @@
   // except pop-up tabs that bridge the crease while standing).
   function openNeighbours(s, c, r, mode, sh) {
     const out = [];
+    if (c < 0) return out;   // trifold face 2: on the left page, aside from the flap's book — it is out of reach, not joined to the right page
     for (const [dc, dr] of DIRS) {
       const nc = c + dc, nr = r + dr;
       if (nc < 0 || nc >= vw(s) || nr < 0 || nr >= s.h) continue;

@@ -749,6 +749,16 @@ const LEVELS = [
       '--------G...',
     ],
   },
+  {
+    id: 'drop', tier: 'hard', chapter: 12, trifold: true, needs: ['needsTrifold', 'needsRoll'],   // 12-4 · the stone falls through the third page onto a page it was never drawn on. She is on the right page at (7,3), in a pocket whose only door is the gap (4,1); the loose stone (10,1) is on the third page. Every crease the player knows rolls it LEFT — the third page's own (a lean of the flap, or its fold) and the book's with the flap flat (12-1's rigid leaf) — and two squares left is the hole (8,1): it drops in, the level is dead. Folded, the third page rolls the other way (12-3): fold it (the fold itself rolls the stone to (9,1)), close the book from (1,0) — (2,1) is the square it rolls onto, 'stone' — it rolls to (10,1); closed, stack 1 row 1 lands you on the third page at (9,1); open, and it rolls on into the hole (11,1), THROUGH it, onto the right page's gap (4,1): paper. Walk the folded leaf — (10,1), the right page through the hole at (4,1), down its column and along row 4 to (7,4) — lift the third page a little (you are on the right page) and step to her. play.js: rigid close+open / flap lean = stone swallowed at (8,1), dead end; fold + close at (2,1) = crushed. Hand-drawn; len 15 (par 4 + 11) wrong 21 dead 32% noise 0 idle 80%
+    map: [
+      'S..---------',
+      '--.------.r-',
+      '----.-------',
+      '----.--G.---',
+      '----....----',
+    ],
+  },
 ];
 
 if (typeof module !== 'undefined') module.exports = LEVELS;

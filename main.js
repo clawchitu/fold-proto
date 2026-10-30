@@ -433,11 +433,16 @@
     const step = (now) => {
       const t = Math.min(1, (now - t0) / ms);
       setAngle(from + (target - from) * ease(t), false);
-      if (t < 1) tween = requestAnimationFrame(step); else { tween = null; bus.emit('settle'); }
+      if (t < 1) tween = requestAnimationFrame(step); else { tween = null; bus.emit('settle'); autoCrease(); }
     };
     tween = requestAnimationFrame(step);
   }
   function cancelTween() { if (tween) cancelAnimationFrame(tween); tween = null; }
+  // ch. 12 (creative review 10/29): once the third page lies folded all the way onto the right page there is nothing left to do
+  // on its crease (no walking on a folded flap — tri.walkFolded), so the control goes back to the book's crease by itself, after
+  // the magnet has settled (never mid-drag: the finger that folded the flap must not start closing the book). Laid FLAT again it
+  // stays on the flap's crease: that view is still a book you can walk (right page | third page).
+  function autoCrease() { if (state && tri() && state.face === 2 && angle >= F.FOLD_MIN && !won && !demo) switchCrease(); }
 
   // gentle magnets at the three postures
   function snap() {

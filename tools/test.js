@@ -265,4 +265,7 @@ console.log('to-and-fro tests passed');
   assert.ok(up.face === 3 && L.colOf(wUp, up.c, 0) === 9 && L.at(wUp, up.c, 0) === 'h', 'on a crane under the hole you fly up onto the third page');
   assert.ok(C.flaps(C.grids({ trifold: true, map: ['....S...G...'] }), { c: 4, r: 0, a: 0, face: 0, g: 0 }).every((n) => n && n.face !== 3), 'on the right page under a third page without holes, folding it all the way is never a move (leaning it is)');
 }
+  // the left page lies aside while the flap turns: a figure there (visible column −1) has no moves — it must not step onto the right page
+  const aside = L.create({ trifold: true, map: ['S.......G...'] }); aside.face = 2; aside.char = { c: -1, r: 0 };
+  assert.strictEqual(L.neighbours(aside, aside.char, 'open', new Map()).length, 0, 'aside: no step onto the right page across the open crease');
 console.log('trifold tests passed');
