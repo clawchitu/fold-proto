@@ -722,6 +722,24 @@ const LEVELS = [
       'x-.--S.---.-',
     ],
   },
+  // ---- vol. 3 chapter 12 「三折」 (docs/design-ch12.md): the third page on its own crease at the right page's outer edge ----
+  {
+    id: 'home', tier: 'teach', chapter: 12, trifold: true, needs: ['needsTrifold'],   // 12-1 · teach · two mirrors bring a column home: she is on the third page at (9,1), home column 1. Close the book as it is and the third page swings out past your page onto the table — she goes with it. Fold the third page onto the right page first, then close: the left page meets the third page, and stack 1 row 1 has her on top. The single mirror (6,1) is paper on the right page — the vol. 1 answer, and she is not there. The loose stone (8,2) is the chapter's second lesson, shown, not needed: on that first, failing close the third page lifts WITH the right page (one stiff leaf) and the stone rolls over the second crease into the right page's gap (7,2); fold the third page first and the same close rolls it the other way, to (9,2) — 12-3 「回」 is built on both. Hand-drawn
+    map: [
+      'S..--..-.--.',
+      '-.-..-.-.G-.',
+      '..-.-..-r..-',
+    ],
+  },
+  {
+    id: 'hole', tier: 'mid', chapter: 12, trifold: true, needs: ['needsTrifold'],   // 12-2 · the folded third page covers the right page — except through its holes. She is on the right page at (4,1) and the right page is in pieces. Fold the third page over: it bridges the gaps, and standing on (11,1) you are right over her — on the third page, under which she is. Lay it flat from there and you are out on the third page. The way is round the folded leaf to (6,2), which is the RIGHT page seen through the third page's hole (9,2): lay the third page flat from there and you are on the right page, past its gaps; close, the stacks lead to her. hunt.js hole seed 2 #4 (start moved by the hunt to (7,0)): len 17, wrong 13, dead 22%, noise 1 (the (0,1) stone makes the crush basin)
+    map: [
+      '...--..S.---',
+      'x.x-G--.x-..',
+      '.x-.--.-.--.',
+      '-..-.----...',
+    ],
+  },
 ];
 
 if (typeof module !== 'undefined') module.exports = LEVELS;

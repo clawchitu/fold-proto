@@ -110,6 +110,9 @@
       'chHead.11': '十一 · 来回', 'ch.11.line': '立起来，又放下。什么都没发生的时候，其实什么都发生了。', 'paper.ch11': '硬卡纸。立起来过，看不出来。',
       'letter.11.title': '左岸来信', 'letter.11.body': '立起来，又放下。\n你以为什么都没发生——\n石头已经在河里了，影子已经换了列。\n来回几次，我数着。', 'letter.11.sign': '——左岸', 'letter.11.end': '卷三《倾》第三章完。\n下一章，信要折两次。',
       'slip.fro.title': '来回', 'slip.fro.body': '斜起，再放平：书经过立起两次，没合上。每颗松石滚了两格，可是没有压——胶没粘，墨没印，鹤没飞。合上再打开也是两次过立，中间却多了一次压。', 'slip.fro.pic': '图：斜起，石头滚一格；放平，它掉进缺口；对面的胶什么也没粘到。',
+      'chHead.12': '十二 · 三折', 'ch.12.line': '信太长了，折两次才够小。', 'paper.ch12': '硬卡纸，右页外沿接了第三页。它有自己的折痕。',
+      'letter.12.title': '右岸来信', 'letter.12.body': '信太长了，折两次才够小。\n折两次，我回到原来那列——\n只是叠在你上面。\n够小了。寄。', 'letter.12.sign': '——右岸', 'letter.12.end': '卷三《倾》完。\n卷四，冰。',
+      'slip.trifold.title': '三折', 'slip.trifold.body': '第三页接在右页外沿，有自己的折痕。一次只动一道折痕：书摊平才能折第三页。直接合书，第三页甩到桌上；先把它折到右页上再合，左页碰到的就是第三页——第三页的第 c 列落在你的第 c 列上：折两次，回到原来那列。第三页上的洞里露出右页。', 'slip.trifold.pic': '图：第三页折上来，再合书；她在第三页第二列，就在你那一列的叠上。',
       'letter.6.title': '右岸来信', 'letter.6.body': '你翻过来了。\n我在这一页等了很久，久到字都写到了背面。\n不要紧——合上的时候，\n哪一面对着你，由你定。', 'letter.6.sign': '——右岸', 'letter.6.end': '卷二《翻页》第二章完。\n背面还有字。',
     },
 
@@ -210,6 +213,9 @@
       'chHead.11': '11 · To and Fro', 'ch.11.line': 'Stand it up, lay it down. When nothing happened, everything did.', 'paper.ch11': 'Card. It has stood up before; you cannot tell.',
       'letter.11.title': 'A Letter from the Left Bank', 'letter.11.body': 'Stood it up, laid it down.\nYou think nothing happened —\nthe stone is in the river already, the shadow has changed its column.\nTo and fro, a few times. I counted.', 'letter.11.sign': '— the Left Bank', 'letter.11.end': 'End of Book Three, chapter three.\nNext, a letter folded twice.',
       'slip.fro.title': 'To and Fro', 'slip.fro.body': 'Lean, then lay it flat: the page passed upright twice and the book never closed. Every loose stone rolled two squares — but nothing was pressed: no glue took, no ink printed, no crane flew. Close and open again is the same two passes with a press in between.', 'slip.fro.pic': 'Picture: lean, the stone rolls one; flatten, it drops into the gap; the glue across from it took nothing.',
+      'chHead.12': '12 · Trifold', 'ch.12.line': 'The letter was too long; folded twice it is small enough.', 'paper.ch12': 'Card, with a third page on the right page\'s outer edge. It has a crease of its own.',
+      'letter.12.title': 'A Letter from the Right Bank', 'letter.12.body': 'The letter was too long; folded twice it is small enough.\nFolded twice, I am back in my own column —\nonly on top of you.\nSmall enough. Send it.', 'letter.12.sign': '— the Right Bank', 'letter.12.end': 'End of Book Three.\nBook Four: ice.',
+      'slip.trifold.title': 'Trifold', 'slip.trifold.body': 'The third page hangs off the right page\'s outer edge on a crease of its own. One crease moves at a time: the third page only while the book lies flat. Close the book as it is and the third page swings out onto the table; fold it onto the right page first and the left page meets the THIRD page — its column c lands on your column c: folded twice, back in your own column. Through the third page\'s holes you see the right page.', 'slip.trifold.pic': 'Picture: the third page folded over, then the book closed; she is in the third page\'s second column, right on your column\'s stack.',
       'letter.6.title': 'A Letter from the Right Bank', 'letter.6.body': 'You turned the page.\nI waited on this one so long the writing ran onto the back.\nNever mind — when the book is shut,\nwhich face is towards you is yours to choose.', 'letter.6.sign': '— the Right Bank', 'letter.6.end': 'End of Book Two, chapter two.\nThere is more on the back.',
     },
 
@@ -310,6 +316,9 @@
       'chHead.11': '十一 · 往き来', 'ch.11.line': '立てて、また寝かせる。何も起きなかったとき、実はすべてが起きていた。', 'paper.ch11': '厚紙。立てたことがある。見ても分からない。',
       'letter.11.title': '左岸からの手紙', 'letter.11.body': '立てて、また寝かせた。\n何も起きなかったと思うだろう——\n石はもう川の中、影はもう列を変えた。\n何度か往き来した。数えていた。', 'letter.11.sign': '——左岸より', 'letter.11.end': '第三巻『傾』第三章 了。\n次の章、手紙は二度折る。',
       'slip.fro.title': '往き来', 'slip.fro.body': '傾けて、また平らに：頁は二度立ち上がり、本は閉じていない。転がる石はみな二枡転がった——でも圧はない：糊は貼らず、墨は刷らず、鶴は飛ばない。閉じて開くのも二度の立ち上がりだが、間に一度の圧がある。', 'slip.fro.pic': '図：傾けると石が一枡転がる。平らにすると隙間へ落ちる。向かいの糊は何も貼れなかった。',
+      'chHead.12': '十二 · 三つ折り', 'ch.12.line': '手紙が長すぎた。二度折れば小さくなる。', 'paper.ch12': '厚紙。右の頁の外側に三枚目の頁。自分の折り目がある。',
+      'letter.12.title': '右岸からの手紙', 'letter.12.body': '手紙が長すぎた。二度折ってやっと小さくなる。\n二度折れば、わたしは元の列に戻る——\nただ、あなたの上に重なって。\nもう小さい。送る。', 'letter.12.sign': '——右岸より', 'letter.12.end': '第三巻『傾』了。\n第四巻、氷。',
+      'slip.trifold.title': '三つ折り', 'slip.trifold.body': '三枚目の頁は右の頁の外側に、自分の折り目でつながっている。動く折り目は一度にひとつ：本が平らなときだけ三枚目を折れる。そのまま閉じると三枚目は机へ振り出される；先に右の頁へ折ってから閉じると、左の頁が出会うのは三枚目——三枚目の c 列はあなたの c 列に重なる：二度折れば元の列。三枚目の穴からは右の頁が見える。', 'slip.trifold.pic': '図：三枚目を折ってから閉じる。彼女は三枚目の二列目、あなたの列の重なりの上。',
       'letter.6.title': '右岸からの手紙', 'letter.6.body': 'めくってくれたね。\nこの頁で長く待ちすぎて、字が裏まで続いた。\nかまわない——閉じたとき、\nどちらの面がきみに向くかは、きみが決める。', 'letter.6.sign': '——右岸より', 'letter.6.end': '第二巻『頁をめくる』第二章 了。\n裏にも、まだ字がある。',
     },
 
@@ -410,6 +419,9 @@
       'chHead.11': '11장 · 오가기', 'ch.11.line': '세웠다가, 다시 눕혀요. 아무 일도 없었을 때, 사실은 다 일어났어요.', 'paper.ch11': '두꺼운 종이. 세운 적이 있어요. 봐서는 몰라요.',
       'letter.11.title': '왼쪽 강가에서 온 편지', 'letter.11.body': '세웠다가, 다시 눕혔어.\n아무 일도 없었다고 생각하겠지——\n돌은 벌써 강에 있고, 그림자는 벌써 줄을 바꿨어.\n몇 번을 오갔는지, 세고 있었어.', 'letter.11.sign': '— 왼쪽 강가에서', 'letter.11.end': '제3권 《기울다》 3장 끝.\n다음 장, 편지는 두 번 접어요.',
       'slip.fro.title': '오가기', 'slip.fro.body': '기울였다가 다시 눕혀요: 면이 두 번 곧추섰고 책은 닫히지 않았어요. 구르는 돌은 모두 두 칸 굴렀지만 누른 적은 없어요——풀은 안 붙고, 먹은 안 찍히고, 학은 안 날아요. 닫았다 여는 것도 두 번 곧추서지만, 사이에 한 번 눌러요.', 'slip.fro.pic': '그림: 기울이면 돌이 한 칸 굴러요. 눕히면 틈에 빠져요. 맞은편 풀은 아무것도 못 붙였어요.',
+      'chHead.12': '12장 · 세 번 접기', 'ch.12.line': '편지가 너무 길어서, 두 번 접어야 작아져요.', 'paper.ch12': '두꺼운 종이. 오른쪽 면 바깥에 셋째 면이 붙어 있어요. 자기 접는 선이 있어요.',
+      'letter.12.title': '오른쪽 강가에서 온 편지', 'letter.12.body': '편지가 너무 길어서, 두 번 접어야 작아져.\n두 번 접으면, 나는 원래 그 줄로 돌아와——\n다만 네 위에 겹쳐서.\n이제 작아. 보낼게.', 'letter.12.sign': '— 오른쪽 강가에서', 'letter.12.end': '제3권 《기울다》 끝.\n제4권, 얼음.',
+      'slip.trifold.title': '세 번 접기', 'slip.trifold.body': '셋째 면은 오른쪽 면 바깥 가장자리에 자기 접는 선으로 붙어 있어요. 한 번에 접는 선 하나만 움직여요: 책이 펼쳐져 있을 때만 셋째 면을 접을 수 있어요. 그대로 닫으면 셋째 면은 책상으로 휙 나가요; 먼저 오른쪽 면 위로 접고 닫으면 왼쪽 면이 만나는 건 셋째 면——셋째 면의 c 열이 당신의 c 열에 겹쳐요: 두 번 접으면 원래 그 줄. 셋째 면의 구멍으로는 오른쪽 면이 보여요.', 'slip.trifold.pic': '그림: 셋째 면을 접고 책을 닫아요. 그녀는 셋째 면 둘째 열, 당신 열의 겹 위에.',
       'letter.6.title': '오른쪽 강가에서 온 편지', 'letter.6.body': '네가 페이지를 넘겼구나.\n이 페이지에서 너무 오래 기다려 글이 뒷면까지 이어졌다.\n괜찮아. 책을 닫았을 때\n어느 면이 너를 향할지는 네가 정하니까.', 'letter.6.sign': '— 오른쪽 강가에서', 'letter.6.end': '제2권 《페이지를 넘기다》 제2장 끝.\n뒷면에 글이 더 있다.',
     },
   };
@@ -488,6 +500,10 @@
       hover: ['悬', '它还会飞回来。','斜到 60°（这一关唯一一次过立），走到鹤 (8,3) 上合书：它带你到 (1,3)。只开到 30°——别摊平，摊平又是一次过立，松石会滚到你要走的格上。走到飞过来的鹤 (3,4) 上，再合：它带你到 (6,4)。开到 55°，往下一格是她。', '从合着开到斜着，不过 90°：再合一次，石头一格没动。'],
       past: ['过', '右页有胶。', '每合一次，右页的胶就把对面的石头粘过来。先让石头滚：走到 (8,3)，斜到 55°，往下走到 (8,4)，放平——两次过立，什么也没压。往左一格到 (7,4)，这才合上，叠合走到 (2,3)，斜到 80°，她在两步之外。', '该滚的先滚完，再合。'],
       park: ['停', '翻过去，那一页就不动了。', '在 (7,3) 把书立到 90°（右页的松石滚一格），走到 (6,2) 合上——别先放平：第二次过立会把 (6,1) 填上，那一叠两边都成了纸，叠合就换不到左页，翻不了书。叠合走到 (4,1)，翻。翻过来之后抬起的是第三页：摊平、斜到 30°、再摊平——三次过立全是第三页的，右页那几颗贴在背面一动不动。第三页的缺口填上了，走到她。', '填上的缺口也是纸：那一叠两边都是纸，就换不了页。立一次就合。'],
+      // ---- vol. 3 chapter 12 「三折」 (docs/design-ch12.md) ----
+      home: ['本列', '她在第三页。', '先把第三页折到右页上（书摊平时才折得动），再合书：这回左页碰到的是第三页。她在 (10,2)——折两次，镜像两次，回到你自己那列：走到第 2 列第 2 行那一叠，她就在上面。直接合书的话，第三页甩到桌上，她跟着出去了；右页的 (7,2) 是卷一的答案，可她不在那儿。', '折两次，回到原来那列。'],
+      hole: ['洞', '她在右页上。', '把第三页折上来，它把右页的缺口都搭上了。可是站到 (12,2)——正在她头顶——你是在第三页上，她在下面；从那儿把第三页放平，你就在外面的第三页上了。绕着折好的那一叶走到 (7,3)：那里第三页有个洞 (10,3)，你脚下是洞里露出来的右页。从那儿放平第三页，你就站在右页上、缺口的另一边。合上，叠合走到她。', '洞里露出来的是右页。'],
+      return: ['回', '石头在你那一列。', '站到 (2,2)——你要从这一叠合书。先别折第三页：先折它，(10,2) 那颗松石往它自己的折痕滚到 (9,2)，离开你那一列；可第三页折着的时候，低处是书的折痕，在第三页上是往右——合书那一下它滚回 (10,2)，正落在你身上。第三页摊着时把书合上再打开：两次过立，它滚到 (9,2)，再滚过第二道折痕掉进右页的缺口 (8,2)。这才折第三页，在 (2,2) 合书，叠合沿着第三页绕到她。', '折着的第三页，石头往反方向滚。'],
       roll: ['滚', '石头没粘住。', '斜起到 80°：页经过立起那一下，松石往折痕滚一格，掉进你旁边的缺口——缺口成了纸。走过去。', '书立起来，石头就往折痕滚；不用合上。'],
       twice: ['两次', '差两格。', '斜起（它滚一格），再放平（再滚一格）：石头掉进缺口，桥就有了。合上再打开，也是这两次。', '来回一次是两次过立；放平那一下也算。'],
       jump: ['跳', '影子跟着石头。', '斜到 50°：去的路上页立过一次，远处那颗已经滚到第 7 列——它的影子落在 (3,4) 的缺口上，不在你照着图算的那格。走近处那颗的影子 (4,3)，下到 (3,4)，再到 (2,4)；放平、合上，叠合走法通到她。', '影子落在石头滚之后的位置，不是画出来的位置。'],
@@ -570,6 +586,10 @@
       hover: ['Hover', 'It will fly back.','Lean to 60° (the only pass in this letter), walk onto the crane (8,3) and close: it carries you to (1,3). Open only to 30° — not flat: flat is another pass, and the loose stones roll onto your squares. Walk onto the crane that flew to (3,4) and close again: it carries you to (6,4). Open to 55°; she is one step down.', 'From closed to a lean is not a pass: close again and no stone has moved.'],
       past: ['Past', 'The right page has glue.', 'Every close lets the right page\'s glue pull the stones facing it across. Let the stones roll first: walk to (8,3), lean to 55°, walk down to (8,4), lay it flat — two passes, nothing pressed. Step left to (7,4) and only now close; walk the stacks to (2,3), lean to 80°, and she is two steps away.', 'Roll what must roll, then close.'],
       park: ['Parked', 'Turn it over, and that page stands still.', 'Stand the book up to 90° at (7,3) (the right page\'s loose stones roll one) and close from (6,2) — do not lay it flat first: a second pass fills (6,1), both sides of that stack are paper then, and the stacks never switch you to the left page: no turn. Walk the stacks to (4,1) and turn. Now the lifted page is the third page: lay it flat, lean to 30°, lay it flat — all three passes are the third page\'s; the right page\'s stones, on the back of the leaf, never move. The third page\'s gaps fill; walk to her.', 'A filled gap is paper too: a stack with paper on both sides never switches your page. Stand it up once, then close.'],
+      // ---- vol. 3 chapter 12 「三折」 (docs/design-ch12.md) ----
+      home: ['Home Column', 'She is on the third page.', 'Fold the third page onto the right page first (it moves only while the book lies flat), then close: this time the left page meets the third page. She is at (10,2) — folded twice, mirrored twice, back in your own column: walk to the stack at column 2, row 2 and she is on top. Close the book as it is and the third page swings out onto the table, with her; the right page\'s (7,2) is the Book One answer, and she is not there.', 'Folded twice, back in your own column.'],
+      hole: ['Holes', 'She is on the right page.', 'Fold the third page over and it bridges all the right page\'s gaps. But standing on (12,2) — right over her — you are on the third page and she is under it; lay it flat from there and you are out on the third page. Go round the folded leaf to (7,3): the third page has a hole there, (10,3), and what you stand on is the right page showing through. Lay the third page flat from there: you are on the right page, past its gaps. Close; the stacks lead to her.', 'Through a hole, you stand on the right page.'],
+      return: ['Back', 'The stone is in your column.', 'Stand on (2,2) — this is the stack you close from. Do not fold the third page yet: fold it and the loose stone (10,2) rolls to its own crease, (9,2), off your column — but with the third page folded the low side is the book\'s crease, which on the third page is to the right, and the close rolls it back onto (10,2), onto you. With the third page lying flat, close the book and open it: two passes, it rolls to (9,2) and on over the second crease into the right page\'s gap (8,2). Only now fold the third page, close on (2,2), and the stacks take you round the third page to her.', 'Folded over, the third page rolls the other way.'],
       roll: ['Roll', 'The stone is not glued down.', 'Lean to 80°: as the page passes upright the loose stone rolls one square towards the crease and drops into the gap beside you — the gap is paper now. Walk across.', 'Stand the book up and the stone rolls to the crease; no close needed.'],
       twice: ['Twice', 'Two squares short.', 'Lean (it rolls one), flatten (it rolls one more): the stone drops into the gap and the bridge is there. Close and open again would have been the same two passes.', 'A lean that comes back is two passes; flattening counts too.'],
       jump: ['Jump', 'The shadow follows the stone.', 'Lean to 50°: on the way the page passed upright and the far stone has rolled to column 7 — its shadow falls on the gap at (3,4), not where you worked it out from the drawing. Walk the near stone’s shadow at (4,3), down to (3,4), across to (2,4); flatten, close, and the stacks lead to her.', 'The shadow falls where the stone is after its roll, not where it was drawn.'],
@@ -606,6 +626,10 @@
       hover: ['宙', 'また飛んで戻る。','60° に傾け（ただ一度の立ち）、鶴 (8,3) に乗って閉じる：(1,3) へ。30° まで開く——寝かせない。飛んできた鶴 (3,4) に乗ってまた閉じる：(6,4) へ。55° まで開いて、一つ下が彼女。', '閉じた本を傾けるまで開いても、90° は越えない。'],
       past: ['過', '右頁に糊。', '閉じるたび右頁の糊が向かいの石を取る。先に転がす：(8,3) で 55°、(8,4) へ下り、寝かせる。(7,4) で初めて閉じ、重ねの道で (2,3)、80° で彼女まで二歩。', '転がすものを転がしてから閉じる。'],
       park: ['止', '翻せば、その頁は止まる。', '(7,3) で 90° まで立て、(6,2) で閉じる——先に寝かせない：二度目の立ち上がりで (6,1) が埋まり、その重ねは両側とも紙になって左頁へ移れず、翻せない。重ねの道で (4,1)、翻す。上がるのは第三頁：寝かせ、30°、寝かせる——三度とも第三頁の石だけが転がる。彼女へ。', '埋まった隙間も紙：両側が紙の重ねでは頁を移れない。一度立てたら、閉じる。'],
+      // ---- vol. 3 chapter 12 「三つ折り」 (docs/design-ch12.md) — 草稿 TODO review ----
+      home: ['元の列', '彼女は三枚目の頁にいる。', '先に三枚目を右の頁へ折る（本が平らなときだけ動く）、それから閉じる：今度、左の頁が出会うのは三枚目。彼女は (10,2)——二度折り、二度映して、あなた自身の列に戻る：2 列 2 行の重なりへ歩けば、彼女はその上。そのまま閉じると三枚目は机へ振り出され、彼女も一緒に出ていく；右の頁の (7,2) は第一巻の答えで、彼女はそこにいない。', '二度折れば、元の列。'],
+      hole: ['穴', '彼女は右の頁にいる。', '三枚目を折ると右の頁の隙間はみな橋になる。でも (12,2)——彼女の真上——に立てば、あなたは三枚目の上、彼女はその下；そこで三枚目を寝かせると外の三枚目に出てしまう。折った葉を回って (7,3) へ：そこは三枚目の穴 (10,3)、足もとは穴から見える右の頁。そこで三枚目を寝かせれば、あなたは右の頁の、隙間の向こう側。閉じて、重ねを歩いて彼女へ。', '穴の中は右の頁。'],
+      return: ['戻', '石はあなたの列にある。', '(2,2) に立つ——ここで閉じる。まだ三枚目を折らない：折ると石 (10,2) は自分の折り目へ (9,2) まで転がり、あなたの列を離れる——でも三枚目を折っていると低い側は本の折り目、三枚目の上では右：閉じた瞬間に (10,2) へ戻ってあなたの上に落ちる。三枚目が平らなまま本を閉じて開く：二度の立ち上がりで (9,2)、さらに二つ目の折り目を越えて右の頁の隙間 (8,2) へ落ちる。それから三枚目を折り、(2,2) で閉じ、重ねを歩いて三枚目を回り彼女へ。', '折った三枚目では、石は逆へ転がる。'],
       roll: ['転', '石は貼られていない。', '80° まで傾ける：頁が立った拍子に石が折り目へ一枡転がり、隣の隙間に落ちる——隙間は紙になった。渡る。', '本を立てれば石は折り目へ転がる。閉じなくていい。'],
       twice: ['二度', '二枡足りない。', '傾けて（一枡）、平らに戻す（もう一枡）：石が隙間に落ちて橋になる。閉じて開いても同じ二度。', '往復は二度の「立ち」。戻すほうも数える。'],
       jump: ['跳', '影は石についていく。', '50° まで傾ける：途中で頁が立ち、遠い石は 7 列目へ転がっている——影は (3,4) の隙間に落ちる。近い石の影 (4,3) を渡り、(3,4) へ、(2,4) へ。平らにして閉じれば束が彼女へ続く。', '影は転がったあとの石の位置に落ちる。'],
@@ -685,6 +709,10 @@
       hover: ['머묾', '다시 날아 돌아와요.','60°로 기울이고(단 한 번 서기), 학 (8,3)에 올라 닫아요: (1,3)으로. 30°까지만 열어요——눕히지 말고요. 날아온 학 (3,4)에 올라 다시 닫아요: (6,4)로. 55°까지 열면 한 칸 아래가 그녀예요.', '닫힌 책을 기울기까지만 열면 90°를 넘지 않아요.'],
       past: ['지나', '오른쪽 면에 풀.', '닫을 때마다 오른쪽 풀이 맞은편 돌을 가져가요. 먼저 굴려요: (8,3)에서 55°, (8,4)로 내려가 눕혀요. (7,4)에서 처음 닫고, 겹친 길로 (2,3), 80°면 그녀까지 두 걸음.', '구를 것을 다 굴리고 닫아요.'],
       park: ['멈춤', '넘기면 그 면은 멈춰요.', '(7,3)에서 90°까지 세우고, (6,2)에서 닫아요——먼저 눕히지 말고요: 두 번째 곧추서기에 (6,1)이 메워지고, 그 겹은 양쪽 다 종이가 되어 왼쪽 면으로 못 건너가요, 못 넘겨요. 겹친 길로 (4,1), 넘겨요. 이제 들리는 건 셋째 면: 눕히고, 30°, 눕히고——세 번 모두 셋째 면의 돌만 굴러요. 그녀에게.', '메워진 틈도 종이예요: 양쪽이 다 종이인 겹에서는 면을 못 바꿔요. 한 번 세웠으면, 닫아요.'],
+      // ---- vol. 3 chapter 12 「세 번 접기」 (docs/design-ch12.md) — 초안 TODO review ----
+      home: ['제자리 열', '그녀는 셋째 면에 있어요.', '먼저 셋째 면을 오른쪽 면 위로 접고(책이 펼쳐져 있을 때만 움직여요), 그다음 닫아요: 이번에 왼쪽 면이 만나는 건 셋째 면이에요. 그녀는 (10,2)——두 번 접고 두 번 비추면 당신 자신의 열로 돌아와요: 2열 2행 겹으로 걸어가면 그녀가 그 위에 있어요. 그대로 닫으면 셋째 면은 책상으로 휙 나가고 그녀도 함께 나가요; 오른쪽 면의 (7,2)는 1권의 답이지만 그녀는 거기 없어요.', '두 번 접으면 원래 그 열.'],
+      hole: ['구멍', '그녀는 오른쪽 면에 있어요.', '셋째 면을 접으면 오른쪽 면의 틈이 모두 이어져요. 하지만 (12,2)——그녀 바로 위——에 서면 당신은 셋째 면 위, 그녀는 그 아래; 거기서 셋째 면을 펴면 바깥 셋째 면으로 나가 버려요. 접힌 장을 돌아 (7,3)으로: 거기 셋째 면에 구멍 (10,3)이 있고, 발밑은 구멍으로 보이는 오른쪽 면이에요. 거기서 셋째 면을 펴면 당신은 오른쪽 면, 틈 건너편에 있어요. 닫고, 겹을 걸어 그녀에게.', '구멍 속은 오른쪽 면.'],
+      return: ['되돌아옴', '돌은 당신의 열에 있어요.', '(2,2)에 서요——여기서 닫아요. 아직 셋째 면을 접지 마요: 접으면 돌 (10,2)는 자기 접는 선 쪽 (9,2)로 굴러 당신 열을 떠나요——하지만 셋째 면이 접혀 있으면 낮은 쪽은 책의 접는 선, 셋째 면 위에서는 오른쪽: 닫는 순간 (10,2)로 돌아와 당신 위로 떨어져요. 셋째 면이 펼쳐진 채로 책을 닫았다가 열어요: 두 번 곧추서면 (9,2), 다시 둘째 접는 선을 넘어 오른쪽 면 틈 (8,2)에 빠져요. 그다음 셋째 면을 접고 (2,2)에서 닫으면, 겹을 따라 셋째 면을 돌아 그녀에게.', '접힌 셋째 면에서 돌은 반대로 굴러요.'],
       roll: ['구르기', '돌이 붙어 있지 않아요.', '80°까지 기울여요: 페이지가 서는 순간 돌이 접힌 금 쪽으로 한 칸 굴러 옆 틈에 떨어져요. 틈은 종이가 됐어요. 건너가요.', '책을 세우면 돌이 접힌 금으로 굴러요. 닫지 않아도 돼요.'],
       twice: ['두 번', '두 칸 모자라요.', '기울이고(한 칸), 다시 펴요(한 칸 더): 돌이 틈에 떨어져 다리가 돼요. 닫았다 열어도 같은 두 번이에요.', '한 번 오가는 건 두 번 세우는 것. 펴는 쪽도 세요.'],
       jump: ['뛰기', '그림자는 돌을 따라가요.', '50°까지 기울여요: 가는 길에 페이지가 한 번 섰고, 먼 돌은 7열로 굴러갔어요. 그림자는 (3,4) 틈에 떨어져요. 가까운 돌의 그림자 (4,3)을 지나 (3,4)로, (2,4)로. 펴고 닫으면 묶음이 그녀에게 이어져요.', '그림자는 구른 뒤의 돌 자리에 떨어져요.'],
