@@ -759,6 +759,15 @@ const LEVELS = [
       '----....----',
     ],
   },
+  {
+    id: 'twofold', tier: 'final', chapter: 12, trifold: true, needs: ['needsTrifold', 'needsRoll', 'needsCrane'],   // 12-6 · final · 卷三 finale · fold it — and lay it flat again. She is on the right page at (7,3); her mirror (0,3) is a stone, and the right page's path to her ((6,0) … (4,0), (4,1), (4,2), (4,3) … (7,3)) has an exact paper copy on the left page, the one you start on — so no stack ever switches page: only the crane (1,0) gets you across, at a close with the third page FLAT (left meets right, 10-1). The bridge is the right page's gap (4,1), under the third page's hole (11,1). Fold the third page (its loose stone (10,1) rolls to (9,1)); folded, lean the book and lay it flat again (11-1: two passes, no press) — the stone rolls RIGHT (12-3), to (10,1), into the hole (11,1), through it onto (4,1): paper (12-4). Then LAY THE THIRD PAGE FLAT and close on the crane: it carries you to (6,0); closed, the stacks walk you down the copy to (7,3). play.js: fold first and close on the crane (the whole chapter's habit) = the crane's landing is the third page's stone (9,0), crushed ('stone'); close on the crane at once (10-1's habit) = carried, but the third page lifts with the right page and the stone rolls left into the hole (8,1): DEAD END. Fold, close anywhere else, open also drops the stone (the same two passes with a press between, par 6): the press is free here, the aha is the same. Core verified in design-ch12.md §3.2, lengthened by the left copy (start at its far end); len 21 (par 6 + 15) wrong 27 dead 45% noise 0
+    map: [
+      '-h.....--x--',
+      '-...-----.r-',
+      '---..-------',
+      'xS.....G----',
+    ],
+  },
 ];
 
 if (typeof module !== 'undefined') module.exports = LEVELS;

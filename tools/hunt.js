@@ -220,6 +220,12 @@ const T = {
       for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (p.face === 3 && s.face === 2 && L.standing(s.a) && s.a < L.FOLD_MIN) { for (let j = i + 1; j < st.length; j++) { if (st[j].face === 3) { hover = true; break; } if (st[j].face !== 2 || !L.standing(st[j].a)) break; } }
         if (s.face === 3 && p.face !== 3 && pg(X, p) !== pg(X, s)) carry = true; }
       return [hover, carry, m.needsCrane, m.needsTrifold]; } },
+  flaphover2: { rows: 4, trifold: true, lamp: null, tiles: '.-xrg', par: 5, closes: 2, minpar: 4, need: 'trifold+roll', elements: 8, minlen: 15, phases: 1, backs: 0,
+    seed: ['S..-..-.-...', '.g.-.x-..r.-', '...-..-.-.G.', '.-.-..-.-...'],
+    pred: (m, X) => { // 12-5 (design-ch12.md §3.2 candidate): the third page hovers — folded, opened only to a lean (no pass, its stones stay), folded again — and the hover is needed (every opening rolls → dearer / unsolvable); a left-page glue fires on the way (through a hole onto the right page)
+      const st = X.states; let hover = false;
+      for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (p.face === 3 && s.face === 2 && L.standing(s.a) && s.a < L.FOLD_MIN) { for (let j = i + 1; j < st.length; j++) { if (st[j].face === 3) { hover = true; break; } if (st[j].face !== 2 || !L.standing(st[j].a)) break; } } }
+      return [hover, m.needsHover, m.glueFires, m.needsTrifold]; } },
   crane2: { rows: 4, trifold: true, lamp: null, tiles: '.-xh', par: 4, closes: 2, minpar: 3, need: 'trifold+crane', elements: 7, minlen: 12, phases: 0, backs: 0,
     seed: ['S.h.-..-.-..', '.-.-.x.-.-..', '..-..-..-.G.', '.x--.-.-.-..'],
     pred: (m, X) => { // a crane carries you twice — once at a press of the book, once at the press of the flap onto the right page — and the second carry ends on the third page
