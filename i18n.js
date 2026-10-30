@@ -85,7 +85,7 @@
       // ---- ch. 12 trifold UI (main.js / a11y.js; docs/design-ch12.md §1) ----
       'pre.third': '第三页', 'pre.thirdLabel': '换折痕：在书和第三页自己的折痕之间切换（P）',
       'tri.onFlap': '现在折的是第三页：右页平放，第三页抬起', 'tri.onBookFlat': '现在折的是书：第三页摊着，跟右页一起抬', 'tri.onBookFolded': '现在折的是书：第三页折在右页上，洞里露出右页',
-      'tri.bookFirst': '先把书摊平，才能折第三页——一次只动一道折痕', 'tri.flapFirst': '先把第三页放平，或者折到底，才能折书',
+      'tri.bookFirst': '先把书摊平，才能折第三页——一次只动一道折痕', 'tri.flapFirst': '先把第三页放平，或者折到底，才能折书', 'tri.hingeIsBook': '第三页用手指折；铰链折的是书。', 'duo.hint': '也可以把手机合一点。',
       'tri.blocked': '第三页折不下去：你站在它上面，正下方右页是石头。先走开', 'tri.covered': '第三页折不下去：它的纸会盖在你身上。站到它的洞下面，或者离开右页', 'tri.aside': '第三页立着的时候，你在左页上哪儿也去不了', 'tri.walkFolded': '第三页合在右页上时走不了：按「第三页」换回书的折痕再走',
       fellOff: '书合上时第三页还摊着，它甩出左页外沿扣在桌上——你也跟着掉下去了。回到起点，信重新摊平',
       'tri.layerThird': '第三页', 'tri.layerHole': '右页，透过第三页的洞', 'tri.flapView': '第三页在它自己的折痕上，{a}°；右页平放，左页在一边够不着',
@@ -188,7 +188,7 @@
       // ---- ch. 12 trifold UI (main.js / a11y.js; docs/design-ch12.md §1) ----
       'pre.third': 'Third page', 'pre.thirdLabel': 'Switch crease: between the book and the third page’s own crease (P)',
       'tri.onFlap': 'Now folding the third page: the right page lies flat, the third page lifts', 'tri.onBookFlat': 'Now folding the book: the third page lies open and lifts with the right page', 'tri.onBookFolded': 'Now folding the book: the third page lies folded on the right page; its holes show the right page',
-      'tri.bookFirst': 'Lay the book flat first — one crease moves at a time', 'tri.flapFirst': 'Lay the third page flat, or fold it all the way, before you fold the book',
+      'tri.bookFirst': 'Lay the book flat first — one crease moves at a time', 'tri.flapFirst': 'Lay the third page flat, or fold it all the way, before you fold the book', 'tri.hingeIsBook': 'Fold the third page with your finger; the hinge folds the book.', 'duo.hint': 'You can also fold the phone a little.',
       'tri.blocked': 'The third page won’t fold down: you’re standing on it right over a stone on the right page. Step off first', 'tri.covered': 'The third page won’t fold down: its paper would lie on you. Stand under one of its holes, or leave the right page', 'tri.aside': 'While the third page is up you can’t go anywhere on the left page', 'tri.walkFolded': 'With the third page folded down you can’t walk: switch back to the book’s crease (P) first',
       fellOff: 'The book closed with the third page still open: it swung out past the left page onto the table, with you on it. Back to the start, the letter laid flat again.',
       'tri.layerThird': 'third page', 'tri.layerHole': 'right page, through a hole in the third page', 'tri.flapView': 'third page on its own crease at {a}°; the right page lies flat, the left page aside out of reach',
@@ -295,7 +295,7 @@
       // ---- ch. 12 trifold UI (main.js / a11y.js; docs/design-ch12.md §1) ----
       'pre.third': '三枚目', 'pre.thirdLabel': '折り目を切り替える：本の折り目と三枚目の折り目（P）',
       'tri.onFlap': 'いま折っているのは三枚目：右ページは平ら、三枚目が起きる', 'tri.onBookFlat': 'いま折っているのは本：三枚目は開いたまま、右ページと一緒に起きる', 'tri.onBookFolded': 'いま折っているのは本：三枚目は右ページに折り重なり、穴から右ページが見える',
-      'tri.bookFirst': '先に本を平らに——折り目は一度にひとつ', 'tri.flapFirst': '三枚目を平らにするか、最後まで折ってから、本を折る',
+      'tri.bookFirst': '先に本を平らに——折り目は一度にひとつ', 'tri.flapFirst': '三枚目を平らにするか、最後まで折ってから、本を折る', 'tri.hingeIsBook': '三枚目は指で折る。スマホの綴じ目が折るのは本。', 'duo.hint': 'スマホを少し閉じても折れる。',
       'tri.blocked': '三枚目は折れない：その上に立っていて、真下の右ページが石。先にどいて', 'tri.covered': '三枚目は折れない：その紙があなたに被さる。穴の下に立つか、右ページから離れて', 'tri.aside': '三枚目が起きているあいだ、左ページではどこへも行けない', 'tri.walkFolded': '三枚目を折り重ねたままでは歩けない：「三枚目」で本の折り目に戻してから',
       fellOff: '三枚目を開いたまま本を閉じた。三枚目は左ページの外へ振り出されて机に伏せ、あなたも一緒に落ちた。最初から、手紙を広げなおす',
       'tri.layerThird': '三枚目', 'tri.layerHole': '右ページ、三枚目の穴越し', 'tri.flapView': '三枚目は自分の折り目で{a}°。右ページは平ら、左ページは脇にあって届かない',
@@ -407,7 +407,7 @@
       // ---- ch. 12 trifold UI (main.js / a11y.js; docs/design-ch12.md §1) ----
       'pre.third': '셋째 페이지', 'pre.thirdLabel': '접는 선 바꾸기: 책의 접는 선과 셋째 페이지의 접는 선 (P)',
       'tri.onFlap': '지금 접는 건 셋째 페이지: 오른쪽 페이지는 평평하고, 셋째 페이지가 들려요', 'tri.onBookFlat': '지금 접는 건 책: 셋째 페이지는 펼친 채 오른쪽 페이지와 함께 들려요', 'tri.onBookFolded': '지금 접는 건 책: 셋째 페이지는 오른쪽 페이지 위에 접혀 있고, 구멍으로 오른쪽 페이지가 보여요',
-      'tri.bookFirst': '먼저 책을 평평하게 펴요—접는 선은 한 번에 하나만', 'tri.flapFirst': '셋째 페이지를 평평하게 펴거나 끝까지 접은 다음에 책을 접어요',
+      'tri.bookFirst': '먼저 책을 평평하게 펴요—접는 선은 한 번에 하나만', 'tri.flapFirst': '셋째 페이지를 평평하게 펴거나 끝까지 접은 다음에 책을 접어요', 'tri.hingeIsBook': '셋째 페이지는 손가락으로 접어요. 휴대폰의 접는 선은 책을 접어요.', 'duo.hint': '휴대폰을 조금 접어도 돼요.',
       'tri.blocked': '셋째 페이지가 접히지 않아요: 그 위에 서 있고, 바로 아래 오른쪽 페이지는 돌이에요. 먼저 비켜요', 'tri.covered': '셋째 페이지가 접히지 않아요: 그 종이가 나를 덮게 돼요. 구멍 아래에 서거나, 오른쪽 페이지에서 비켜요', 'tri.aside': '셋째 페이지가 들려 있는 동안 왼쪽 페이지에서는 어디로도 갈 수 없어요', 'tri.walkFolded': '셋째 페이지를 접어 둔 채로는 걸을 수 없어요: ‘셋째 페이지’로 책의 접는 선으로 돌아간 다음 걸어요',
       fellOff: '셋째 페이지를 편 채로 책을 닫았어요. 셋째 페이지가 왼쪽 페이지 밖으로 넘어가 책상에 엎어지고, 나도 함께 떨어졌어요. 처음부터, 편지를 다시 펼쳐요',
       'tri.layerThird': '셋째 페이지', 'tri.layerHole': '오른쪽 페이지, 셋째 페이지의 구멍 너머', 'tri.flapView': '셋째 페이지는 제 접는 선에서 {a}°. 오른쪽 페이지는 평평하고, 왼쪽 페이지는 옆에 있어 닿지 않아요',
