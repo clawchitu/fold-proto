@@ -138,10 +138,19 @@ const SLIPS = [
       { angle: 0 },
       { walk: [1, 1] }, { win: true },            // the road joins: down to the letter
     ] },
+  { id: 'trifold', level: '12-1', tile: null, trifold: true,   // vol. 3 ch. 12 「三折」 (docs/design-ch12.md §5): a posture slip — the second crease
+    map: ['S---.--.-G--', '............'],
+    beats: [
+      { angle: 180, at: [0, 0] },                 // close as it is: the third page swings out past your page — she is out on the table, nowhere in your stacks
+      { angle: 0 },
+      { flap: 180 },                              // fold the third page onto the right page (the book lies flat)
+      { angle: 180 },                             // now close: the left page meets the third page
+      { walkStack: [1, 0] }, { win: true },       // her (9,0) is stack 1 — your own column: two mirrors bring it home
+    ] },
 ];
 
 function run(slip) {
-  const s = F.create({ map: slip.map, lamp: slip.lamp });
+  const s = F.create({ map: slip.map, lamp: slip.lamp, trifold: slip.trifold });
   let angle = 0, src = null;
   const mode = () => F.modeOf(angle);
   const sh = () => F.shadows(s, angle);
@@ -178,6 +187,15 @@ function run(slip) {
       if (b.shadowAt && !sh().has(b.shadowAt.join(','))) fail(`no shadow at ${b.shadowAt} at fold ${b.angle} (${[...sh().keys()]})`);
       if (b.rolled && !rolled.some((e) => e.cells[0].c === b.rolled[0][0] && e.cells[0].r === b.rolled[0][1] && e.cells[1].c === b.rolled[1][0] && e.cells[1].r === b.rolled[1][1])) fail(`expected a loose stone to roll ${b.rolled[0]} → ${b.rolled[1]} on the way to fold ${b.angle}`);
       log.push(`fold ${angle}${b.stamp ? ' · ' + b.stamp : ''}${b.shadowAt ? ' · shadow at ' + b.shadowAt : ''}${b.rolled ? ' · stone rolled to ' + b.rolled[1] + (rolled.some((e) => e.filled) ? ' (into the gap: paper now)' : '') : ''}`);
+    }
+    if (b.flap !== undefined) {   // ch. 12: the third page's own crease to b (0 flat, 180 folded), only while the book lies flat
+      if (angle !== 0) fail('the third page moves only while the book lies flat');
+      const from = s.face === 3 ? 180 : 0; s.char = F.flapIn(s, s.char); s.face = 2;
+      if (b.flap >= F.FOLD_MIN && F.flapBlock(s)) fail('the third page will not fold onto a stone under you');
+      for (let a = from; a !== b.flap;) { const p = a; a += Math.sign(b.flap - from) * 5; if (F.passes(p, a)) F.roll(s); if (!F.ride(s, s.char, null, a)) fail('fell / crushed on the flap'); }
+      if (b.flap >= F.FOLD_MIN) { const ev = F.stamp(s); s.char = F.carried(ev, s.char); }
+      const out = F.flapOut(s, s.char, b.flap >= F.FOLD_MIN); if (!out) fail('squeezed'); s.char = out; s.face = b.flap >= F.FOLD_MIN ? 3 : 0;
+      log.push(b.flap >= F.FOLD_MIN ? 'third page folded onto the right page' : 'third page flat');
     }
     if (b.flip) {
       const why = F.flipBlock(s, angle); if (why) fail(`cannot turn: ${why}`);

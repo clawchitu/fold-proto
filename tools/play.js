@@ -168,6 +168,11 @@ for (const act of actions) {
     if (!path) { const b = L.pathBlock(s, target, mode(), shade()) || { why: 'gap' }; const closed = mode() === 'fold'; say(`cannot get to ${closed ? 'stack' : 'col'} ${(closed ? L.proj(target.c) : target.c) + 1}, row ${target.r + 1} (from ${closed ? 'stack' : 'col'} ${(closed ? L.proj(s.char.c) : s.char.c) + 1}, row ${s.char.r + 1}): ${({ stone: closed ? `a stone on the upper (${s.face ? 'third' : 'right'}) page covers that stack` : 'a stone blocks the way', card: 'a left-page stone lies under the paper of that stack: blocked', door: 'a locked door', gap: closed ? 'neither side of that stack is paper' : 'a gap', edge: 'the edge of the book', crease: 'the crease (pages only join when closed, or on standing tabs)' })[b.why]} at ${closed ? 'stack' : 'col'} ${b.c + 1}, row ${b.r + 1}`); }
     else { push(); for (const p of path) { s.char = p; steps++; if (L.isWin(s, mode())) { won = true; break; } } const closed = mode() === 'fold'; say(closed ? `arrived at stack ${L.proj(s.char.c) + 1}, row ${s.char.r + 1}, on the ${L.isRight(s.char.c) ? (s.face ? 'THIRD (upper)' : 'RIGHT (upper)') : 'LEFT (under)'} page` : `arrived at col ${(TRI ? mapCol(s.char.c, s.char.r) : s.char.c) + 1}, row ${s.char.r + 1}`); }
   } else if (verb === 'undo') { const u = undo.pop(); if (!u) say('nothing to undo'); else { s.grid = u.grid; s.char = u.char; angle = u.angle; flapA = u.flapA; s.face = u.face; say('undone'); } }
+  else if (verb === 'solvable') {   // design check (not a game action): can the level still be won from here? (docs/design-ch12.md: the obvious route must die)
+    const C = require('./check.js'), lvNow = { ...lv, map: s.grid.map((row) => row.join('')) }, B = C.grids(lvNow);
+    const r = C.solve(lvNow, C.ANGLES, { c: s.char.c, r: s.char.r, a: fold(), face: s.face, g: 0 }, { B });
+    say(r ? `[solver] still winnable from here: ${r.cost} more hinge moves (${r.steps.join(' → ')})` : '[solver] DEAD END: no way to win from here (undo / restart)');
+  }
   else if (verb === 'hint') { hintsUsed++; say('? ' + (text.hint1 && rung++ === 0 ? text.hint1 : text.hint)); }
   else say('unknown action: ' + act);
 }

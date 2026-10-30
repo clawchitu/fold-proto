@@ -146,6 +146,26 @@ const T = {
       const st = X.states, gC = X.B.base.grid.findIndex((row) => row.includes('G')) >= 0 && X.B.base.grid.some((row) => row.indexOf('G') >= 8); let home = false;
       for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (p.face === 3 && s.face === 3 && p.a === s.a && G_posture(s.a) === 'fold' && pg(X, p) === 0 && pg(X, s) === 2) home = true; }
       return [gC, home, m.needsTrifold]; } },
+  rigid: { rows: 3, trifold: true, lamp: null, tiles: '.-xr', par: 3, closes: 1, minpar: 2, need: 'roll', elements: 5, minlen: 7, phases: 0, backs: 0,
+    seed: ['S.-..-.-r...', '-.-..-.-..-.', '..-...-G.-..'],
+    pred: (m, X) => { // lying flat the third page is one stiff leaf with the right page: lifted with the book, its loose stone rolls OVER the second crease onto the right page — the solution has that roll, and needs it
+      const st = X.states; let over = false;
+      for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (p.face !== 0 || s.face !== 0 || p.a === s.a || !L.passes(p.a, s.a)) continue;
+        const g0 = X.B.G[p.g], g1 = X.B.G[X.B.roll(p.g, 0, L.isRight(p.c) ? { c: p.c, r: p.r } : null)]; for (let r = 0; r < X.B.h; r++) if (g0[r][8] === 'r' && g1[r][8] !== 'r') over = true; }
+      return [over, m.needsRoll]; } },
+  leaf: { rows: 3, trifold: true, lamp: null, tiles: '.-xr', par: 3, closes: 1, minpar: 3, need: 'trifold+roll', elements: 5, minlen: 11, phases: 0, backs: 0,
+    seed: ['-....--x.r.G', '--------S--.', '.--..--..r.-'],   // 12-2 from rigid seed 1 #1, lengthened (mid needs len ≥ 11)
+    pred: (m, X) => { const st = X.states; let over = false;
+      for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (p.face !== 0 || s.face !== 0 || p.a === s.a || !L.passes(p.a, s.a)) continue;
+        const g0 = X.B.G[p.g], g1 = X.B.G[X.B.roll(p.g, 0, L.isRight(p.c) ? { c: p.c, r: p.r } : null)]; for (let r = 0; r < X.B.h; r++) if (g0[r][8] === 'r' && g1[r][8] !== 'r') over = true; }
+      return [over, m.needsRoll, m.needsTrifold, m.len >= 11]; } },
+  rigid2: { rows: 3, trifold: true, lamp: null, tiles: '.-xr', par: 3, closes: 1, minpar: 3, need: 'trifold+roll', elements: 5, minlen: 8, phases: 0, backs: 0,
+    seed: ['S.-..-..r.-.', '-.-..-.-.-G.', '..-...-..-..'],
+    pred: (m, X) => { // as rigid, but the letter is on the third page: the solution first lifts the book with the third page LYING FLAT (its stone rolls over the second crease onto the right page), and only then folds the third page
+      const st = X.states; let over = -1, flap = -1;
+      for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (s.face === 3 && p.face !== 3 && flap < 0) flap = i; if (p.face !== 0 || s.face !== 0 || p.a === s.a || !L.passes(p.a, s.a)) continue;
+        const g0 = X.B.G[p.g], g1 = X.B.G[X.B.roll(p.g, 0, L.isRight(p.c) ? { c: p.c, r: p.r } : null)]; for (let r = 0; r < X.B.h; r++) if (g0[r][8] === 'r' && g1[r][8] !== 'r' && over < 0) over = i; }
+      return [over > 0 && flap > over, X.B.base.grid.some((row) => row.indexOf('G') >= 8), m.needsRoll, m.needsTrifold]; } },
   hole: { rows: 4, trifold: true, lamp: null, tiles: '.-x', par: 3, closes: 1, minpar: 2, need: 'trifold', elements: 6, minlen: 9, phases: 0, backs: 0,
     seed: ['S-..-..G..-.', '.-.x--..-..-', '..-.-.-.-.-.', '.-..-.-..-..'],
     pred: (m, X) => { // the solution stands, closed with the flap folded, on a right-page square seen THROUGH a hole of the third page — filling that hole with paper breaks the level
@@ -161,6 +181,45 @@ const T = {
         const g0 = X.B.G[p.g], g1 = X.B.G[X.B.roll(p.g, 3, L.isRight(p.c) ? { c: p.c, r: p.r } : null)];
         for (let r = 0; r < X.B.h; r++) for (let c = 8; c < 11; c++) if (g0[r][c] === 'r' && g1[r][c] !== 'r' && g1[r][c + 1] === 'r') away = true; }
       return [away, m.needsRoll, m.needsTrifold]; } },
+  drop: { rows: 4, trifold: true, lamp: null, tiles: '.-xr', par: 4, closes: 2, minpar: 3, need: 'trifold+roll', elements: 7, minlen: 13, phases: 0, backs: 0,
+    seed: ['S..-..-.-...', '.x.-.--..r--', '...-..-.-..G', '.-.-....-...'],
+    pred: (m, X) => { // with the third page folded and the book lifted, a third-page loose stone rolls AWAY from its own crease and falls THROUGH one of its holes onto the right page (into a right-page gap: a bridge there) — the solution has that roll and needs it
+      const st = X.states; let drop = false;
+      for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (p.face !== 3 || s.face !== 3 || p.a === s.a || !L.passes(p.a, s.a)) continue;
+        const g0 = X.B.G[p.g], g1 = X.B.G[X.B.roll(p.g, 3, L.isRight(p.c) ? { c: p.c, r: p.r } : null)];
+        for (let r = 0; r < X.B.h; r++) for (let c = 8; c < 12; c++) if (g0[r][c] === 'r' && g1[r][c] !== 'r' && g0[r][14 - c] !== g1[r][14 - c]) drop = true; }
+      return [drop, m.needsRoll, m.needsTrifold]; } },
+  order2: { rows: 4, trifold: true, lamp: null, tiles: '.-xrh', par: 5, closes: 2, minpar: 4, need: 'trifold+crane+roll', elements: 8, minlen: 18, phases: 0, backs: 0,
+    seed: ['S.------.---', '-h----.-.r.G', '------------', '------------'],
+    pred: (m, X) => { // fold order decides ground (12-6): a crane carries you left → right at a close with the third page OPEN, and right → third at the press of the third page — not left → third at one close with the third page folded (the 12-1 habit)
+      const st = X.states; let lr = false, rt = false, lt = false;
+      for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (!C.pressed(p, s)) continue; const a = pg(X, p), b = pg(X, s);
+        if (s.face === 0 && a === 0 && b === 1) lr = true; if (s.face === 3 && p.face !== 3 && a === 1 && b === 2) rt = true; if (s.face === 3 && p.face === 3 && a === 0 && b === 2) lt = true; }
+      return [lr, rt, !lt, m.needsCrane, m.needsRoll, m.needsTrifold]; } },
+  back: { rows: 5, trifold: true, lamp: null, tiles: '.-xr', par: 4, closes: 2, minpar: 4, need: 'trifold+roll', elements: 5, minlen: 15, phases: 0, backs: 0,
+    seed: ['S.------.---', '..------.r.x', '----------.-', '--------G..-', '------------'],   // the hand board: len 11
+    pred: (m, X) => { // 12-4 「回」: the stone on your column rolls AWAY and comes BACK. Fold the third page first (12-1) and it rolls to its crease, off your column; close and — with the third page folded the low side is the book's crease — it rolls back onto your column and onto you. The solution instead lifts the book with the third page flat first (12-2: it rolls over the second crease, off the third page), then folds, then closes on that same square
+      const st = X.states; let rigid = -1, flap = -1, close = null;
+      for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (s.face === 3 && p.face !== 3 && flap < 0) flap = i;
+        if (p.face === 3 && s.face === 3 && G_posture(s.a) === 'fold' && G_posture(p.a) !== 'fold' && !close) close = p;
+        if (p.face === 0 && s.face === 0 && p.a !== s.a && L.passes(p.a, s.a) && rigid < 0) { const g0 = X.B.G[p.g], g1 = X.B.G[X.B.roll(p.g, 0, null)]; for (let r = 0; r < X.B.h; r++) if (g0[r][8] === 'r' && g1[r][8] !== 'r') rigid = i; } }
+      let kill = false; if (close && !L.isRight(close.c)) { const lv = { map: X.B.base.grid.map((r) => r.join('')), trifold: true }, B2 = C.grids(lv); const n1 = C.flapOf(B2, { c: close.c, r: close.r, a: 0, face: 0, g: 0 }, 180); if (n1) kill = C.move(B2, n1, 180) === null; }
+      return [rigid > 0 && flap > rigid, kill, m.needsRoll, m.needsTrifold, (m.wrong || 0) >= 6]; } },
+  finale: { rows: 5, trifold: true, lamp: null, tiles: '.-xrh', par: 5, closes: 2, minpar: 4, need: 'trifold+roll+crane', elements: 8, minlen: 18, phases: 0, backs: 0,
+    seed: ['S.------.---', '-h----.-.r.G', '------------', '------------', '------------'],   // the crane core (len 7)
+    pred: (m, X) => { // 12-6: the order of the two folds decides what the left page meets — a crane carries you at a close with the third page OPEN (left meets right), the third page is folded later, and folding it first at the same square kills (the third page's stone comes back, 12-4)
+      const st = X.states; let lr = false, flap = -1, close0 = -1, close = null;
+      for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (s.face === 3 && p.face !== 3 && flap < 0) flap = i;
+        if (p.face === 0 && s.face === 0 && G_posture(s.a) === 'fold' && G_posture(p.a) !== 'fold') { if (close0 < 0) close0 = i; if (pg(X, p) === 0 && pg(X, s) === 1) { lr = true; if (!close) close = p; } } }
+      let kill = false; if (close) { const lv = { map: X.B.base.grid.map((r) => r.join('')), trifold: true }, B2 = C.grids(lv); const n1 = C.flapOf(B2, { c: close.c, r: close.r, a: 0, face: 0, g: 0 }, 180); if (n1) kill = C.move(B2, n1, 180) === null; else kill = n1 === null; }
+      return [lr, close0 > 0 && flap > close0, kill, m.needsCrane, m.needsRoll, m.needsTrifold, (m.wrong || 0) >= 8]; } },
+  flaphover: { rows: 4, trifold: true, lamp: null, tiles: '.-xrh', par: 5, closes: 2, minpar: 4, need: 'trifold+crane+roll', elements: 8, minlen: 15, phases: 0, backs: 0,
+    seed: ['S..-..-.-...', '.x.-.h-..r.-', '...-..-.-.G.', '.-.-..-.-...'],
+    pred: (m, X) => { // 12-5: the third page hovers — folded, opened only to a lean (no pass), folded again: two presses of the third page on the right page and none of its stones roll; a crane carries you at a press of the third page
+      const st = X.states; let hover = false, carry = false;
+      for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (p.face === 3 && s.face === 2 && L.standing(s.a) && s.a < L.FOLD_MIN) { for (let j = i + 1; j < st.length; j++) { if (st[j].face === 3) { hover = true; break; } if (st[j].face !== 2 || !L.standing(st[j].a)) break; } }
+        if (s.face === 3 && p.face !== 3 && pg(X, p) !== pg(X, s)) carry = true; }
+      return [hover, carry, m.needsCrane, m.needsTrifold]; } },
   crane2: { rows: 4, trifold: true, lamp: null, tiles: '.-xh', par: 4, closes: 2, minpar: 3, need: 'trifold+crane', elements: 7, minlen: 12, phases: 0, backs: 0,
     seed: ['S.h.-..-.-..', '.-.-.x.-.-..', '..-..-..-.G.', '.x--.-.-.-..'],
     pred: (m, X) => { // a crane carries you twice — once at a press of the book, once at the press of the flap onto the right page — and the second carry ends on the third page
@@ -168,6 +227,22 @@ const T = {
       for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (pg(X, p) === pg(X, s) || !C.pressed(p, s)) continue;
         if (s.face === 3 && p.face !== 3) { if (pg(X, s) === 2) flap = true; } else if (pg(X, s) !== pg(X, p)) book = true; }
       return [book, flap, m.needsCrane, m.needsTrifold]; } },
+  flapfro: { rows: 4, trifold: true, lamp: null, tiles: '.-xr', par: 5, closes: 2, minpar: 4, need: 'trifold+roll', elements: 8, minlen: 14, phases: 0, backs: 0,
+    seed: ['S..-.-..-.r.', '.x.-.-..r-..', '...-....-.-.', '.-.-.-..-..G'],
+    pred: (m, X) => { // two creases count their own passes: the third page's loose stones roll on the FLAP's crease (a flap lean that comes back, no press) and also on the book's — the solution has a third-page roll from each crease
+      const st = X.states; let flapRoll = false, bookRoll = false;
+      for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; const ga = X.B.G[p.g], gb = X.B.G[s.g]; let moved = false;
+        for (let r = 0; r < X.B.h; r++) for (let c = 8; c < 12; c++) if ((ga[r][c] === 'r') !== (gb[r][c] === 'r')) moved = true;
+        if (!moved) continue; const flap = p.face === 2 || s.face === 2 || (p.face !== s.face); if (flap && !C.pressed(p, s)) flapRoll = true; if (!flap) bookRoll = true; }
+      return [flapRoll, bookRoll, m.needsRoll, m.needsTrifold]; } },
+  order: { rows: 4, trifold: true, lamp: null, tiles: '.-xrh', par: 6, closes: 3, minpar: 4, need: 'trifold+crane', elements: 9, minlen: 16, phases: 0, backs: 0,
+    seed: ['S.h.-..-.-..', '.-.-.r.-.-..', '..-..-..-.G.', '.x--.-.-.r..'],
+    pred: (m, X) => { // the order of the folds decides what the left page meets: the solution closes the book once with the third page OPEN (left meets right) and once with it FOLDED (left meets the third page), and a crane flies at each
+      const st = X.states; let open = false, folded = false;
+      for (let i = 1; i < st.length; i++) { const p = st[i - 1], s = st[i]; if (p.face !== s.face || !C.pressed(p, s)) continue;
+        const w0 = X.B.world(p.g, p.face); let crane = false; for (let r = 0; r < X.B.h; r++) for (let c = 0; c < 8; c++) if (L.at(w0, c, r) === 'h' && L.at(X.B.world(s.g, s.face), c, r) !== 'h') crane = true;
+        if (crane && s.face === 0) open = true; if (crane && s.face === 3) folded = true; }
+      return [open, folded, m.needsCrane, m.needsTrifold]; } },
 };
 // ch. 12: the MAP column / page (0 left, 1 right, 2 third) of a state on a trifold board — face 2 shifts one page, face 3 reads the top layer
 const mc = (X, s) => (s.face === 2 ? s.c + 4 : L.colOf(X.B.world(s.g, s.face), s.c, s.r));
