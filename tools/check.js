@@ -18,7 +18,7 @@ const TIERS = { teach: [0, 2], easy: [0, 6], mid: [0, 99], hard: [5, 99], final:
 // chapter, not every level. teach–mid ≤ 3 changes; hard / final ≤ 4; optional 「暗信」 challenge levels ≤ 6.
 // Full closes ≤ 2 on the main path, ≤ 3 in 「暗信」. A chapter's main path may not exceed 24 changes in total.
 const PAR_MAX = { teach: 3, easy: 3, mid: 3, hard: 4, final: 5, dark: 6 };   // final 4 → 5 (Chitu 10/25, difficulty-v3.md §6: the 暗信 at par 5–6 are the only levels that resisted the owner)
-const PAR_MAX_CH = { 11: { hard: 5, final: 6 } };   // ch. 11 「来回」 (design-vol3.md §1.3): a lean that comes back costs 2 changes and no close — hard 4 → 5, final 5 → 6 in this chapter only
+const PAR_MAX_CH = { 11: { hard: 5, final: 6 }, 12: { mid: 4, hard: 5, final: 6 } };   // ch. 11 「来回」 (design-vol3.md §1.3): a lean that comes back costs 2 changes and no close — hard 4 → 5, final 5 → 6 in this chapter only. ch. 12 「三折」 (design-ch12.md §3.3): the second crease is one or two posture changes of its own (fold the third page; lay it back) — mid 3 → 4, hard 5, final 6
 const CLOSES_MAX = { main: 2, final: 3, dark: 3, wet: 3 };   // wet: chapter 7 「墨晕」 main path — closes are the chapter's resource (difficulty-v3.md §4.2, roadmap §4 #4)
 const WET_CHAPTER = 7;   // final 2 → 3 (Chitu 10/25, difficulty-v3.md §6: the third close after a closed walk is what held 暗三)
 const CHAPTER_PAR_MAX = 24;
@@ -449,6 +449,7 @@ const GATES = {
 };
 const IDLE_MAX = 0.70;          // (gap cells + paper that carries nothing) / all cells, for mid and above (postmortem §1.1; teach / easy boards are allowed to be sparse)
 const IDLE_MAX_3 = 0.80;        // three-page boards: only two of the three pages face at any moment, so the same absolute density (≥ 12 carrying cells on 5 rows) is 20% of 60 cells
+const IDLE_MAX_TRI = 0.85;      // trifold boards (ch. 12): the left page must stay nearly empty by geometry — any left-page paper beside the stack path onto the folded leaf is a shortcut onto the third page (design-ch12.md §3.3, 12-3) — so a 4-row board carries ~10 cells of 48
 const DEAD_FREE_CHAPTERS = 4;   // chapters whose levels may have no dead state at all (vol. 1: the game teaches, undo is a courtesy)
 
 let ok = true;
@@ -507,7 +508,7 @@ LEVELS.forEach((lv, i) => {
   if (gate.wrongMin && m.wrong < gate.wrongMin) fail(`TOO READABLE: ${m.wrong} wrong turns over the solution, ${tierName} needs ≥ ${gate.wrongMin}`);
   if (lv.len != null && m.len !== lv.len) fail(`LENGTH CHANGED: declared len ${lv.len}, measured ${m.len}`);
   if (gate.noiseMax != null && m.noise > gate.noiseMax) fail(`${m.noise} DECOY elements (${m.decoys.join(' ')}), max ${gate.noiseMax} for ${tierName}`);
-  const idleMax = lv.map[0].length > 2 * L.N ? IDLE_MAX_3 : IDLE_MAX;
+  const idleMax = lv.trifold ? IDLE_MAX_TRI : lv.map[0].length > 2 * L.N ? IDLE_MAX_3 : IDLE_MAX;
   if (!['teach', 'easy'].includes(lv.tier) && idle > idleMax) fail(`${Math.round(idle * 100)}% of the board carries nothing (${m.voids} gaps + ${m.irrelevant} idle cells), max ${idleMax * 100}% from mid up`);
   // every level must need the chapter's mechanic it was built on
   for (const need of lv.needs || []) if (!r[need]) fail(`does not need ${need}`);

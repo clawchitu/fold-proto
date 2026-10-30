@@ -740,6 +740,15 @@ const LEVELS = [
       '-..-.----...',
     ],
   },
+  {
+    id: 'return', tier: 'mid', chapter: 12, trifold: true, needs: ['needsTrifold', 'needsRoll'],   // 12-3 · the stone on your column rolls away and comes BACK. She is on the third page at (8,3); you close from stack 1 — (1,1) — and the loose stone (9,1) sits on that very column. The 12-1 habit: fold the third page first — it rolls to its own crease, (8,1), off your column. But with the third page folded the low side is the BOOK's crease, which on the third page is to the right: the close rolls it back to (9,1), onto you (play.js: 'stone'). Close from (0,0) or (1,0) instead and it rolls on to (10,1), (11,1) — the edge of the page, where it sits on the only path: dead end. The way: with the third page lying FLAT (one stiff leaf with the right page, 12-1) close and open — two passes, (9,1) → (8,1) → over the second crease into the right page's gap (7,1), gone; only then fold the third page, close on (1,1), and the stacks walk you along the third page's edge to her. No fixed stone: the page's own edge stops the stone where it hurts (noise 0). Hand-drawn (design-ch12.md §3.1); len 13 (par 4 + 9) wrong 5 idle 81% — mid under the ch. 12 par (PAR_MAX_CH) and the trifold idle gate
+    map: [
+      'S.------.---',
+      '..------.r..',
+      '-----------.',
+      '--------G...',
+    ],
+  },
 ];
 
 if (typeof module !== 'undefined') module.exports = LEVELS;
