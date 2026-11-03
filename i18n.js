@@ -10,6 +10,8 @@
       title: '折 · 折信', brandSub: '折信', langGroup: '语言', langName: '中文', langSet: '已切换为中文',
       suggest: '读屏或闭眼玩？按这里开启声音模式',
       navGame: '游戏', levels: '关卡', hint: '提示', reset: '重来', a11y: '无障碍',
+      // hint-skip (native app): the faint 「?」 before it wakes, and 「跳过这一封」 after the whole solution
+      'hint.soon': '稍后可用', 'skip.offer': '跳过这一封', 'skip.hint': '先去下一封，这一封随时可以回来送', 'lv.skipped': '跳过了', 'lv.skippedValue': '跳过了，还没送到，随时可以回来',
       dragCrease: '拖动折痕', gridLabel: '书页：第1到4列是左页，第5到8列是右页',
       gridHelp: '第4列和第5列之间是折痕，合上时右页翻到左页上：第5列叠在第4列，第8列叠在第1列。方向键听每一格，回车走过去，F 折一点，Shift 加 F 展开一点，H 提示，R 重来，U 撤销，问号听全部按键。',
       'mode.open': '打开', 'mode.pop': '立起', 'mode.lean': '斜起', 'mode.fold': '合上',
@@ -120,6 +122,8 @@
       title: '折 · Letterfold', brandSub: 'Letterfold', langGroup: 'Language', langName: 'English', langSet: 'Language: English',
       suggest: 'Screen reader, or eyes closed? Turn on sound mode here',
       navGame: 'Game', levels: 'Levels', hint: 'Hint', reset: 'Restart', a11y: 'Accessibility',
+      // hint-skip (native app): the faint 「?」 before it wakes, and 「跳过这一封」 after the whole solution
+      'hint.soon': 'available soon', 'skip.offer': 'Skip this letter', 'skip.hint': 'Go on to the next letter; you can come back to deliver this one any time', 'lv.skipped': 'Skipped', 'lv.skippedValue': 'Skipped, not delivered yet; come back any time',
       dragCrease: 'Drag the crease', gridLabel: 'Book: columns 1 to 4 are the left page, 5 to 8 the right page',
       gridHelp: 'The crease runs between columns 4 and 5. Closing lays the right page over the left: column 5 on column 4, column 8 on column 1. Arrow keys hear each square, Enter walks there, F folds a step, Shift+F unfolds a step, H hint, R restart, U undo, question mark for every key.',
       'mode.open': 'Open', 'mode.pop': 'Standing', 'mode.lean': 'Leaning', 'mode.fold': 'Closed',
@@ -223,6 +227,8 @@
       title: '折 · 折り文', brandSub: '折り文', langGroup: '言語', langName: '日本語', langSet: '日本語に切り替えました',
       suggest: 'スクリーンリーダーで、あるいは目を閉じて遊ぶなら、ここでサウンドモードをオンに',
       navGame: 'ゲーム', levels: 'ステージ', hint: 'ヒント', reset: 'やり直す', a11y: 'アクセシビリティ',
+      // hint-skip (native app): the faint 「?」 before it wakes, and 「跳过这一封」 after the whole solution
+      'hint.soon': 'もうすぐ使える', 'skip.offer': 'この手紙をとばす', 'skip.hint': '次の手紙へ。この手紙はいつでも戻って届けられる', 'lv.skipped': 'とばした', 'lv.skippedValue': 'とばした。まだ届いていない、いつでも戻れる',
       dragCrease: '折り目をドラッグ', gridLabel: '本：1〜4列が左ページ、5〜8列が右ページ',
       gridHelp: '折り目は4列と5列のあいだ。閉じると右ページが左ページに重なる：5列は4列に、8列は1列に。矢印キーで各マスを聴き、Enterでそこへ歩く。Fで少し折り、Shift+Fで少し開く。Hはヒント、Rはやり直し、Uは戻す、?キーで全部のキー。',
       'mode.open': '開く', 'mode.pop': '立つ', 'mode.lean': '傾く', 'mode.fold': '閉じる',
@@ -335,6 +341,8 @@
       title: '折 · 접은 편지', brandSub: '접은 편지', langGroup: '언어', langName: '한국어', langSet: '한국어로 바꿨어요',
       suggest: '화면 낭독기를 쓰거나 눈을 감고 하나요? 여기서 소리 모드를 켤 수 있어요',
       navGame: '게임', levels: '단계', hint: '힌트', reset: '다시 하기', a11y: '접근성',
+      // hint-skip (native app): the faint 「?」 before it wakes, and 「跳过这一封」 after the whole solution
+      'hint.soon': '곧 사용 가능', 'skip.offer': '이 편지 건너뛰기', 'skip.hint': '다음 편지로 가요. 이 편지는 언제든 돌아와 전할 수 있어요', 'lv.skipped': '건너뜀', 'lv.skippedValue': '건너뜀, 아직 전하지 않음, 언제든 돌아올 수 있어요',
       dragCrease: '접는 선을 끌어요', gridLabel: '책: 1~4열은 왼쪽 페이지, 5~8열은 오른쪽 페이지',
       gridHelp: '접는 선은 4열과 5열 사이에 있어요. 닫으면 오른쪽 페이지가 왼쪽 페이지 위에 겹쳐요: 5열은 4열 위에, 8열은 1열 위에. 방향키로 칸마다 듣고, Enter로 그 칸까지 걸어요. F는 조금 접기, Shift+F는 조금 펴기, H는 힌트, R은 다시 하기, U는 되돌리기, 물음표는 모든 키.',
       'mode.open': '펼침', 'mode.pop': '세움', 'mode.lean': '기울임', 'mode.fold': '닫힘',
