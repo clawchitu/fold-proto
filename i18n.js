@@ -11,7 +11,7 @@
       suggest: '读屏或闭眼玩？按这里开启声音模式',
       navGame: '游戏', levels: '关卡', hint: '提示', reset: '重来', a11y: '无障碍',
       // hint-skip (native app): the faint 「?」 before it wakes, and 「跳过这一封」 after the whole solution
-      'hint.soon': '稍后可用', 'skip.offer': '跳过这一封', 'skip.hint': '先去下一封，这一封随时可以回来送', 'lv.skipped': '跳过了', 'lv.skippedValue': '跳过了，还没送到，随时可以回来',
+      'hint.soon': '稍后可用', 'skip.letterWaits': '这一章的信，要等跳过的那几封都送到了才拆。', 'skip.offer': '跳过这一封', 'skip.hint': '先去下一封，这一封随时可以回来送', 'lv.skipped': '跳过了', 'lv.skippedValue': '跳过了，还没送到，随时可以回来',
       'guide.walk': '沿虚线走到圈里', 'guide.walkTo': '沿虚线走到{pos}', 'guide.close': '合上书', 'guide.open': '把书摊平', 'guide.stand': '把页立起来（90°）', 'guide.lean': '把页斜到约 {a}°', 'guide.turn': '把合上的书翻个面（⇋）', 'guide.third': '折第三页（⫽）', 'guide.off': '离开了路线：撤销，或重新开始，再跟着走',
       dragCrease: '拖动折痕', gridLabel: '书页：第1到4列是左页，第5到8列是右页',
       gridHelp: '第4列和第5列之间是折痕，合上时右页翻到左页上：第5列叠在第4列，第8列叠在第1列。方向键听每一格，回车走过去，F 折一点，Shift 加 F 展开一点，H 提示，R 重来，U 撤销，问号听全部按键。',
@@ -124,7 +124,7 @@
       suggest: 'Screen reader, or eyes closed? Turn on sound mode here',
       navGame: 'Game', levels: 'Levels', hint: 'Hint', reset: 'Restart', a11y: 'Accessibility',
       // hint-skip (native app): the faint 「?」 before it wakes, and 「跳过这一封」 after the whole solution
-      'hint.soon': 'available soon', 'skip.offer': 'Skip this letter', 'skip.hint': 'Go on to the next letter; you can come back to deliver this one any time', 'lv.skipped': 'Skipped', 'lv.skippedValue': 'Skipped, not delivered yet; come back any time',
+      'hint.soon': 'available soon', 'skip.letterWaits': 'This chapter’s letter waits until the letters you skipped are delivered.', 'skip.offer': 'Skip this letter', 'skip.hint': 'Go on to the next letter; you can come back to deliver this one any time', 'lv.skipped': 'Skipped', 'lv.skippedValue': 'Skipped, not delivered yet; come back any time',
       'guide.walk': 'Walk the dotted line to the ring', 'guide.walkTo': 'Walk the dotted line to {pos}', 'guide.close': 'Close the book', 'guide.open': 'Open the book flat', 'guide.stand': 'Stand the page up (90°)', 'guide.lean': 'Lean the page to about {a}°', 'guide.turn': 'Turn the shut book over (⇋)', 'guide.third': 'Fold the third page (⫽)', 'guide.off': 'Off the route: undo, or restart, to follow it again',
       dragCrease: 'Drag the crease', gridLabel: 'Book: columns 1 to 4 are the left page, 5 to 8 the right page',
       gridHelp: 'The crease runs between columns 4 and 5. Closing lays the right page over the left: column 5 on column 4, column 8 on column 1. Arrow keys hear each square, Enter walks there, F folds a step, Shift+F unfolds a step, H hint, R restart, U undo, question mark for every key.',
@@ -230,7 +230,7 @@
       suggest: 'スクリーンリーダーで、あるいは目を閉じて遊ぶなら、ここでサウンドモードをオンに',
       navGame: 'ゲーム', levels: 'ステージ', hint: 'ヒント', reset: 'やり直す', a11y: 'アクセシビリティ',
       // hint-skip (native app): the faint 「?」 before it wakes, and 「跳过这一封」 after the whole solution
-      'hint.soon': 'もうすぐ使える', 'skip.offer': 'この手紙をとばす', 'skip.hint': '次の手紙へ。この手紙はいつでも戻って届けられる', 'lv.skipped': 'とばした', 'lv.skippedValue': 'とばした。まだ届いていない、いつでも戻れる',
+      'hint.soon': 'もうすぐ使える', 'skip.letterWaits': 'この章の手紙は、とばした手紙をすべて届けてから開く。', 'skip.offer': 'この手紙をとばす', 'skip.hint': '次の手紙へ。この手紙はいつでも戻って届けられる', 'lv.skipped': 'とばした', 'lv.skippedValue': 'とばした。まだ届いていない、いつでも戻れる',
       'guide.walk': '点線にそって丸まで歩く', 'guide.walkTo': '点線にそって{pos}まで歩く', 'guide.close': '本を閉じる', 'guide.open': '本を平らに開く', 'guide.stand': 'ページを立てる（90°）', 'guide.lean': 'ページを約{a}°まで傾ける', 'guide.turn': '閉じた本を裏返す（⇋）', 'guide.third': '三枚目を折る（⫽）', 'guide.off': 'ルートから外れた。取り消すか、やり直してまたたどる',
       dragCrease: '折り目をドラッグ', gridLabel: '本：1〜4列が左ページ、5〜8列が右ページ',
       gridHelp: '折り目は4列と5列のあいだ。閉じると右ページが左ページに重なる：5列は4列に、8列は1列に。矢印キーで各マスを聴き、Enterでそこへ歩く。Fで少し折り、Shift+Fで少し開く。Hはヒント、Rはやり直し、Uは戻す、?キーで全部のキー。',
@@ -345,7 +345,7 @@
       suggest: '화면 낭독기를 쓰거나 눈을 감고 하나요? 여기서 소리 모드를 켤 수 있어요',
       navGame: '게임', levels: '단계', hint: '힌트', reset: '다시 하기', a11y: '접근성',
       // hint-skip (native app): the faint 「?」 before it wakes, and 「跳过这一封」 after the whole solution
-      'hint.soon': '곧 사용 가능', 'skip.offer': '이 편지 건너뛰기', 'skip.hint': '다음 편지로 가요. 이 편지는 언제든 돌아와 전할 수 있어요', 'lv.skipped': '건너뜀', 'lv.skippedValue': '건너뜀, 아직 전하지 않음, 언제든 돌아올 수 있어요',
+      'hint.soon': '곧 사용 가능', 'skip.letterWaits': '이 장의 편지는 건너뛴 편지를 모두 전한 뒤에 열려요.', 'skip.offer': '이 편지 건너뛰기', 'skip.hint': '다음 편지로 가요. 이 편지는 언제든 돌아와 전할 수 있어요', 'lv.skipped': '건너뜀', 'lv.skippedValue': '건너뜀, 아직 전하지 않음, 언제든 돌아올 수 있어요',
       'guide.walk': '동그라미까지 점선을 따라 걸어요', 'guide.walkTo': '{pos}까지 점선을 따라 걸어요', 'guide.close': '책을 닫아요', 'guide.open': '책을 평평하게 펴요', 'guide.stand': '페이지를 세워요 (90°)', 'guide.lean': '페이지를 약 {a}°까지 기울여요', 'guide.turn': '닫힌 책을 뒤집어요 (⇋)', 'guide.third': '셋째 페이지를 접어요 (⫽)', 'guide.off': '길에서 벗어났어요. 되돌리거나 다시 시작해서 따라가요',
       dragCrease: '접는 선을 끌어요', gridLabel: '책: 1~4열은 왼쪽 페이지, 5~8열은 오른쪽 페이지',
       gridHelp: '접는 선은 4열과 5열 사이에 있어요. 닫으면 오른쪽 페이지가 왼쪽 페이지 위에 겹쳐요: 5열은 4열 위에, 8열은 1열 위에. 방향키로 칸마다 듣고, Enter로 그 칸까지 걸어요. F는 조금 접기, Shift+F는 조금 펴기, H는 힌트, R은 다시 하기, U는 되돌리기, 물음표는 모든 키.',
